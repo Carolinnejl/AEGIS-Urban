@@ -11,6 +11,7 @@ const PaginaSensores   = lazy(() => import("../pages/Sensors/SensorsPage"));
 const PaginaAlertas    = lazy(() => import("../pages/Alerts/AlertsPage"));
 const PaginaSimulacion = lazy(() => import("../pages/Simulation/SimulationPage"));
 const PaginaRegistro    = lazy(() => import("../pages/Register/RegisterPage"));
+const PaginaVerificar    = lazy(() => import("../pages/Verify/VerifyPage"));
 const PaginaCiudadano   = lazy(() => import("../pages/Citizen/CitizenPage"));
 const PaginaTerminos    = lazy(() => import("../pages/Legal/LegalPage").then(m => ({ default: m.PaginaTerminos })));
 const PaginaPrivacidad  = lazy(() => import("../pages/Legal/LegalPage").then(m => ({ default: m.PaginaPrivacidad })));
@@ -34,6 +35,15 @@ function RutaPrivada({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+// Solo para cuentas ciudadanas con sesión iniciada (la verificación de perfil).
+function RutaCiudadano({ children }: { children: React.ReactNode }) {
+  const autenticado = useAuthStore((s) => s.autenticado);
+  const familia = useAuthStore((s) => s.usuario?.familia);
+  if (!autenticado) return <Navigate to="/login" replace />;
+  if (familia !== "CIUDADANO") return <Navigate to="/dashboard" replace />;
+  return <>{children}</>;
+}
+
 export default function AppRouter() {
   return (
     <Suspense fallback={<CargadorPagina />}>
@@ -42,6 +52,7 @@ export default function AppRouter() {
         <Route path="/login" element={<PaginaLogin />} />
         <Route path="/registro" element={<PaginaRegistro />} />
         <Route path="/ciudadano" element={<PaginaCiudadano />} />
+        <Route path="/verificar" element={<RutaCiudadano><PaginaVerificar /></RutaCiudadano>} />
         <Route path="/terminos" element={<PaginaTerminos />} />
         <Route path="/privacidad" element={<PaginaPrivacidad />} />
 

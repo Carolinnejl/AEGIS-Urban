@@ -6,12 +6,23 @@ import { requierePermiso } from "../../security/access-control/PermissionGuard";
 import { desconectarSesion } from "../websocket/SocketServer";
 import { registroService, validarRegistro } from "./registro.service";
 import { LEGAL } from "../../config/legal";
+import { verificacionService } from "./verificacion.service";
+import { requierePerfilVerificado } from "./verificacion.middleware";
+import type { CanalVerificacion } from "./verificacion";
+import { limitar } from "../../shared/http/limitador";
 
 const router       = Router();
 const servicioAuth = new AuthService();
 
 // POST /api/auth/login
-router.post("/login", async (req: Request, res: Response, next: NextFunction) => {
+// Máximo 10 intentos por usuario e IP cada 15 minutos (frena la fuerza bruta de contraseñas).
+const limitarLogin = limitar({
+  ventanaMs: 15 * 60_000, max: 10,
+  clave: (req) => `${req.ip}:${String(req.body?.username ?? "").toLowerCase()}`,
+  mensaje: "Demasiados intentos de inicio de sesión.",
+});
+
+router.post("/login", limitarLogin, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { username, password } = req.body as { username?: string; password?: string };
 
@@ -73,19 +84,48 @@ router.post("/registro", async (req: Request, res: Response, next: NextFunction)
   try {
     const datos = validarRegistro(req.body);
     const ip = ipDe(req);
-    await registroService.registrar(datos, ip);
+    const idUsuario = await registroService.registrar(datos, ip);
+    const verificacion = await verificacionService.emitirAmbos(idUsuario);
     const sesion = await servicioAuth.iniciarSesion(datos.username, datos.password, ip, req.headers["user-agent"] ?? "unknown");
     res.status(201).json({
-      message: "Cuenta creada y perfil verificado",
+      message: "Cuenta creada. Falta verificar el perfil con los códigos de email y celular",
       token: sesion.token,
       user: { id: sesion.usuario.id, username: sesion.usuario.username, familyId: sesion.usuario.idFamilia, familyName: sesion.usuario.familia },
       ubicacionConsentida: datos.aceptaUbicacion,
+      verificacion,
     });
   } catch (err) { next(err); }
 });
 
+// ── Verificación de perfil por códigos (email y celular). El envío es SIMULADO en esta versión.
+const canalDe = (valor: unknown): CanalVerificacion => {
+  if (valor === "EMAIL" || valor === "PHONE") return valor;
+  throw new BadRequestError("'canal' debe ser EMAIL o PHONE");
+};
+const limitarVerificacion = limitar({
+  ventanaMs: 15 * 60_000, max: 30, clave: (req) => String(req.user?.id ?? req.ip),
+  mensaje: "Demasiadas solicitudes de verificación.",
+});
+
+// GET /api/auth/verificacion — estado de la verificación del perfil
+router.get("/verificacion", requiereAutenticacion, requierePermiso("/api/auth/verificacion", "GET"), async (req: Request, res: Response, next: NextFunction) => {
+  try { res.json(await verificacionService.estado(req.user!.id)); } catch (err) { next(err); }
+});
+
+// POST /api/auth/verificacion/reenviar — pide un código nuevo para un canal
+router.post("/verificacion/reenviar", requiereAutenticacion, requierePermiso("/api/auth/verificacion/reenviar", "POST"), limitarVerificacion, async (req: Request, res: Response, next: NextFunction) => {
+  try { res.json(await verificacionService.emitir(req.user!.id, canalDe(req.body?.canal))); } catch (err) { next(err); }
+});
+
+// POST /api/auth/verificacion/confirmar — confirma el código recibido
+router.post("/verificacion/confirmar", requiereAutenticacion, requierePermiso("/api/auth/verificacion/confirmar", "POST"), limitarVerificacion, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    res.json(await verificacionService.confirmar(req.user!.id, canalDe(req.body?.canal), String(req.body?.codigo ?? ""), ipDe(req)));
+  } catch (err) { next(err); }
+});
+
 // PUT /api/auth/consentimiento-ubicacion — otorgar o revocar el permiso de ubicación
-router.put("/consentimiento-ubicacion", requiereAutenticacion, requierePermiso("/api/auth/consentimiento-ubicacion", "PUT"), async (req: Request, res: Response, next: NextFunction) => {
+router.put("/consentimiento-ubicacion", requiereAutenticacion, requierePermiso("/api/auth/consentimiento-ubicacion", "PUT"), requierePerfilVerificado, async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (typeof req.body?.acepta !== "boolean") throw new BadRequestError("'acepta' debe ser true o false");
     await registroService.fijarConsentimientoUbicacion(req.user!.id, req.body.acepta, ipDe(req));

@@ -8,10 +8,10 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-22E5FF?style=flat-square&logo=typescript&logoColor=white&labelColor=0B1220)
 ![React](https://img.shields.io/badge/React-18-22E5FF?style=flat-square&logo=react&logoColor=white&labelColor=0B1220)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-8B5CF6?style=flat-square&logo=postgresql&logoColor=white&labelColor=0B1220)
-![Tests](https://img.shields.io/badge/tests-50%20aprobados-19F5A0?style=flat-square&labelColor=0B1220)
+![Tests](https://img.shields.io/badge/tests-109%20aprobados-19F5A0?style=flat-square&labelColor=0B1220)
 ![Estado](https://img.shields.io/badge/estado-prototipo-FFB020?style=flat-square&labelColor=0B1220)
 
-[Documentación](docs/README.md) · [Cómo levantarlo](#cómo-levantarlo) · [Modo ciudadano](#modo-ciudadano) · [Arquitectura](#arquitectura) · [Autoría](#autoría)
+[Documentación](docs/README.md) · [Cómo levantarlo](#cómo-levantarlo) · [Modo ciudadano](#modo-ciudadano) · [Arquitectura](#arquitectura) · [Equipo](#equipo)
 
 </div>
 
@@ -64,17 +64,19 @@ cd aegis-urban-backend  && npm install && node scripts/crear-env.js && npm run d
 cd aegis-urban-frontend && npm install && npm run dev
 ```
 
-Las migraciones están en `aegis-urban-backend/database/migrations/` (001 a 012) y los datos de ejemplo en `database/seeds/`. Docker las aplica solo al crear un volumen vacío; en una base existente aplicalas en orden (el `arrancar.bat` se ocupa de 006 a 012).
+Las migraciones están en `aegis-urban-backend/database/migrations/` (001 a 012) y los datos de ejemplo en `database/seeds/`. Docker las aplica solo al crear un volumen vacío; en una base existente aplicalas en orden (el `arrancar.bat` se ocupa de 006 a 014).
+
+El backend **no arranca** sin `JWT_SECRET` (mínimo 32 caracteres) ni `AES_SECRET_KEY` (64 caracteres hexadecimales): no hay valores por defecto. `node scripts/crear-env.js` los genera aleatorios.
 
 ### Comandos
 
 | Dónde | Comando | Qué hace |
 |---|---|---|
 | backend | `npm run dev` | API con recarga automática en `:3001` |
-| backend | `npm test` | Pruebas unitarias (47) |
+| backend | `npm test` | Pruebas unitarias (102) |
 | backend | `npm run build` | Compila a JavaScript |
 | frontend | `npm run dev` | Web con Vite en `:5173` |
-| frontend | `npm test` | Pruebas del frontend (3) |
+| frontend | `npm test` | Pruebas del frontend (7) |
 | frontend | `npm run build` | Verifica tipos y genera el bundle |
 
 ---
@@ -107,6 +109,16 @@ Al crear una cuenta (`/registro`) hay que aceptar, con casillas sin marcar de an
 3. La declaración de edad (18 años o autorización de un tutor)
 
 El permiso de **ubicación** se pide aparte y es opcional. Cada consentimiento queda registrado con su versión, fecha e IP. La persona puede descargar sus datos y darse de baja (la cuenta se anonimiza).
+
+### Verificación del perfil
+
+Después de registrarse, el perfil se verifica confirmando **dos códigos de 6 dígitos**: uno para el correo y otro para el celular (que se pide al registrarse y se guarda cifrado con AES-256).
+
+- Los códigos se guardan solo como HMAC, vencen a los 10 minutos y se invalidan tras 5 intentos fallidos. Se puede pedir otro código cada 30 s.
+- **Correo real, celular simulado.** Con `VERIFICACION_EMAIL_REAL=true` y las variables `SMTP_*` el código del correo se envía de verdad (probado con Resend por SMTP; también sirve Gmail con una contraseña de aplicación). El código del celular es **siempre simulado**: aparece en un SMS de mentira dentro de `/verificar` y en la consola del servidor. Con `VERIFICACION_EMAIL_REAL=false` los dos son simulados.
+- Resend, mientras no se verifique un dominio propio, solo entrega a la casilla del dueño de la cuenta (remitente `onboarding@resend.dev`). Para enviar a cualquier persona hace falta verificar un dominio o usar otro proveedor SMTP.
+- Las credenciales van solo en `.env` (ignorado por git), nunca en el repositorio.
+- El perfil queda verificado (`users.verified_at`) cuando se confirman ambos códigos.
 
 > [!IMPORTANT]
 > Los textos legales son una **base para el prototipo**. Un profesional debe revisarlos antes de un uso real con público. Detalle en el [Anexo E](docs/documento-funcional/06-anexos.md#anexo-e--marco-legal-y-consentimientos).
@@ -167,7 +179,7 @@ flowchart TB
 ```text
 AEGIS-Urban/
 ├── aegis-urban-backend/
-│   ├── database/migrations/    # Esquema SQL versionado (001–012)
+│   ├── database/migrations/    # Esquema SQL versionado (001–014)
 │   ├── database/seeds/         # Datos iniciales y de ejemplo
 │   ├── scripts/                # crear-env.js (genera el .env)
 │   ├── src/
@@ -215,9 +227,23 @@ Toda la documentación se lee directamente en GitHub, por páginas:
 
 ---
 
-## Autoría
+## Equipo
 
-Proyecto de **Carolina Lobo**.
+| N.º | Integrante |
+|---|---|
+| 1 | Carolina Lobo |
+| 2 | Sabrina De Marco |
+| 3 | Maximiliano Chaparro |
+| 4 | Maximo Casanovas |
+| 5 | Melina Cullari |
+
+| # | Rol | Responsabilidad principal |
+|---|---|---|
+| I1 | Product Owner y documentador QA | Documentación, criterios de aceptación, plan de pruebas |
+| I2 | Desarrollo frontend | React, mapa de ciudad, UI de alertas, i18n |
+| I3 | Desarrollo backend core | Node.js, patrones de diseño, API REST |
+| I4 | Seguridad y base de datos | PostgreSQL, AES/BCrypt, DVH/DVV, backups |
+| I5 | Integración full-stack y WebSockets | socket.io, integración, CI/CD, despliegue |
 
 ---
 

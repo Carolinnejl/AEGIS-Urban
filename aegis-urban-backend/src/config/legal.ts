@@ -5,8 +5,8 @@
  * y cada consentimiento guardado queda asociado a la versión que el usuario leyó.
  */
 export const LEGAL = {
-  VERSION_TERMINOS:   "2026-10-30.2",
-  VERSION_PRIVACIDAD: "2026-10-30.2",
-  VERSION_UBICACION:  "2026-10-30.2",
+  VERSION_TERMINOS:   "2026-11-16",
+  VERSION_PRIVACIDAD: "2026-11-16",
+  VERSION_UBICACION:  "2026-11-16",
   EDAD_MINIMA:        18,
 } as const;

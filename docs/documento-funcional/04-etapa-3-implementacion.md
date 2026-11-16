@@ -42,17 +42,21 @@ AEGIS-Urban-master/
 - **Derechos del titular**: descarga de los datos propios y baja con anonimización.
 - Rol `CIUDADANO` de solo lectura, sin acceso a pantallas ni endpoints de gestión.
 - Rediseño visual "cian neón + vidrio" con fondo de grilla y mapa oscuro.
+- **Verificación de perfil por códigos**: un código de 6 dígitos para el correo y otro para el celular. Se guardan como HMAC, vencen a los 10 minutos, se invalidan tras 5 intentos fallidos y tienen espera entre reenvíos. El **correo se envía de verdad por SMTP** si se activa (`VERIFICACION_EMAIL_REAL`; probado con Resend) y el **SMS es simulado** (SMS de mentira en pantalla). El canal de envío es intercambiable (patrón Strategy) y si el envío real falla el código no queda guardado.
+- **Planes de evacuación con la ubicación real del sensor**: el área (círculo de 500 m, 2 km o 1 km según la estrategia) se centra en las coordenadas del sensor y la población se estima con una densidad de referencia (supuesto, no dato censal). Los puntos de encuentro son los dos distritos más cercanos: no existe un catastro de refugios.
+- **Errores en rutas asíncronas**: se incorporó `express-async-errors`; antes, un error de base de datos dentro de un handler `async` terminaba el proceso del servidor.
+- **Seguridad de sesión**: `JWT_SECRET` y `AES_SECRET_KEY` son obligatorios y se validan al arrancar (sin valores por defecto); el JWT se verifica con el algoritmo fijado (HS256) y el inicio de sesión admite 10 intentos cada 15 minutos por usuario e IP.
 
 Los escenarios se ejecutan en temporizadores del proceso Node. Un cierre ordenado marca los ejercicios activos como abortados; para despliegues multiinstancia o recuperación tras una caída abrupta se requiere un worker persistente.
 
 ## 3.3 Pruebas y compilación
 
-La suite automatizada cubre cálculo de integridad, matriz de autorización por familia, cálculo de cercanía a zonas de riesgo, avisos derivados del clima y validación del registro con sus consentimientos.
+La suite automatizada cubre cálculo de integridad, matriz de autorización por familia, cálculo de cercanía a zonas de riesgo, avisos derivados del clima validación del registro con sus consentimientos, estrategias de evacuación, validación de secretos, límite de intentos y verificación por códigos.
 
 | Verificación | Resultado registrado |
 |---|---|
-| Pruebas backend | 47 pruebas aprobadas en 5 suites |
-| Pruebas frontend | 3 pruebas aprobadas (almacén de sesión) |
+| Pruebas backend | 113 pruebas aprobadas en 12 suites |
+| Pruebas frontend | 8 pruebas aprobadas (almacenes de sesión y de verificación) |
 | Compilación TypeScript backend | Aprobada |
 | Compilación TypeScript y bundle frontend | Aprobada |
 | Pruebas conectadas a PostgreSQL real | Pendientes |
@@ -62,9 +66,9 @@ Las pruebas de roles actuales simulan las respuestas de la capa de datos. Antes 
 
 ## 3.4 Migraciones y puesta en marcha
 
-El esquema se versiona en `aegis-urban-backend/database/migrations/`. Las migraciones 006 a 012 son repetibles y se aplican en orden. La `010_configurable_scenarios.sql` amplía los tipos de escenario y sus permisos; la `012_citizen_role.sql` agrega el rol `CIUDADANO`, la tabla `user_consent` y la columna `users.terms_verified_at`.
+El esquema se versiona en `aegis-urban-backend/database/migrations/`. Las migraciones 006 a 014 son repetibles y se aplican en orden. La `010_configurable_scenarios.sql` amplía los tipos de escenario y sus permisos; la `012_citizen_role.sql` agrega el rol `CIUDADANO`, la tabla `user_consent` y la columna `users.terms_verified_at`. La `013_profile_verification.sql` agrega la tabla `verification_code`, las marcas `email_verified_at`, `phone_verified_at` y `verified_at`, y los permisos de verificación. La `014_evacuation_strategies.sql` corrige la restricción de `evacuation_plan.strategy_used`, que solo aceptaba nombres que ninguna estrategia usaba y hacía fallar todo plan de evacuación.
 
-`arrancar.bat` (Windows) reutiliza el contenedor `aegis_postgres` si ya existe, aplica las migraciones 006–012, carga los datos iniciales, genera el `.env` si falta y abre backend y frontend.
+`arrancar.bat` (Windows) reutiliza el contenedor `aegis_postgres` si ya existe, aplica las migraciones 006–014, carga los datos iniciales, genera el `.env` si falta y abre backend y frontend.
 
 Docker Compose monta las migraciones en la inicialización de un volumen vacío; no vuelve a ejecutarlas en un volumen ya creado. Confirmar la migración aplicada antes de probar filtros y escenarios. Configuración, secretos y comandos de desarrollo están en el [README principal](../../README.md).
 

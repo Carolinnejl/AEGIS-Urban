@@ -1,15 +1,21 @@
 import { z } from "zod";
 import { db } from "../../config/database";
 import { LEGAL } from "../../config/legal";
+import { AESCipher } from "../../security/encryption/AESCipher";
+import { normalizarTelefono } from "./verificacion";
 import { BCryptHasher } from "../../security/encryption/BCryptHasher";
 import { bitacora } from "../../integrity/BitacoraService";
 import { AppError, BadRequestError, ConflictError } from "../../shared/errors/AppError";
 
 /** Datos mínimos (principio de minimización, Ley 25.326 art. 4): solo usuario, email y contraseña. */
 export const esquemaRegistro = z.object({
-  username: z.string().trim().toLowerCase().regex(/^[a-z0-9_.]{4,30}$/, "Usuario: 4 a 30 caracteres (letras, números, _ o .)"),
-  email:    z.string().trim().toLowerCase().email("Email inválido").max(255),
-  password: z.string().min(10, "La contraseña debe tener al menos 10 caracteres")
+  username: z.string({ required_error: "El usuario es obligatorio" }).trim().toLowerCase().regex(/^[a-z0-9_.]{4,30}$/, "Usuario: 4 a 30 caracteres (letras, números, _ o .)"),
+  email:    z.string({ required_error: "El email es obligatorio" }).trim().toLowerCase().email("Email inválido").max(255),
+  // Se pide para verificar el perfil con un código por SMS (se guarda cifrado con AES-256).
+  telefono: z.string({ required_error: "El celular es obligatorio: se usa para verificar tu perfil" }).trim()
+    .refine((v) => normalizarTelefono(v) !== null, "Teléfono inválido: usá entre 8 y 15 dígitos (podés empezar con +)")
+    .transform((v) => normalizarTelefono(v) as string),
+  password: z.string({ required_error: "La contraseña es obligatoria" }).min(10, "La contraseña debe tener al menos 10 caracteres")
     .regex(/[A-Za-z]/, "La contraseña debe incluir letras")
     .regex(/[0-9]/, "La contraseña debe incluir números")
     .max(128),
@@ -47,9 +53,9 @@ export class RegistroService {
       if (existe.rowCount) throw new ConflictError("El usuario o el email ya están registrados");
 
       const { rows } = await cliente.query<{ id_user: number }>(
-        `INSERT INTO users (username, email, password_hash, id_family, terms_verified_at)
-         SELECT $1, $2, $3, f.id_family, NOW() FROM family f WHERE f.name = 'CIUDADANO'
-         RETURNING id_user`, [datos.username, datos.email, hash, ]);
+        `INSERT INTO users (username, email, password_hash, phone_enc, id_family, terms_verified_at)
+         SELECT $1, $2, $3, $4, f.id_family, NOW() FROM family f WHERE f.name = 'CIUDADANO'
+         RETURNING id_user`, [datos.username, datos.email, hash, AESCipher.cifrar(datos.telefono)]);
       if (!rows[0]) throw new AppError("El rol CIUDADANO no existe: aplicá la migración 012", 500);
       const idUsuario = rows[0].id_user;
 
@@ -96,6 +102,7 @@ export class RegistroService {
   async misDatos(idUsuario: number) {
     const [perfil, consentimientos] = await Promise.all([
       db.consultar(`SELECT u.id_user, u.username, u.email, u.created_at, u.last_login, u.terms_verified_at,
+                           u.email_verified_at, u.phone_verified_at, u.verified_at,
                            f.name AS familia
                       FROM users u LEFT JOIN family f ON f.id_family = u.id_family WHERE u.id_user = $1`, [idUsuario]),
       db.consultar(`SELECT consent_type, version, granted, created_at FROM user_consent
@@ -113,9 +120,11 @@ export class RegistroService {
   async darDeBaja(idUsuario: number, ip: string): Promise<void> {
     await db.consultar(
       `UPDATE users SET is_active = FALSE, username = 'baja-' || id_user, email = 'baja-' || id_user || '@anonimo.invalid',
-              password_hash = '!', full_name_enc = NULL, dni_enc = NULL, phone_enc = NULL
+              password_hash = '!', full_name_enc = NULL, dni_enc = NULL, phone_enc = NULL,
+              email_verified_at = NULL, phone_verified_at = NULL, verified_at = NULL
         WHERE id_user = $1`, [idUsuario]);
     await db.consultar("DELETE FROM session_token WHERE id_user = $1", [idUsuario]);
+    await db.consultar("DELETE FROM verification_code WHERE id_user = $1", [idUsuario]);
     await bitacora.registrarEvento({
       accion: "USER_DELETED_BY_REQUEST", nombreEntidad: "users", idEntidad: String(idUsuario),
       idUsuario, direccionIp: ip,

@@ -1,4 +1,6 @@
 import "./config/env";
+// Hace que un error dentro de un handler async llegue al errorMiddleware en vez de tumbar el proceso.
+import "express-async-errors";
 import express, { Application, Request, Response, NextFunction } from "express";
 import cors from "cors";
 import helmet from "helmet";

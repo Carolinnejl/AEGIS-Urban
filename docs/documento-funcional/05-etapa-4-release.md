@@ -6,7 +6,7 @@ Esta etapa define cómo comprobar el producto y qué falta antes de exponerlo a 
 
 ## 4.1 Release
 
-Las funciones de filtros, escenarios, autorización y modo ciudadano se entregan como cambios de software más las migraciones `010` a `012`. En una base existente, respaldar y aplicarlas en orden antes de habilitar esos flujos (`arrancar.bat` lo hace en desarrollo).
+Las funciones de filtros, escenarios, autorización y modo ciudadano se entregan como cambios de software más las migraciones `010` a `013`. En una base existente, respaldar y aplicarlas en orden antes de habilitar esos flujos (`arrancar.bat` lo hace en desarrollo).
 
 **Lista de control:** compilación backend/frontend aprobada; suite automatizada aprobada; migraciones comprobadas; roles revisados; sensores sintéticos identificados; y respaldo con restauración verificada.
 
@@ -21,6 +21,7 @@ Las funciones de filtros, escenarios, autorización y modo ciudadano se entregan
 | Ver clima y avisos sin cuenta | Ciudadano | Muestra clima real y avisos con su origen (REAL/SIMULADO), sin pedir datos | Implementado; pendiente con usuarios |
 | Registrarse aceptando términos, privacidad y edad | Ciudadano | El registro se rechaza si falta alguno; la ubicación es opcional; queda la evidencia | Verificado por API |
 | Estar dentro de una zona de peligro | Ciudadano | Cartel con dirección para alejarse; precaución cerca del borde | Verificado en modo prueba; GPS real pendiente |
+| Verificar el perfil con los códigos de email y celular | Ciudadano | Con ambos códigos correctos el perfil queda verificado; un código vencido, incorrecto o agotado se rechaza | Probado en pruebas unitarias; envío simulado |
 | Revocar la ubicación, descargar datos y darse de baja | Ciudadano | Los datos se exportan y la baja anonimiza la cuenta | Verificado por API |
 | Consultar un aviso oficial de un organismo | Ciudadano | Requiere un conector oficial (CAP) | Fuera del prototipo |
 
@@ -52,6 +53,6 @@ Los contratos de endpoints, criterios de producto y glosario están en [Anexos](
 
 El incremento agrega el modo ciudadano con clima real, alerta por ubicación y registro con consentimientos legales, además de la gestión de filtros y ejercicios. AEGIS usa Open-Meteo para el clima, pero no está conectado a APIs oficiales de alerta y no debe presentarse como fuente de instrucciones de emergencia.
 
-Prioridades siguientes: **revisión legal de los textos por un profesional**; integrar una fuente oficial autorizada; suscripciones por zona y avisos con la app cerrada (PWA); agregar pruebas de integración contra la base; completar filtros del mapa y bitácora; preparar un worker persistente; y validar accesibilidad y aceptación con usuarios.
+Prioridades siguientes: **envío real de email y SMS** (hoy simulado); catastro de refugios y rutas por calles para la evacuación; **revisión legal de los textos por un profesional**; integrar una fuente oficial autorizada; suscripciones por zona y avisos con la app cerrada (PWA); agregar pruebas de integración contra la base; completar filtros del mapa y bitácora; preparar un worker persistente; y validar accesibilidad y aceptación con usuarios.
 
 [← Etapa 3 — Implementación y testing](04-etapa-3-implementacion.md) · [Índice](README.md) · [Anexos →](06-anexos.md)

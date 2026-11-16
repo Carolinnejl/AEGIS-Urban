@@ -58,3 +58,8 @@ vitest.config.ts.timestamp*
 
 # Respaldos locales de la BD
 /backups/
+
+# Material ajeno al proyecto / temporales
+.tmp-restoba-template/
+PROFILE_README.md
+readmes/

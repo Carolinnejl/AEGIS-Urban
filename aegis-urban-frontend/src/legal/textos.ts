@@ -7,9 +7,9 @@
  * el registro rechaza versiones viejas y cada consentimiento queda asociado a la versión leída.
  */
 export const LEGAL = {
-  VERSION_TERMINOS:   "2026-10-30.2",
-  VERSION_PRIVACIDAD: "2026-10-30.2",
-  VERSION_UBICACION:  "2026-10-30.2",
+  VERSION_TERMINOS:   "2026-11-16",
+  VERSION_PRIVACIDAD: "2026-11-16",
+  VERSION_UBICACION:  "2026-11-16",
   EDAD_MINIMA:        18,
 } as const;
 
@@ -25,7 +25,7 @@ export const TERMINOS: SeccionLegal[] = [
   ]},
   { titulo: "3. Registro y cuenta", parrafos: [
     "Para crear una cuenta debés tener 18 años o más, o contar con la autorización de tu madre, padre o tutor/a legal. Los datos que cargues deben ser verdaderos y sos responsable de mantener tu contraseña en secreto.",
-    "Tu perfil queda verificado cuando aceptás estos Términos y la Política de Privacidad. Podés usar la parte pública de la aplicación (clima y zonas de riesgo) sin crear una cuenta.",
+    "Tu perfil queda verificado cuando aceptás estos Términos y la Política de Privacidad y confirmás los códigos de verificación enviados a tu correo y a tu celular. Podés usar la parte pública de la aplicación (clima y zonas de riesgo) sin crear una cuenta.",
   ]},
   { titulo: "4. Uso permitido", parrafos: [
     "Te comprometés a no intentar vulnerar la seguridad del sistema, no sobrecargar el servicio, no usarlo para difundir información falsa sobre emergencias y no acceder a datos de otras personas.",
@@ -47,13 +47,14 @@ export const PRIVACIDAD: SeccionLegal[] = [
     "Responsable del tratamiento: Carolina Lobo, responsable del proyecto AEGIS Urban.",
   ]},
   { titulo: "2. Qué datos recolectamos", parrafos: [
-    "Solo los mínimos necesarios: nombre de usuario, correo electrónico y contraseña (guardada cifrada de forma irreversible con BCrypt).",
+    "Solo los mínimos necesarios: nombre de usuario, correo electrónico, número de celular y contraseña. La contraseña se guarda cifrada de forma irreversible (BCrypt) y el celular se guarda cifrado (AES-256).",
     "También guardamos la evidencia de tus consentimientos: qué aceptaste, la versión del texto, la fecha y la dirección IP.",
-    "No pedimos DNI, teléfono, nombre real ni datos sensibles.",
+    "No pedimos DNI, nombre real ni datos sensibles.",
   ]},
   { titulo: "3. Para qué los usamos", parrafos: [
-    "Para crear y proteger tu cuenta, verificar tu perfil, mostrarte avisos del clima y de zonas de riesgo, y llevar un registro de auditoría de seguridad del sistema.",
+    "Para crear y proteger tu cuenta, verificar tu perfil mediante un código de 6 dígitos para tu correo y otro para tu celular, mostrarte avisos del clima y de zonas de riesgo, y llevar un registro de auditoría de seguridad del sistema.",
     "No vendemos ni cedemos tus datos a terceros ni los usamos para publicidad.",
+    "El código del correo se envía realmente a través de un proveedor de envío de correo (Resend), que recibe tu dirección de correo y el código solo para entregártelo. El envío por SMS es simulado en esta versión: no se manda ningún SMS real, el código se muestra en pantalla y tu número de celular no se comparte con ningún tercero.",
   ]},
   { titulo: "4. Tu ubicación", parrafos: [
     "La ubicación es opcional y solo se usa si das tu consentimiento expreso. Se utiliza únicamente para calcular, en el momento, si estás cerca de una zona de peligro y avisarte.",
@@ -61,7 +62,7 @@ export const PRIVACIDAD: SeccionLegal[] = [
     "Podés revocar el permiso cuando quieras desde la aplicación y también desde la configuración de tu navegador. Sin ubicación, la aplicación sigue funcionando con la ciudad por defecto o con una zona que elijas a mano.",
   ]},
   { titulo: "5. Terceros", parrafos: [
-    "Usamos Open-Meteo (open-meteo.com) para datos de clima y calidad del aire, y OpenStreetMap para los mapas. Esos servicios reciben tu dirección IP y una ubicación aproximada para responder.",
+    "Usamos Open-Meteo (open-meteo.com) para datos de clima y calidad del aire, y OpenStreetMap para los mapas. Esos servicios reciben tu dirección IP y una ubicación aproximada para responder. Para enviarte el código de verificación por correo usamos Resend (resend.com), que recibe tu dirección de correo.",
   ]},
   { titulo: "6. Tus derechos", parrafos: [
     "Podés ejercer en cualquier momento los derechos de acceso (art. 14), rectificación y supresión (art. 16) de la Ley 25.326. Desde «Mis datos» podés descargar la información que tenemos sobre vos y dar de baja tu cuenta, lo que anonimiza tus datos personales.",

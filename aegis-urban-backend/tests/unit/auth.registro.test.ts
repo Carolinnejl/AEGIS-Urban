@@ -2,7 +2,7 @@ import { validarRegistro } from "../../src/modules/auth/registro.service";
 import { LEGAL } from "../../src/config/legal";
 
 const valido = {
-  username: "Vecina_01", email: "Vecina@Mail.com", password: "clave12345!",
+  username: "Vecina_01", email: "Vecina@Mail.com", password: "clave12345!", telefono: "+54 9 11 2233-4455",
   aceptaTerminos: true, aceptaPrivacidad: true, declaraEdad: true, aceptaUbicacion: false,
   versionTerminos: LEGAL.VERSION_TERMINOS, versionPrivacidad: LEGAL.VERSION_PRIVACIDAD,
 };
@@ -12,6 +12,16 @@ describe("validarRegistro", () => {
     const d = validarRegistro(valido);
     expect(d.username).toBe("vecina_01");
     expect(d.email).toBe("vecina@mail.com");
+  });
+
+  it("normaliza el teléfono (sin espacios ni guiones)", () =>
+    expect(validarRegistro(valido).telefono).toBe("+5491122334455"));
+
+  it("el teléfono es obligatorio y debe ser válido (se usa para verificar el perfil)", () => {
+    const { telefono: _omit, ...sinTelefono } = valido;
+    expect(() => validarRegistro(sinTelefono)).toThrow();
+    expect(() => validarRegistro({ ...valido, telefono: "123" })).toThrow(/Teléfono inválido/);
+    expect(() => validarRegistro({ ...valido, telefono: "abcdefghij" })).toThrow();
   });
 
   it("la ubicación es opcional (por defecto no consentida)", () => {

@@ -8,9 +8,15 @@
 **Estado del producto:** prototipo en desarrollo  
 **Ámbito:** apoyo a operaciones urbanas y simulación; no sustituye protocolos ni autoridad de emergencia.
 
-## Autoría
+## Integrantes del grupo
 
-Proyecto de **Carolina Lobo**.
+| N.º | Integrante |
+|---|---|
+| 1 | Carolina Lobo |
+| 2 | Sabrina De Marco |
+| 3 | Maximiliano Chaparro |
+| 4 | Maximo Casanovas |
+| 5 | Melina Cullari |
 
 ## Propósito
 

@@ -35,7 +35,10 @@ Los endpoints `/api/publico/*` no requieren sesión, limitan a 60 solicitudes po
 | `GET /api/publico/zonas` | Zonas de riesgo vigentes con centro, radio y severidad |
 | `POST /api/publico/riesgo` | Recibe `{lat, lon}` en el cuerpo y devuelve `SEGURO`, `PRECAUCION` o `PELIGRO` con zona, distancia y dirección. Es POST para que la ubicación exacta no quede en los logs |
 | `GET /api/auth/legal` | Versiones vigentes de los textos legales |
-| `POST /api/auth/registro` | Alta de ciudadano. Exige `aceptaTerminos`, `aceptaPrivacidad`, `declaraEdad` y las versiones leídas; `aceptaUbicacion` es opcional |
+| `POST /api/auth/registro` | Alta de ciudadano. Exige `telefono`, `aceptaTerminos`, `aceptaPrivacidad`, `declaraEdad` y las versiones leídas; `aceptaUbicacion` es opcional |
+| `GET /api/auth/verificacion` | Estado de la verificación (email, celular y perfil) con los datos enmascarados |
+| `POST /api/auth/verificacion/reenviar` | Pide un código nuevo para `{canal}` (`EMAIL` o `PHONE`). Espera de 30 s entre códigos y máximo 5 por hora. Solo para un canal simulado la respuesta incluye `codigoSimulado`; un correo real nunca devuelve el código. Si el envío real falla responde 502 |
+| `POST /api/auth/verificacion/confirmar` | Confirma `{canal, codigo}`. Responde 400 si es incorrecto, 410 si venció y 429 si se agotaron los 5 intentos |
 | `PUT /api/auth/consentimiento-ubicacion` | Otorga o revoca el permiso de ubicación (`{acepta}`) |
 | `GET /api/auth/mis-datos` | Derecho de acceso: perfil e historial de consentimientos |
 | `DELETE /api/auth/mis-datos` | Derecho de supresión: baja y anonimización de la cuenta |
@@ -74,6 +77,8 @@ Sólo se aceptan sensores marcados como simulados. El scheduler actual opera en 
 | P0 | Pruebas de integración de rol/ruta con PostgreSQL | Matriz permitida/denegada verificada para cada familia y operación sensible |
 | P0 | Validar cálculos de rutas, población y protocolos | Aprobación de responsables técnicos y organismos competentes antes de uso operativo |
 | P1 | Suscripción por zona y avisos con la app cerrada (PWA) | Notificaciones push probadas en dispositivos móviles |
+| P1 | Dominio propio verificado para el correo (Resend solo entrega al dueño de la cuenta sin dominio) y envío real de SMS con un proveedor | Los códigos llegan a cualquier persona; un canal SMS nuevo en `canales-verificacion.ts` con pruebas de entrega |
+| P1 | Catastro de refugios y rutas por calles para la evacuación | Los puntos de encuentro y los recorridos salen de datos reales y no de distritos cercanos |
 | P1 | Zonas de riesgo como polígonos en lugar de círculos | Cálculo con geometría real de cada zona |
 | P1 | Integración con una API oficial de la ciudad/organismo | Adaptador, actualización, cancelación, expiración y manejo de fallas probados |
 | P1 | Filtros de mapa y paginación de bitácora | Consulta útil con volumen de datos representativo y permisos revisados |
@@ -87,14 +92,16 @@ El texto completo está en la aplicación: [Términos y Condiciones](../../aegis
 | Principio (Ley 25.326 y Decreto 1558/2001) | Cómo se aplica |
 |---|---|
 | Consentimiento libre, expreso e informado (art. 5) | Casillas sin marcar de antemano; los textos se leen antes de aceptar; la ubicación se pide aparte |
-| Calidad y minimización de datos (art. 4) | Solo usuario, correo y contraseña; sin DNI, teléfono ni nombre |
+| Calidad y minimización de datos (art. 4) | Solo usuario, correo, celular (cifrado AES-256) y contraseña; sin DNI ni nombre real |
 | Seguridad de los datos (art. 9) | Contraseñas con BCrypt, sesiones revocables, control de acceso por rol y bitácora íntegra |
 | Derecho de acceso (art. 14) | `GET /api/auth/mis-datos` y botón «Descargar mis datos» |
 | Rectificación y supresión (art. 16) | `DELETE /api/auth/mis-datos`: la cuenta se desactiva y se anonimiza |
 | Control | Reclamos ante la AAIP (www.argentina.gob.ar/aaip), indicada en la Política de Privacidad |
 
-**Evidencia.** Cada consentimiento se guarda en `user_consent` con tipo (`TERMS`, `PRIVACY`, `AGE`, `LOCATION`), versión del texto, si fue otorgado, fecha e IP. Al cambiar un texto se sube su versión (`backend/src/config/legal.ts` y `frontend/src/legal/textos.ts`) y el servidor rechaza registros hechos con una versión vieja. El perfil queda verificado (`terms_verified_at`) al aceptar.
+**Evidencia.** Cada consentimiento se guarda en `user_consent` con tipo (`TERMS`, `PRIVACY`, `AGE`, `LOCATION`), versión del texto, si fue otorgado, fecha e IP. Al cambiar un texto se sube su versión (`backend/src/config/legal.ts` y `frontend/src/legal/textos.ts`) y el servidor rechaza registros hechos con una versión vieja. Aceptar los textos registra `terms_verified_at`; el perfil queda verificado (`verified_at`) cuando se confirman los códigos de email y celular.
 
 **Ubicación.** Las coordenadas exactas viajan por POST, se usan para un único cálculo y no se guardan ni se asocian a la cuenta. Para el clima se envía una posición aproximada (~1 km) a Open-Meteo. El permiso se puede revocar desde la aplicación.
+
+**Verificación de perfil.** Se pide el celular al registrarse y se guarda cifrado (AES-256). El perfil se verifica con un código de 6 dígitos para el correo y otro para el celular. Solo se guarda el HMAC del código (atado al usuario y al canal), que vence a los 10 minutos y se invalida tras 5 intentos fallidos. **El correo se envía de verdad por SMTP** (proveedor Resend; el código nunca se muestra en pantalla ni se escribe en los logs) y **el SMS es simulado**: no sale ningún SMS real y el código se muestra en pantalla. La Política de Privacidad declara ambos hechos y al proveedor de correo. Los derechos de acceso y supresión no dependen de estar verificado.
 
 [← Etapa 4 — Release, operación y mantenimiento](05-etapa-4-release.md) · [Índice](README.md)

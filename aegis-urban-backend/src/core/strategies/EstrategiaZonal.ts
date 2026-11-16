@@ -1,28 +1,28 @@
-import { IEstrategiaEvacuacion, DatosAlerta, PlanEvacuacion } from "./IEstrategiaEvacuacion";
+import { IEstrategiaEvacuacion, DatosAlerta, PlanEvacuacion, DENSIDAD_REFERENCIA_HAB_KM2 } from "./IEstrategiaEvacuacion";
+import { anilloCircular, areaCirculoKm2 } from "../geo/geometria";
 
-// Evacúa solo la zona afectada (radio 500m alrededor del sensor)
+/** Radio de evacuación en metros: 500 m alrededor del sensor (750 m si es un incendio). */
+export const radioZonalM = (tipo: string): number => (tipo === "FIRE" ? 750 : 500);
+
+// Evacúa solo la zona afectada, centrada en la ubicación real del sensor.
 export class EstrategiaZonal implements IEstrategiaEvacuacion {
   obtenerNombre(): string { return "ZONAL"; }
 
   calcularPlan(alerta: DatosAlerta): PlanEvacuacion {
+    const radio = radioZonalM(alerta.tipo);
+    const donde = alerta.zona ? ` en ${alerta.zona}` : "";
     return {
-      estrategiaUsada:   this.obtenerNombre(),
-      rutaGeojson:       JSON.stringify({
+      estrategiaUsada: this.obtenerNombre(),
+      rutaGeojson: JSON.stringify({
         type: "Feature",
-        properties: { radio_metros: 500, tipo: "evacuacion_zonal" },
-        geometry: {
-          type: "Polygon",
-          coordinates: [[
-            [-58.3916, -34.6137], [-58.3716, -34.6137],
-            [-58.3716, -34.5937], [-58.3916, -34.5937],
-            [-58.3916, -34.6137],
-          ]],
-        },
+        properties: { radio_metros: radio, tipo: "evacuacion_zonal", sensor: alerta.idSensor },
+        geometry: { type: "Polygon", coordinates: [anilloCircular(alerta.lat, alerta.lon, radio)] },
       }),
-      personasEstimadas: 800,
+      personasEstimadas: Math.round(areaCirculoKm2(radio) * DENSIDAD_REFERENCIA_HAB_KM2),
       instrucciones:
-        `EVACUACIÓN ZONAL — Sensor #${alerta.idSensor} (${alerta.tipo}). ` +
-        "Desalojar radio 500m. Dirigirse al punto de encuentro más cercano. " +
+        `EVACUACIÓN ZONAL — Sensor #${alerta.idSensor} (${alerta.tipo})${donde}. ` +
+        `Desalojar un radio de ${radio} m alrededor de ${alerta.lat.toFixed(4)}, ${alerta.lon.toFixed(4)}. ` +
+        "Dirigirse al punto de encuentro más cercano. " +
         "Respetar señalización y personal de Defensa Civil.",
     };
   }

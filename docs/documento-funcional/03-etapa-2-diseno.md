@@ -26,6 +26,7 @@ Las migraciones de `aegis-urban-backend/database/migrations/` son la fuente de v
 | `alert` | nivel, tipo, texto, estado y responsables | se origina en un sensor |
 | `evacuation_plan` | estrategia, ruta, alcance y estado | se asocia a una alerta |
 | `simulation_scenario`, `simulation_event` | parámetros, estado, sensor y valor | registra ejercicios y sus lecturas |
+| `verification_code` | canal, HMAC del código, intentos, vencimiento y uso | códigos de verificación de email y celular de un usuario |
 | `user_consent` | tipo de consentimiento, versión del texto, otorgado, fecha e IP | evidencia legal de cada usuario registrado |
 | `audit_log`, `audit_log_control` | actor, acción y huellas DVH/DVV | conserva evidencia de cambios |
 
