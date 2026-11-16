@@ -10,6 +10,7 @@ export default function RegisterPage() {
   const { registrar } = useAuth();
   const [usuario, setUsuario] = useState("");
   const [email, setEmail] = useState("");
+  const [telefono, setTelefono] = useState("");
   const [contrasena, setContrasena] = useState("");
   const [terminos, setTerminos] = useState(false);
   const [privacidad, setPrivacidad] = useState(false);
@@ -19,7 +20,7 @@ export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null);
 
   // Los tres consentimientos obligatorios habilitan el botón; la ubicación es opcional.
-  const puedeEnviar = !!usuario && !!email && contrasena.length >= 10 && terminos && privacidad && edad && !cargando;
+  const puedeEnviar = !!usuario && !!email && telefono.replace(/\D/g, "").length >= 8 && contrasena.length >= 10 && terminos && privacidad && edad && !cargando;
 
   async function enviar(e: FormEvent) {
     e.preventDefault();
@@ -28,7 +29,7 @@ export default function RegisterPage() {
     setCargando(true);
     try {
       await registrar({
-        username: usuario, email, password: contrasena,
+        username: usuario, email, telefono, password: contrasena,
         aceptaTerminos: terminos, aceptaPrivacidad: privacidad, declaraEdad: edad, aceptaUbicacion: ubicacion,
         versionTerminos: LEGAL.VERSION_TERMINOS, versionPrivacidad: LEGAL.VERSION_PRIVACIDAD,
       });
@@ -45,7 +46,7 @@ export default function RegisterPage() {
       <main className={`${styles.card} ${extra.ancha}`}>
         <header className={styles.header}>
           <h1 className={styles.title}>Crear cuenta</h1>
-          <p className={styles.subtitle}>Recibí avisos del clima y de zonas de riesgo cerca tuyo.</p>
+          <p className={styles.subtitle}>Recibí avisos del clima y de zonas de riesgo cerca tuyo. Después vas a verificar tu perfil con un código para tu correo y otro para tu celular.</p>
         </header>
 
         <form onSubmit={enviar} className={styles.form} noValidate>
@@ -58,6 +59,11 @@ export default function RegisterPage() {
             <label htmlFor="r-email" className={styles.label}>Email</label>
             <input id="r-email" type="email" autoComplete="email" placeholder="tu@email.com"
               value={email} onChange={(e) => setEmail(e.target.value)} disabled={cargando} />
+          </div>
+          <div className={styles.field}>
+            <label htmlFor="r-tel" className={styles.label}>Celular</label>
+            <input id="r-tel" type="tel" autoComplete="tel" placeholder="+54 9 11 2233 4455"
+              value={telefono} onChange={(e) => setTelefono(e.target.value)} disabled={cargando} />
           </div>
           <div className={styles.field}>
             <label htmlFor="r-pass" className={styles.label}>Contraseña</label>

@@ -1,28 +1,28 @@
-import { IEstrategiaEvacuacion, DatosAlerta, PlanEvacuacion } from "./IEstrategiaEvacuacion";
+import { IEstrategiaEvacuacion, DatosAlerta, PlanEvacuacion, DENSIDAD_REFERENCIA_HAB_KM2 } from "./IEstrategiaEvacuacion";
+import { anilloCircular, areaCirculoKm2 } from "../geo/geometria";
 
-// Evacúa distrito completo — para alertas CATASTROPHIC o múltiples sensores críticos
+/** Radio de evacuación en metros: 2 km alrededor del sensor (3 km si es un incendio). */
+export const radioMasivaM = (tipo: string): number => (tipo === "FIRE" ? 3000 : 2000);
+
+// Evacúa un área amplia — para alertas CRITICAL/CATASTROPHIC. Centrada en la ubicación real del sensor.
 export class EstraategiaMasiva implements IEstrategiaEvacuacion {
   obtenerNombre(): string { return "MASIVA"; }
 
   calcularPlan(alerta: DatosAlerta): PlanEvacuacion {
+    const radio = radioMasivaM(alerta.tipo);
+    const donde = alerta.zona ? ` (${alerta.zona})` : "";
     return {
-      estrategiaUsada:   this.obtenerNombre(),
-      rutaGeojson:       JSON.stringify({
+      estrategiaUsada: this.obtenerNombre(),
+      rutaGeojson: JSON.stringify({
         type: "Feature",
-        properties: { tipo: "evacuacion_masiva", nivel: "DISTRITO" },
-        geometry: {
-          type: "MultiPolygon",
-          coordinates: [[
-            [[-58.4216, -34.6337], [-58.3416, -34.6337],
-             [-58.3416, -34.5737], [-58.4216, -34.5737],
-             [-58.4216, -34.6337]],
-          ]],
-        },
+        properties: { radio_metros: radio, tipo: "evacuacion_masiva", nivel: "DISTRITO", sensor: alerta.idSensor },
+        geometry: { type: "Polygon", coordinates: [anilloCircular(alerta.lat, alerta.lon, radio, 48)] },
       }),
-      personasEstimadas: 45_000,
+      personasEstimadas: Math.round(areaCirculoKm2(radio) * DENSIDAD_REFERENCIA_HAB_KM2),
       instrucciones:
-        `EVACUACIÓN MASIVA — Alerta CRÍTICA (${alerta.tipo}). ` +
-        "Evacuar el distrito completo de inmediato. Usar rutas de evacuación principales. " +
+        `EVACUACIÓN MASIVA — Alerta CRÍTICA (${alerta.tipo})${donde}. ` +
+        `Evacuar un radio de ${radio / 1000} km alrededor del sensor #${alerta.idSensor} de inmediato. ` +
+        "Usar rutas de evacuación principales. " +
         "Llevar documentos, medicamentos y agua. NO usar ascensores. " +
         "Seguir instrucciones de Defensa Civil y Bomberos.",
     };

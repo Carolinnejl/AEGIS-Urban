@@ -24,7 +24,7 @@ export class GestorJwt {
   /** Verifica y decodifica un JWT. Lanza UnauthorizedError si es inválido o expirado. */
   static verificar(token: string): PayloadToken {
     try {
-      const decoded = jwt.verify(token, env.jwt.secret);
+      const decoded = jwt.verify(token, env.jwt.secret, { algorithms: ["HS256"] });
       if (typeof decoded !== "object" || decoded === null ||
           typeof decoded.sub !== "number" || typeof decoded.usuario !== "string" ||
           typeof decoded.idFamilia !== "number" || typeof decoded.familia !== "string") {

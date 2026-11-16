@@ -9,6 +9,7 @@ import { useUbicacion } from "../../hooks/useUbicacion";
 import DangerOverlay from "../../components/DangerOverlay/DangerOverlay";
 import { CONSENTIMIENTO_UBICACION } from "../../legal/textos";
 import { publicoApi, type Aviso, type Clima, type EvaluacionRiesgo, type ZonaRiesgo } from "../../services/publico";
+import { verificacionApi } from "../../services/verificacion";
 import styles from "./CitizenPage.module.css";
 
 const BUENOS_AIRES = { lat: -34.6037, lon: -58.3816 };
@@ -37,6 +38,13 @@ export default function CitizenPage() {
   const [evaluacion, setEvaluacion] = useState<EvaluacionRiesgo | null>(null);
   const [descartado, setDescartado] = useState<{ id: number; hasta: number } | null>(null);
   const [mensaje, setMensaje] = useState<string | null>(null);
+  // Estado de la verificación del perfil (solo para cuentas ciudadanas con sesión).
+  const [perfilVerificado, setPerfilVerificado] = useState<boolean | null>(null);
+  const esCiudadanoConCuenta = autenticado && usuario?.familia === "CIUDADANO";
+  useEffect(() => {
+    if (!esCiudadanoConCuenta) { setPerfilVerificado(null); return; }
+    verificacionApi.estado().then((e) => setPerfilVerificado(e.verificado)).catch(() => setPerfilVerificado(null));
+  }, [esCiudadanoConCuenta]);
 
   const lat = posicion?.lat ?? BUENOS_AIRES.lat;
   const lon = posicion?.lon ?? BUENOS_AIRES.lon;
@@ -191,6 +199,13 @@ export default function CitizenPage() {
         </nav>
       </header>
 
+      {perfilVerificado === false && (
+        <section className={`${styles.estado} ${styles.precaucion}`} role="status">
+          <strong>PERFIL SIN VERIFICAR</strong>
+          <span>Confirmá los códigos de tu correo y tu celular para completar tu cuenta. <Link to="/verificar">Verificar ahora</Link></span>
+        </section>
+      )}
+
       {mensaje && <p className={styles.mensaje} role="status" onClick={() => setMensaje(null)}>{mensaje}</p>}
 
       {/* ── Estado de riesgo en la ubicación */}
@@ -324,7 +339,7 @@ export default function CitizenPage() {
       {autenticado && usuario?.familia === "CIUDADANO" && (
         <section className={styles.card}>
           <div className={styles.cardHead}><h2>Mis datos</h2></div>
-          <p className={styles.nota}>Cuenta: <strong>{usuario.username}</strong> · perfil verificado</p>
+          <p className={styles.nota}>Cuenta: <strong>{usuario.username}</strong> · {perfilVerificado ? "perfil verificado ✓" : <>perfil sin verificar · <Link to="/verificar">verificar</Link></>}</p>
           <div className={styles.acciones}>
             <button className={styles.secundario} onClick={() => void descargarDatos()}>Descargar mis datos</button>
             <button className={styles.peligroBtn} onClick={() => void eliminarCuenta()}>Dar de baja mi cuenta</button>

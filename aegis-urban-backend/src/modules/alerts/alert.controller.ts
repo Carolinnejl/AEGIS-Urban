@@ -111,10 +111,17 @@ router.post("/:id/evacuar", requiereAutenticacion, requierePermiso("/api/alertas
   const id = parseInt(req.params.id);
   if (isNaN(id)) throw new AppError("ID de alerta inválido", 400);
 
+  // La evacuación se calcula alrededor de la ubicación real del sensor que originó la alerta.
   const { rows } = await db.consultar<{
     id_alert: number; level: string; alert_type: string; id_sensor: number; status: string;
+    lat: string | null; lon: string | null; id_city_node: number; zona: string;
   }>(
-    `SELECT id_alert, level, alert_type, id_sensor, status FROM alert WHERE id_alert = $1`,
+    `SELECT a.id_alert, a.level, a.alert_type, a.id_sensor, a.status,
+            s.lat, s.lon, s.id_city_node, cn.name AS zona
+       FROM alert a
+       JOIN sensor s ON s.id_sensor = a.id_sensor
+       JOIN city_node cn ON cn.id_node = s.id_city_node
+      WHERE a.id_alert = $1`,
     [id]
   );
   if (!rows.length) throw new AppError("Alerta no encontrada", 404);
@@ -123,11 +130,28 @@ router.post("/:id/evacuar", requiereAutenticacion, requierePermiso("/api/alertas
   if (alerta.status !== "ACKNOWLEDGED") {
     throw new AppError("Reconocé la alerta antes de iniciar una evacuación", 409);
   }
+  if (alerta.lat === null || alerta.lon === null) {
+    throw new AppError("El sensor de esta alerta no tiene ubicación registrada: no se puede calcular la evacuación", 409);
+  }
+  const lat = Number(alerta.lat);
+  const lon = Number(alerta.lon);
+
+  // Puntos de encuentro de referencia: los 2 distritos más cercanos (no hay catastro de refugios).
+  const { rows: cercanos } = await db.consultar<{ name: string; centroid_lat: string; centroid_lon: string }>(
+    `SELECT name, centroid_lat, centroid_lon FROM city_node
+      WHERE is_active = TRUE AND node_type = 'DISTRICT' AND centroid_lat IS NOT NULL AND centroid_lon IS NOT NULL
+        AND id_node <> $1
+      ORDER BY power(centroid_lat - $2, 2) + power(centroid_lon - $3, 2)
+      LIMIT 2`,
+    [alerta.id_city_node, lat, lon]
+  );
+  const puntosEncuentro = cercanos.map((n) => ({ nombre: n.name, lat: Number(n.centroid_lat), lon: Number(n.centroid_lon) }));
   const estrategia = ContextoEvacuacion.seleccionarAutomatica(alerta.level, alerta.alert_type);
   const contexto   = new ContextoEvacuacion(estrategia);
 
   const plan = await contexto.ejecutarEvacuacion(
-    { idAlerta: alerta.id_alert, idSensor: alerta.id_sensor, nivel: alerta.level, tipo: alerta.alert_type },
+    { idAlerta: alerta.id_alert, idSensor: alerta.id_sensor, nivel: alerta.level, tipo: alerta.alert_type,
+      lat, lon, zona: alerta.zona, puntosEncuentro },
     req.user?.id,
     req.ip || "127.0.0.1",
   );
