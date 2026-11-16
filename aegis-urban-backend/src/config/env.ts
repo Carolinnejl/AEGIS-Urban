@@ -19,7 +19,7 @@ for (const key of required) {
 // Los secretos son obligatorios y deben ser fuertes: no hay valores por defecto.
 // En tests (NODE_ENV=test) se usan valores fijos que NUNCA deben usarse fuera de las pruebas.
 if (process.env.NODE_ENV === "test") {
-  process.env.JWT_SECRET     ??= "secreto-solo-para-pruebas-automaticas-0123456789abcdef";
+  process.env.JWT_SECRET     ??= "solo-para-pruebas-automaticas-0123456789abcdef-xyz";
   process.env.AES_SECRET_KEY ??= "0".repeat(64);
   // Las pruebas nunca deben depender del .env local ni poder mandar correos de verdad.
   process.env.VERIFICACION_EMAIL_REAL = "false";

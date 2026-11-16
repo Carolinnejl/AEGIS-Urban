@@ -23,3 +23,12 @@ describe("validarSecretos", () => {
 
   it("informa todos los problemas juntos", () => expect(validarSecretos({})).toHaveLength(2));
 });
+
+describe("valores por defecto de las pruebas", () => {
+  it("el secreto de pruebas de env.ts pasa la validación (sin .env, como en CI)", () => {
+    const fuente = require("fs").readFileSync(require("path").join(__dirname, "../../src/config/env.ts"), "utf8");
+    const jwt = /JWT_SECRET\s+\?\?=\s+"([^"]+)"/.exec(fuente)?.[1];
+    expect(jwt).toBeDefined();
+    expect(validarSecretos({ JWT_SECRET: jwt, AES_SECRET_KEY: "0".repeat(64) })).toEqual([]);
+  });
+});
