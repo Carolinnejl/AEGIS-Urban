@@ -42,7 +42,7 @@ Las familias agrupan **patentes** (permisos atómicos, p. ej. `EVACUATION_CREATE
 
 | ID | Categoría | Requerimiento | Cómo se cumple / verifica |
 |---|---|---|---|
-| RNF-01 | Seguridad | Contraseñas con hash irreversible; datos personales con cifrado reversible | bcrypt (factor 12) y AES-256 (`full_name_enc`, `dni_enc`, `phone_enc`); `integracion.test.ts` |
+| RNF-01 | Seguridad | Contraseñas con hash irreversible; datos personales con cifrado reversible | bcrypt (factor 12) y AES-256 (el teléfono se cifra al registrarse; las columnas `full_name_enc` y `dni_enc` están previstas pero hoy el registro no las completa); `integracion.test.ts` |
 | RNF-02 | Seguridad | Fuerza bruta limitada | Limitador: 10 intentos / 15 min por usuario e IP; `seguridad.test.ts` |
 | RNF-03 | Seguridad | Sin inyección SQL ni manipulación de JWT | Consultas parametrizadas, `algorithms: ["HS256"]`; `seguridad.test.ts` |
 | RNF-04 | Integridad | La bitácora no se puede alterar sin que se detecte | DVH/DVV + triggers que rechazan UPDATE/DELETE/TRUNCATE |

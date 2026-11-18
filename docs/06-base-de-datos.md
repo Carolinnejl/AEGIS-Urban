@@ -29,7 +29,7 @@ PostgreSQL 16. El esquema se versiona en `aegis-urban-backend/database/migration
 |---|---|---|
 | Irreversible | Contraseñas | bcrypt, factor 12 |
 | Irreversible | Códigos de verificación | HMAC |
-| Reversible | Nombre, DNI, teléfono | AES-256-CBC (`AES_SECRET_KEY`) |
+| Reversible | Teléfono (columnas de nombre y DNI previstas, hoy sin uso) | AES-256-CBC (`AES_SECRET_KEY`) |
 
 ## Migraciones
 
