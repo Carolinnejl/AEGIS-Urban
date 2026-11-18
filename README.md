@@ -8,14 +8,15 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-22E5FF?style=flat-square&logo=typescript&logoColor=white&labelColor=0B1220)
 ![React](https://img.shields.io/badge/React-18-22E5FF?style=flat-square&logo=react&logoColor=white&labelColor=0B1220)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-8B5CF6?style=flat-square&logo=postgresql&logoColor=white&labelColor=0B1220)
-![Tests](https://img.shields.io/badge/tests-109%20aprobados-19F5A0?style=flat-square&labelColor=0B1220)
+![Tests](https://img.shields.io/badge/tests-190%20aprobados-19F5A0?style=flat-square&labelColor=0B1220)
 ![Estado](https://img.shields.io/badge/estado-prototipo-FFB020?style=flat-square&labelColor=0B1220)
 
 [Documentación](docs/README.md) · [Cómo levantarlo](#cómo-levantarlo) · [Modo ciudadano](#modo-ciudadano) · [Arquitectura](#arquitectura) · [Equipo](#equipo)
 
 </div>
 
-**Proyecto de Carolina Lobo** · Argentina · 2026
+**Proyecto en equipo** · Argentina · 2026 · [ver integrantes](#equipo)
+
 **Estado:** prototipo en desarrollo. No reemplaza a los organismos oficiales: ante una emergencia real llamá al **911**, **100** (bomberos) o **103** (Defensa Civil).
 
 ---
@@ -255,7 +256,6 @@ Toda la documentación se lee directamente en GitHub, por páginas:
 
 <div align="center">
 
-*AEGIS Urban — Advanced Emergency Geographic Intelligence System*
-*Proyecto de Carolina Lobo · 2026*
+*AEGIS Urban · Proyecto en equipo · 2026*
 
 </div>
