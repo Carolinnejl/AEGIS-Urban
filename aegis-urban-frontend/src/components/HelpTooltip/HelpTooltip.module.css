@@ -1,0 +1,4 @@
+.raiz { position: relative; display: inline-flex; vertical-align: middle; margin-left: .4rem; }
+.boton { width: 1.35rem; height: 1.35rem; padding: 0; border-radius: 50%; font: 700 .72rem var(--font-mono); line-height: 1; color: var(--color-cyan); background: rgba(34,229,255,.1); border: 1px solid rgba(34,229,255,.4); }
+.boton:hover, .boton:focus-visible { background: rgba(34,229,255,.22); }
+.globo { position: absolute; z-index: 60; top: calc(100% + .5rem); left: 50%; transform: translateX(-50%); width: max-content; max-width: min(320px, 80vw); padding: .65rem .8rem; border-radius: var(--radius-md); font: 400 .78rem/1.5 var(--font-sans); text-align: left; color: var(--color-text); background: #0d1930; border: 1px solid var(--color-border-glow); box-shadow: 0 8px 28px rgba(0,0,0,.5); }

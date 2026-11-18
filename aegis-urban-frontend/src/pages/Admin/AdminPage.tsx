@@ -1,8 +1,13 @@
 import { useEffect, useState, useCallback } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { Navigate } from "react-router-dom";
 import Sidebar from "../../components/Layout/Sidebar";
 import api from "../../services/api";
-import { useAuthStore } from "../../store/authStore";
+import BackupsPanel from "../../components/Backups/BackupsPanel";
+import { usePatente } from "../../store/authStore";
+import { accionEtiqueta } from "../../i18n/ayudas";
+import LanguageSwitcher from "../../components/LanguageSwitcher/LanguageSwitcher";
+import HelpTooltip from "../../components/HelpTooltip/HelpTooltip";
 import styles from "./AdminPage.module.css";
 
 interface Usuario {
@@ -41,22 +46,13 @@ interface ResultadoIntegridad {
   totalFilas:   number;
 }
 
-type Tab = "usuarios" | "familias" | "bitacora" | "integridad";
-
-const ACCION_LABEL: Record<string, string> = {
-  USER_LOGIN:               "Sesión iniciada",
-  USER_LOGOUT:              "Sesión cerrada",
-  SENSOR_READING_ANOMALY:   "Anomalía",
-  ALERT_CREATED:            "Alerta creada",
-  ALERT_ACKNOWLEDGED:       "Alerta reconocida",
-  ALERT_RESOLVED:           "Alerta resuelta",
-  EVACUATION_INITIATED:     "Evacuación iniciada",
-};
+type Tab = "usuarios" | "familias" | "bitacora" | "integridad" | "respaldos";
 
 export default function AdminPage() {
-  const familiaUsuario = useAuthStore(s => s.usuario?.familia);
-  const esAdministrador = familiaUsuario === "ADMIN_SISTEMA";
-  const esAuditor = familiaUsuario === "AUDITOR";
+  const { t, i18n } = useTranslation();
+  const locale = i18n.resolvedLanguage?.startsWith("en") ? "en-GB" : "es-AR";
+  const esAdministrador = usePatente("ADMIN_USERS_VIEW");
+  const esAuditor = usePatente("AUDIT_VIEW");
   const [tab, setTab]             = useState<Tab>(esAuditor && !esAdministrador ? "bitacora" : "usuarios");
   const [usuarios, setUsuarios]   = useState<Usuario[]>([]);
   const [familias, setFamilias]   = useState<Familia[]>([]);
@@ -66,26 +62,26 @@ export default function AdminPage() {
   const [verificando, setVerificando] = useState(false);
   const [errorCarga, setErrorCarga] = useState<string | null>(null);
 
-  const cargarTab = useCallback(async (t: Tab) => {
+  const cargarTab = useCallback(async (pestana: Tab) => {
     setCargando(true);
     setErrorCarga(null);
     try {
-      if (t === "usuarios") {
+      if (pestana === "usuarios") {
         const res = await api.get<{ usuarios: Usuario[] }>("/admin/usuarios");
         setUsuarios(res.data.usuarios);
-      } else if (t === "familias") {
+      } else if (pestana === "familias") {
         const res = await api.get<{ familias: Familia[] }>("/admin/familias");
         setFamilias(res.data.familias);
-      } else if (t === "bitacora") {
+      } else if (pestana === "bitacora") {
         const res = await api.get<{ entradas: EntradaBitacora[] }>("/admin/bitacora?limite=30");
         setBitacora(res.data.entradas);
       }
     } catch {
-      setErrorCarga("No se pudieron cargar estos datos. Revisá la conexión o tus permisos e intentá de nuevo.");
+      setErrorCarga(t("gestion.admin.errCarga"));
     } finally {
       setCargando(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     if (esAdministrador || esAuditor) cargarTab(tab);
@@ -100,17 +96,18 @@ export default function AdminPage() {
       setTab("integridad");
       setErrorCarga(null);
     } catch {
-      setErrorCarga("No se pudo verificar la bitácora. Revisá la conexión o tus permisos e intentá de nuevo.");
+      setErrorCarga(t("gestion.admin.errVerificar"));
     } finally {
       setVerificando(false);
     }
   };
 
   const tabsBase: { id: Tab; label: string }[] = [
-    { id: "usuarios",   label: "Usuarios" },
-    { id: "familias",   label: "Familias" },
-    { id: "bitacora",   label: "Bitácora" },
-    { id: "integridad", label: "Integridad DVH/DVV" },
+    { id: "usuarios",   label: t("gestion.admin.tabs.usuarios") },
+    { id: "familias",   label: t("gestion.admin.tabs.familias") },
+    { id: "bitacora",   label: t("gestion.admin.tabs.bitacora") },
+    { id: "integridad", label: t("gestion.admin.tabs.integridad") },
+    { id: "respaldos",  label: t("gestion.admin.tabs.respaldos") },
   ];
   const tabs = tabsBase.filter((t: { id: Tab; label: string }) => esAdministrador || (esAuditor && (t.id === "bitacora" || t.id === "integridad")));
 
@@ -121,17 +118,19 @@ export default function AdminPage() {
       <Sidebar />
       <main className={styles.main}>
         <header className={styles.topbar}>
+          <LanguageSwitcher />
           <div>
-            <h1 className={styles.pageTitle}>Administración</h1>
-            <p className={styles.subtitle}>Gestión de usuarios, familias y verificación de integridad DVH/DVV</p>
+            <h1 className={styles.pageTitle}>{t("gestion.admin.titulo")}{tab === "familias" && <HelpTooltip texto={t("help.composite")} />}</h1>
+            <p className={styles.subtitle}>{t("gestion.admin.subtitulo")}</p>
           </div>
           <button
             className={styles.btnIntegridad}
             onClick={verificarIntegridad}
             disabled={verificando}
           >
-            {verificando ? "Verificando…" : "🔐 Verificar Integridad"}
+            {verificando ? t("gestion.admin.verificando") : t("gestion.admin.verificar")}
           </button>
+          <HelpTooltip texto={t("help.dvhDvv")} />
         </header>
 
         {/* Tabs */}
@@ -149,21 +148,23 @@ export default function AdminPage() {
 
         {errorCarga && <div className={styles.errorBanner} role="alert">
           <span>{errorCarga}</span>
-          <button onClick={() => tab === "integridad" ? verificarIntegridad() : cargarTab(tab)}>Reintentar</button>
+          <button onClick={() => tab === "integridad" ? verificarIntegridad() : cargarTab(tab)}>{t("gestion.comun.reintentar")}</button>
         </div>}
+
+        {tab === "respaldos" && esAdministrador && <BackupsPanel />}
 
         {/* ── Usuarios */}
         {tab === "usuarios" && (
           <div className={styles.panelWrap}>
-            {cargando ? <div className={styles.loading}>Cargando…</div> : (
+            {cargando ? <div className={styles.loading}>{t("gestion.comun.cargando")}</div> : (
               <table className={styles.tabla}>
                 <thead><tr>
-                  <th>ID</th>
-                  <th>Usuario</th>
-                  <th>Email</th>
-                  <th>Familia</th>
-                  <th>Estado</th>
-                  <th>Último acceso</th>
+                  <th>{t("gestion.admin.usuarios.id")}</th>
+                  <th>{t("gestion.admin.usuarios.usuario")}</th>
+                  <th>{t("gestion.admin.usuarios.email")}</th>
+                  <th>{t("gestion.admin.usuarios.familia")}</th>
+                  <th>{t("gestion.admin.usuarios.estado")}</th>
+                  <th>{t("gestion.admin.usuarios.ultimo")}</th>
                 </tr></thead>
                 <tbody>
                   {usuarios.map(u => (
@@ -174,12 +175,12 @@ export default function AdminPage() {
                       <td>{u.family_name}</td>
                       <td>
                         <span className={`${styles.estadoBadge} ${u.is_active ? styles["estadoBadge--activo"] : styles["estadoBadge--inactivo"]}`}>
-                          {u.is_active ? "Activo" : "Inactivo"}
+                          {u.is_active ? t("gestion.admin.usuarios.activo") : t("gestion.admin.usuarios.inactivo")}
                         </span>
                       </td>
                       <td className={styles.mono}>
                         {u.last_login
-                          ? new Date(u.last_login).toLocaleString("es-AR", { dateStyle: "short", timeStyle: "short" })
+                          ? new Date(u.last_login).toLocaleString(locale, { dateStyle: "short", timeStyle: "short" })
                           : "—"}
                       </td>
                     </tr>
@@ -193,14 +194,14 @@ export default function AdminPage() {
         {/* ── Familias */}
         {tab === "familias" && (
           <div className={styles.panelWrap}>
-            {cargando ? <div className={styles.loading}>Cargando…</div> : (
+            {cargando ? <div className={styles.loading}>{t("gestion.comun.cargando")}</div> : (
               <table className={styles.tabla}>
                 <thead><tr>
-                  <th>ID</th>
-                  <th>Nombre</th>
-                  <th>Descripción</th>
-                  <th>Usuarios</th>
-                  <th>Creada</th>
+                  <th>{t("gestion.admin.familias.id")}</th>
+                  <th>{t("gestion.admin.familias.nombre")}</th>
+                  <th>{t("gestion.admin.familias.descripcion")}</th>
+                  <th>{t("gestion.admin.familias.usuarios")}</th>
+                  <th>{t("gestion.admin.familias.creada")}</th>
                 </tr></thead>
                 <tbody>
                   {familias.map(f => (
@@ -212,7 +213,7 @@ export default function AdminPage() {
                         <span className={styles.usuariosBadge}>{f.total_usuarios}</span>
                       </td>
                       <td className={styles.mono}>
-                        {new Date(f.created_at).toLocaleDateString("es-AR")}
+                        {new Date(f.created_at).toLocaleDateString(locale)}
                       </td>
                     </tr>
                   ))}
@@ -225,15 +226,15 @@ export default function AdminPage() {
         {/* ── Bitácora */}
         {tab === "bitacora" && (
           <div className={styles.panelWrap}>
-            {cargando ? <div className={styles.loading}>Cargando…</div> : (
+            {cargando ? <div className={styles.loading}>{t("gestion.comun.cargando")}</div> : (
               <table className={styles.tabla}>
                 <thead><tr>
-                  <th>#Log</th>
-                  <th>Acción</th>
-                  <th>Entidad</th>
-                  <th>ID</th>
-                  <th>IP</th>
-                  <th>Fecha</th>
+                  <th>{t("gestion.admin.bitacora.log")}</th>
+                  <th>{t("gestion.admin.bitacora.accion")}</th>
+                  <th>{t("gestion.admin.bitacora.entidad")}</th>
+                  <th>{t("gestion.admin.bitacora.id")}</th>
+                  <th>{t("gestion.admin.bitacora.ip")}</th>
+                  <th>{t("gestion.admin.bitacora.fecha")}</th>
                 </tr></thead>
                 <tbody>
                   {bitacora.map(e => (
@@ -241,14 +242,14 @@ export default function AdminPage() {
                       <td className={styles.mono}>{e.id_log}</td>
                       <td>
                         <span className={`${styles.actTag} ${styles[`actTag--${e.action}`]}`}>
-                          {ACCION_LABEL[e.action] ?? e.action}
+                          {accionEtiqueta(t, e.action)}
                         </span>
                       </td>
                       <td className={styles.muted}>{e.entity_name}</td>
                       <td className={styles.mono}>{e.entity_id}</td>
                       <td className={styles.mono}>{e.ip_address}</td>
                       <td className={styles.mono}>
-                        {new Date(e.created_at).toLocaleString("es-AR", { dateStyle: "short", timeStyle: "short" })}
+                        {new Date(e.created_at).toLocaleString(locale, { dateStyle: "short", timeStyle: "short" })}
                       </td>
                     </tr>
                   ))}
@@ -263,12 +264,8 @@ export default function AdminPage() {
           <div className={styles.integridadPanel}>
             {!integridad ? (
               <div className={styles.integridadEmpty}>
-                <p>Hacé clic en <strong>"Verificar Integridad"</strong> para recalcular DVH + DVV de todos los registros del audit log.</p>
-                <p className={styles.integridadDesc}>
-                  El sistema recorre cada fila de <code>audit_log</code>, recalcula el hash individual (DVH)
-                  y el hash encadenado (DVV), y compara con los valores almacenados.
-                  Cualquier fila alterada queda identificada.
-                </p>
+                <p><Trans i18nKey="gestion.admin.integridad.vacio1" components={[<span key="0" />, <strong key="1" />]} /></p>
+                <p className={styles.integridadDesc}>{t("gestion.admin.integridad.vacio2")}</p>
               </div>
             ) : (
               <>
@@ -276,29 +273,29 @@ export default function AdminPage() {
                   <span className={styles.integridadIcon}>{integridad.esValida ? "✓" : "✗"}</span>
                   <div>
                     <div className={styles.integridadVeredicto}>
-                      {integridad.esValida ? "Integridad VÁLIDA" : "Integridad COMPROMETIDA"}
+                      {integridad.esValida ? t("gestion.admin.integridad.valida") : t("gestion.admin.integridad.comprometida")}
                     </div>
                     <div className={styles.integridadSub}>
-                      {integridad.totalFilas} filas analizadas
+                      {t("gestion.admin.integridad.filas", { n: integridad.totalFilas })}
                       {integridad.filaCorrupta
-                        ? ` — fila #${integridad.filaCorrupta} comprometida`
-                        : " — sin alteraciones detectadas"}
+                        ? t("gestion.admin.integridad.filaComp", { f: integridad.filaCorrupta })
+                        : t("gestion.admin.integridad.sinAlt")}
                     </div>
                   </div>
                 </div>
 
                 <div className={styles.integridadMeta}>
                   <div className={styles.metaRow}>
-                    <span className={styles.metaKey}>Total de filas</span>
+                    <span className={styles.metaKey}>{t("gestion.admin.integridad.totalFilas")}</span>
                     <span className={styles.metaVal}>{integridad.totalFilas}</span>
                   </div>
                   <div className={styles.metaRow}>
-                    <span className={styles.metaKey}>Resultado</span>
+                    <span className={styles.metaKey}>{t("gestion.admin.integridad.resultado")}</span>
                     <span className={styles.metaVal}>{integridad.motivo}</span>
                   </div>
                   {integridad.filaCorrupta && (
                     <div className={styles.metaRow}>
-                      <span className={styles.metaKey}>Fila corrupta</span>
+                      <span className={styles.metaKey}>{t("gestion.admin.integridad.filaCorrupta")}</span>
                       <span className={`${styles.metaVal} ${styles["metaVal--danger"]}`}>
                         #{integridad.filaCorrupta}
                       </span>
@@ -307,12 +304,8 @@ export default function AdminPage() {
                 </div>
 
                 <div className={styles.integridadDesc}>
-                  <p>
-                    Cada fila tiene un <strong>DVH</strong> (hash SHA-256 de sus propios campos)
-                    y un <strong>DVV</strong> (hash encadenado que incluye el DVV de la fila anterior).
-                    Si cualquier campo de una fila es alterado — incluso por superusuario — el DVH cambia
-                    y rompe toda la cadena DVV a partir de esa fila.
-                  </p>
+                  <p><Trans i18nKey="gestion.admin.integridad.explicacion" components={[<span key="0" />, <strong key="1" />]} /></p>
+                  <p>{t("gestion.admin.integridad.inmutable")}</p>
                 </div>
               </>
             )}

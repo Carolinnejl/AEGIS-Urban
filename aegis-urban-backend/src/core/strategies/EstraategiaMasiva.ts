@@ -19,6 +19,7 @@ export class EstraategiaMasiva implements IEstrategiaEvacuacion {
         geometry: { type: "Polygon", coordinates: [anilloCircular(alerta.lat, alerta.lon, radio, 48)] },
       }),
       personasEstimadas: Math.round(areaCirculoKm2(radio) * DENSIDAD_REFERENCIA_HAB_KM2),
+      radioMetros: radio,
       instrucciones:
         `EVACUACIÓN MASIVA — Alerta CRÍTICA (${alerta.tipo})${donde}. ` +
         `Evacuar un radio de ${radio / 1000} km alrededor del sensor #${alerta.idSensor} de inmediato. ` +

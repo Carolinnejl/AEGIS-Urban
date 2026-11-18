@@ -6,6 +6,8 @@ export interface UsuarioAuth {
   username:  string;
   idFamilia: number;
   familia:   string;
+  /** Códigos de patente efectivos (propios + heredados). La API sigue validando cada petición. */
+  permisos?: string[];
 }
 
 interface EstadoAuth {
@@ -15,6 +17,10 @@ interface EstadoAuth {
   establecerSesion:   (usuario: UsuarioAuth, token: string) => void;
   cerrarSesion:       () => void;
 }
+
+/** ¿El usuario tiene esa patente? Los botones se muestran por patente, no por nombre de familia. */
+export const usePatente = (codigo: string): boolean =>
+  useAuthStore((s) => s.usuario?.permisos?.includes(codigo) ?? false);
 
 export const useAuthStore = create<EstadoAuth>()(
   persist(
@@ -31,6 +37,9 @@ export const useAuthStore = create<EstadoAuth>()(
     }),
     {
       name: "aegis-auth",
+      // v2: la sesión guarda las patentes. Una sesión anterior sin ellas se descarta y se vuelve a iniciar sesión.
+      version: 2,
+      migrate: () => ({ usuario: null, token: null, autenticado: false }),
       partialize: (estado) => ({
         usuario:     estado.usuario,
         token:       estado.token,

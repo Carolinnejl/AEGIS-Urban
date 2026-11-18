@@ -28,3 +28,12 @@ describe("authStore", () => {
     expect(useAuthStore.getState().token).toBeNull();
   });
 });
+
+describe("usePatente (lógica de patentes)", () => {
+  it("guarda los permisos de la sesión y los consulta por código", () => {
+    useAuthStore.getState().establecerSesion({ ...usuario, permisos: ["ALERT_ACKNOWLEDGE", "AUDIT_VIEW"] }, "tok");
+    const permisos = useAuthStore.getState().usuario?.permisos ?? [];
+    expect(permisos.includes("ALERT_ACKNOWLEDGE")).toBe(true);
+    expect(permisos.includes("BACKUP_RESTORE")).toBe(false);
+  });
+});

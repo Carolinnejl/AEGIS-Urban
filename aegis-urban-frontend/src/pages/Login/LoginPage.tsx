@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../context/AuthContext";
+import LanguageSwitcher from "../../components/LanguageSwitcher/LanguageSwitcher";
 import styles from "./LoginPage.module.css";
 
 export default function LoginPage() {
@@ -28,6 +29,7 @@ export default function LoginPage() {
 
   return (
     <div className={styles.page}>
+      <LanguageSwitcher flotante />
       {/* ── Fondo decorativo animado */}
       <div className={styles.bgGrid} aria-hidden="true" />
 
@@ -113,8 +115,8 @@ export default function LoginPage() {
         </form>
 
         <p className={styles.altLinks}>
-          <Link to="/registro">Crear cuenta</Link>
-          <Link to="/ciudadano">Ver como ciudadano</Link>
+          <Link to="/registro">{t("ciudadano.crearCuenta")}</Link>
+          <Link to="/ciudadano">{t("auth.verCiudadano")}</Link>
         </p>
 
         {/* ── Pie */}

@@ -4,80 +4,847 @@
     "tagline": "Logistics Orchestration & Early Warning Platform"
   },
   "nav": {
-    "dashboard":  "Dashboard",
-    "cityMap":    "City Map",
-    "sensors":    "Sensors",
-    "alerts":     "Alerts",
+    "dashboard": "Dashboard",
+    "cityMap": "City Map",
+    "sensors": "Sensors",
+    "alerts": "Alerts",
     "simulation": "Simulation",
-    "admin":      "Administration",
-    "logout":     "Log Out"
+    "admin": "Administration",
+    "logout": "Log Out"
   },
   "auth": {
-    "loginTitle":       "Sign In",
-    "loginSubtitle":    "Access the AEGIS Urban monitoring system",
-    "username":         "Username",
-    "password":         "Password",
+    "loginTitle": "Sign In",
+    "loginSubtitle": "Access the AEGIS Urban monitoring system",
+    "username": "Username",
+    "password": "Password",
     "usernamePlaceholder": "Your username",
     "passwordPlaceholder": "Your password",
-    "loginButton":      "Sign In",
-    "loggingIn":        "Verifying...",
+    "loginButton": "Sign In",
+    "loggingIn": "Verifying...",
     "invalidCredentials": "Invalid username or password",
-    "sessionExpired":   "Your session has expired. Please sign in again."
+    "sessionExpired": "Your session has expired. Please sign in again.",
+    "verCiudadano": "View as a citizen"
   },
   "dashboard": {
-    "title":          "Dashboard",
-    "activeSensors":  "Active Sensors",
-    "activeAlerts":   "Active Alerts",
+    "title": "Dashboard",
+    "activeSensors": "Active Sensors",
+    "activeAlerts": "Active Alerts",
     "criticalAlerts": "Critical Alerts",
-    "lastUpdate":     "Last update"
+    "lastUpdate": "Last update"
   },
   "alerts": {
     "level": {
-      "INFO":     "Info",
-      "LOW":      "Low",
-      "MEDIUM":   "Medium",
-      "HIGH":     "High",
+      "INFO": "Info",
+      "LOW": "Low",
+      "MEDIUM": "Medium",
+      "HIGH": "High",
       "CRITICAL": "Critical"
     },
-    "noAlerts":    "No active alerts",
+    "noAlerts": "No active alerts",
     "acknowledge": "Acknowledge"
   },
   "sensors": {
     "type": {
-      "FLOOD":       "Flood",
-      "FIRE":        "Fire",
-      "WIND":        "Wind",
+      "FLOOD": "Flood",
+      "FIRE": "Fire",
+      "WIND": "Wind",
       "AIR_QUALITY": "Air Quality"
     },
     "status": {
-      "ACTIVE":      "Active",
-      "INACTIVE":    "Inactive",
-      "FAULT":       "Fault",
+      "ACTIVE": "Active",
+      "INACTIVE": "Inactive",
+      "FAULT": "Fault",
       "CALIBRATING": "Calibrating"
     }
   },
   "simulation": {
-    "title":       "Simulation Engine",
+    "title": "Simulation Engine",
     "newScenario": "New Scenario",
-    "runSim":      "Run Simulation",
-    "stopSim":     "Stop"
+    "runSim": "Run Simulation",
+    "stopSim": "Stop"
   },
   "common": {
-    "loading":  "Loading...",
-    "error":    "An error occurred",
-    "save":     "Save",
-    "cancel":   "Cancel",
-    "confirm":  "Confirm",
-    "delete":   "Delete",
-    "edit":     "Edit",
-    "view":     "View",
-    "search":   "Search",
-    "noData":   "No data available",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "search": "Search",
+    "noData": "No data available",
     "language": "Language"
   },
   "help": {
     "dvhDvv": "DVH/DVV ensure the immutability of every audit log entry. Any direct database alteration is automatically detected.",
     "composite": "The permission system uses the Composite Pattern: each family inherits the permissions of its parent family plus its own.",
     "simulation": "The Simulation Engine (Mocking Engine) generates disaster scenarios without real hardware, using synthetic data calibrated by geographic zone."
+  },
+  "lang": {
+    "etiqueta": "Language",
+    "es": "Español",
+    "en": "English"
+  },
+  "tipos": {
+    "HEAT": "Heat",
+    "COLD": "Cold",
+    "WIND": "Wind",
+    "RAIN": "Rain",
+    "STORM": "Storm",
+    "AIR_QUALITY": "Air quality",
+    "FOG": "Fog",
+    "SNOW": "Snow",
+    "FLOOD": "Flood",
+    "FIRE": "Fire",
+    "POWER_OUT": "Power outage"
+  },
+  "direcciones": {
+    "norte": "north",
+    "noreste": "northeast",
+    "este": "east",
+    "sureste": "southeast",
+    "sur": "south",
+    "suroeste": "southwest",
+    "oeste": "west",
+    "noroeste": "northwest"
+  },
+  "condiciones": {
+    "despejado": "Clear",
+    "parcial": "Partly cloudy",
+    "nublado": "Overcast",
+    "niebla": "Fog",
+    "llovizna": "Drizzle",
+    "lluvia": "Rain",
+    "nieve": "Snow",
+    "chubascos": "Showers",
+    "chubascosNieve": "Snow showers",
+    "tormenta": "Thunderstorm",
+    "variable": "Variable"
+  },
+  "avisosClima": {
+    "STORM": {
+      "CRITICAL": {
+        "titulo": "Thunderstorm",
+        "detalle": "Take shelter indoors and stay away from trees and open areas."
+      }
+    },
+    "HEAT": {
+      "CRITICAL": {
+        "titulo": "Extreme heat",
+        "detalle": "Feels like {{valor}} °C. Stay hydrated and avoid the sun between 11 am and 5 pm."
+      },
+      "WARNING": {
+        "titulo": "Intense heat",
+        "detalle": "Feels like {{valor}} °C. Drink water and find shade."
+      }
+    },
+    "COLD": {
+      "CRITICAL": {
+        "titulo": "Extreme cold",
+        "detalle": "Feels like {{valor}} °C. Dress warmly and avoid exposure."
+      },
+      "WARNING": {
+        "titulo": "Intense cold",
+        "detalle": "Feels like {{valor}} °C. Dress warmly."
+      }
+    },
+    "WIND": {
+      "CRITICAL": {
+        "titulo": "Very strong gusts",
+        "detalle": "Gusts of {{valor}} km/h. Stay away from trees, signs and power lines."
+      },
+      "WARNING": {
+        "titulo": "Strong wind",
+        "detalle": "Gusts of {{valor}} km/h. Secure loose objects."
+      }
+    },
+    "RAIN": {
+      "CRITICAL": {
+        "titulo": "Heavy rain",
+        "detalle": "{{valor}} mm in the last hour. Risk of flooding: avoid low-lying areas."
+      },
+      "WARNING": {
+        "titulo": "Moderate rain",
+        "detalle": "{{valor}} mm in the last hour. Drive carefully."
+      }
+    },
+    "AIR_QUALITY": {
+      "CRITICAL": {
+        "titulo": "Poor air quality",
+        "detalle": "AQI {{valor}}. Avoid outdoor physical activity."
+      },
+      "WARNING": {
+        "titulo": "Fair air quality",
+        "detalle": "AQI {{valor}}. Sensitive people should limit outdoor exertion."
+      }
+    },
+    "FOG": {
+      "WARNING": {
+        "titulo": "Fog",
+        "detalle": "Reduced visibility. Use low beams and slow down."
+      }
+    },
+    "SNOW": {
+      "WARNING": {
+        "titulo": "Snowfall",
+        "detalle": "Slippery roads. Avoid unnecessary trips."
+      }
+    }
+  },
+  "ciudadano": {
+    "kicker": "AEGIS URBAN · CITIZEN",
+    "titulo": "Weather and risk zones",
+    "panelGestion": "Management panel",
+    "salir": "Log out",
+    "ingresar": "Log in",
+    "crearCuenta": "Create account",
+    "sinVerificar": {
+      "titulo": "PROFILE NOT VERIFIED",
+      "texto": "Confirm the codes sent to your email and phone to complete your account.",
+      "enlace": "Verify now"
+    },
+    "estado": {
+      "peligro": "DANGER ZONE",
+      "precaucion": "CAUTION",
+      "seguro": "SAFE"
+    },
+    "mensajeSeguro": "There are no danger zones near your location.",
+    "mensajePeligro": "⚠ You are in a danger zone ({{zona}}, {{tipo}}). Move away toward the {{direccion}}.",
+    "mensajePrecaucionDentro": "Caution: there is an alert in {{zona}}. Avoid the area and move away toward the {{direccion}}.",
+    "mensajePrecaucionCerca": "Caution: you are {{metros}} m from a risk zone ({{zona}}). Do not get closer.",
+    "consent": {
+      "titulo": "Do you want to be alerted when you are near a danger zone?",
+      "p1": "We will use your device location only while the app is open, to warn you if you are near a danger zone.",
+      "p2": "Your exact coordinates are not stored or linked to your account.",
+      "p3": "You can revoke this permission at any time.",
+      "legal": "By allowing it you accept the use of your location under the <1>Privacy Policy</1> (Argentine Law 25,326).",
+      "permitir": "Allow location",
+      "ahoraNo": "Not now"
+    },
+    "clima": {
+      "titulo": "Weather now",
+      "real": "REAL · Open-Meteo",
+      "sensacion": "Feels like",
+      "viento": "Wind",
+      "rafagas": "Gusts",
+      "lluvia": "Rain",
+      "aire": "Air (AQI)",
+      "cargando": "Loading weather…",
+      "noDisponible": "The weather service is not available right now.",
+      "ubicacion": "Location: {{donde}}",
+      "dondePrueba": "test mode ({{etiqueta}})",
+      "dondeDispositivo": "your device",
+      "dondeDefecto": "Buenos Aires (default)"
+    },
+    "ubicacion": {
+      "titulo": "My location",
+      "gps": "GPS status",
+      "estados": {
+        "inactivo": "inactive",
+        "buscando": "searching for signal…",
+        "activo": "active",
+        "denegado": "blocked by the browser",
+        "noSoportado": "not supported",
+        "error": "no signal"
+      },
+      "ayudaBloqueo": "Enable location in your browser settings (padlock next to the address).",
+      "revocar": "Revoke location permission",
+      "noComparte": "You are not sharing your location.",
+      "permitir": "Allow location",
+      "responder": "Answer the question above to enable location alerts.",
+      "notif": "Enable browser notifications",
+      "notifOn": "Notifications enabled ✓",
+      "sinSoporte": "Your browser does not support notifications.",
+      "activadas": "Notifications enabled.",
+      "denegadas": "Notifications were not enabled (permission denied)."
+    },
+    "mapa": {
+      "titulo": "Risk zone map",
+      "zonas": "{{n}} active zone(s)",
+      "vos": "You"
+    },
+    "avisos": {
+      "titulo": "Alerts",
+      "resumen": "{{total}} total · {{criticos}} critical",
+      "vacio": "No alerts right now. All quiet!",
+      "real": "REAL",
+      "simulado": "SIMULATED",
+      "enZona": "{{tipo}} in {{zona}}",
+      "detalleSimulado": "Alert detected by the city sensors."
+    },
+    "prueba": {
+      "titulo": "Test mode",
+      "salir": "Exit test mode",
+      "descripcion": "Simulate your position relative to a risk zone to see the danger screen without moving. Zones are created by starting a scenario from the Simulation panel.",
+      "sinZonas": "There are no active risk zones right now.",
+      "dentro": "Inside",
+      "cerca": "Near",
+      "lejos": "Far",
+      "etiquetas": {
+        "dentro": "inside {{zona}}",
+        "cerca": "near {{zona}}",
+        "lejos": "far from {{zona}}"
+      }
+    },
+    "misDatos": {
+      "titulo": "My data",
+      "cuenta": "Account:",
+      "verificado": "profile verified ✓",
+      "sinVerificar": "profile not verified",
+      "verificar": "verify",
+      "descargar": "Download my data",
+      "baja": "Delete my account",
+      "confirmarBaja": "Delete your account? Your personal data will be anonymized and you will not be able to sign in with it again.",
+      "errDescarga": "Your data could not be downloaded.",
+      "errBaja": "The account could not be deleted."
+    },
+    "pie": {
+      "terminos": "Terms and Conditions",
+      "privacidad": "Privacy Policy",
+      "orientativo": "For guidance only. In an emergency call 911."
+    }
+  },
+  "peligro": {
+    "titulo": "You are in a danger zone!",
+    "mensaje": "{{tipo}} in <1>{{zona}}</1>. Move away as soon as possible toward the <1>{{direccion}}</1>.",
+    "notificacion": "{{tipo}} in {{zona}}: move away toward the {{direccion}}.",
+    "distancia": "{{m}} m from the zone center (danger radius: {{radio}} m)",
+    "emergencias": "Emergency: <1>911</1> · Fire <1>100</1> · Civil Defense <1>103</1>",
+    "entendido": "Got it, I am moving away"
+  },
+  "registro": {
+    "titulo": "Create account",
+    "subtitulo": "Get weather and risk-zone alerts near you. Afterwards you will verify your profile with one code for your email and another for your phone.",
+    "usuario": "Username",
+    "usuarioPH": "4 to 30 characters (letters, numbers, _ .)",
+    "email": "Email",
+    "emailPH": "you@email.com",
+    "celular": "Phone",
+    "celularPH": "+54 9 11 2233 4455",
+    "contrasena": "Password",
+    "contrasenaPH": "At least 10 characters, with letters and numbers",
+    "consentimientos": "Consents",
+    "terminos": "I have read and accept the <1>Terms and Conditions</1> <2>(required)</2>",
+    "privacidad": "I have read and accept the <1>Privacy Policy</1> and the processing of my data under Argentine Law 25,326 <2>(required)</2>",
+    "edad": "I am over {{edad}} years old or have the authorization of my parent or guardian <1>(required)</1>",
+    "ubicacion": "Allow the use of my location",
+    "ubicacionDesc": "to warn me if I am in a danger zone <1>(optional)</1>",
+    "ubicacionP1": "We will use your device location only while the app is open, to warn you if you are near a danger zone.",
+    "ubicacionP2": "Your exact coordinates are not stored or linked to your account.",
+    "ubicacionP3": "You can revoke this permission at any time.",
+    "enviar": "Accept and create account",
+    "enviando": "Creating account…",
+    "yaTengo": "I already have an account",
+    "verSinCuenta": "View without an account",
+    "errorGenerico": "The account could not be created"
+  },
+  "verificacion": {
+    "kicker": "AEGIS URBAN · VERIFICATION",
+    "titulo": "Verify your profile",
+    "intro": "Confirm the code sent to your email and the one sent to your phone to complete your account.",
+    "simulacionTotal": "<1>Simulation mode:</1> in this version no real email or SMS is sent. The codes appear in the simulated inboxes below, as they would with a delivery provider.",
+    "simulacionParcial": "<1>Real email, simulated phone:</1> the email code is really sent to your inbox. In this version no real SMS is sent: the phone code appears in the simulated SMS below.",
+    "correo": "Email",
+    "celular": "Phone",
+    "verificado": "VERIFIED ✓",
+    "pendiente": "PENDING",
+    "bandejaSim": "📥 Inbox (simulated)",
+    "smsSim": "💬 SMS (simulated)",
+    "mensajeCodigo": "Your AEGIS Urban verification code is <1>{{codigo}}</1>. It expires in 10 minutes.",
+    "sinMensaje": "There is no message yet. Request a new code to see it here.",
+    "correoReal": "✉ Real email",
+    "correoRealTexto": "We sent a code to <1>{{destino}}</1>. It may take a minute; also check your spam folder.",
+    "codigo": "6-digit code",
+    "confirmar": "Confirm",
+    "reenviar": "Resend code",
+    "reenviarEn": "Request another code in {{s}} s",
+    "listo": "Profile verified!",
+    "listoTexto": "You can now use all the features of your account.",
+    "irCiudadana": "Go to the citizen view",
+    "seguirSin": "Continue without verifying",
+    "salir": "Log out",
+    "reintentar": "Retry",
+    "errEstado": "Your profile status could not be loaded",
+    "errConfirmar": "The code could not be confirmed",
+    "errReenviar": "A new code could not be requested"
+  },
+  "legalPagina": {
+    "volver": "← Back to sign-up",
+    "ciudadana": "Citizen view",
+    "version": "Version {{version}} · Argentina",
+    "soloEspanol": "The legal texts are available in Spanish only.",
+    "base": "Prototype baseline text: pending legal review before real use with the public."
+  },
+  "gestion": {
+    "comun": {
+      "live": "● LIVE",
+      "offline": "○ offline",
+      "enVivo": "LIVE",
+      "sinConexion": "OFFLINE",
+      "actualizar": "Refresh",
+      "reintentar": "Retry",
+      "cerrar": "Close",
+      "todas": "All",
+      "todos": "All",
+      "cargando": "Loading…"
+    },
+    "acciones": {
+      "USER_LOGIN": "Signed in",
+      "USER_LOGOUT": "Signed out",
+      "SENSOR_READING_ANOMALY": "Anomaly detected",
+      "ALERT_CREATED": "Alert created",
+      "ALERT_ACKNOWLEDGED": "Alert acknowledged",
+      "ALERT_RESOLVED": "Alert resolved",
+      "EVACUATION_INITIATED": "Evacuation started",
+      "USER_REGISTERED": "User registered",
+      "EMAIL_VERIFIED": "Email verified",
+      "PHONE_VERIFIED": "Phone verified",
+      "BACKUP_CREATED": "Backup created",
+      "BACKUP_RESTORE_DRILL": "Restore drill",
+      "BACKUP_RESTORED": "Database restored",
+      "LOCATION_CONSENT_GRANTED": "Location consent granted",
+      "LOCATION_CONSENT_REVOKED": "Location consent revoked",
+      "USER_DELETED_BY_REQUEST": "Account deleted"
+    },
+    "dashboard": {
+      "eyebrow": "OPERATIONS CENTER · BUENOS AIRES",
+      "subtitulo": "Status of sensors, alerts and city activity.",
+      "salud": "Service status",
+      "actualizarDatos": "Refresh data",
+      "error": "The data could not be updated. The API may be unavailable.",
+      "kicker": "CURRENT SITUATION",
+      "resumen": "Operational summary",
+      "actualizado": "Updated {{hora}}",
+      "esperando": "Waiting for data",
+      "subSensores": "active sensors",
+      "subAlertas": "ongoing alerts",
+      "subCriticas": "active critical",
+      "lecturas": "Readings 24h",
+      "subLecturas": "telemetry records",
+      "accesos": "Quick links",
+      "abrirMapa": "Open map",
+      "abrirMapaSub": "View sensors by zone",
+      "gestionar": "Manage alerts",
+      "gestionarSub": "Review active events",
+      "probar": "Try a scenario",
+      "probarSub": "Simulate sensor readings",
+      "actividad": "Recent activity",
+      "eventos": "{{n}} events",
+      "vacio": "The simulation engine generates activity every 15 seconds.",
+      "nueva": "⚠ New alert:"
+    },
+    "alertas": {
+      "titulo": "Alerts",
+      "subtitulo": "Events by severity, zone and handling status.",
+      "resumen": {
+        "activas": "Active",
+        "criticas": "Critical",
+        "reconocidas": "Acknowledged",
+        "resueltas": "Resolved"
+      },
+      "filtros": {
+        "todas": "All",
+        "activas": "Active",
+        "reconocidas": "Acknowledged",
+        "resueltas": "Resolved"
+      },
+      "buscar": "Search by sensor, zone or description",
+      "buscarAria": "Search alerts",
+      "severidad": "Severity",
+      "severidadAria": "Filter by severity",
+      "zona": "Zone",
+      "desde": "From",
+      "hasta": "To",
+      "total": "{{n}} alerts in total",
+      "errorCarga": "The alerts could not be loaded.",
+      "cargando": "Loading alerts…",
+      "vacio": "No alerts for this filter.",
+      "vacioSub": "The simulation engine generates readings every 15 seconds.",
+      "niveles": {
+        "WARNING": "WARNING",
+        "CRITICAL": "CRITICAL",
+        "CATASTROPHIC": "CATASTROPHIC"
+      },
+      "nivelesSel": {
+        "WARNING": "Warning",
+        "CRITICAL": "Critical",
+        "CATASTROPHIC": "Catastrophic"
+      },
+      "estados": {
+        "ACTIVE": "ACTIVE",
+        "ACKNOWLEDGED": "ACKNOWLEDGED",
+        "RESOLVED": "RESOLVED"
+      },
+      "reconocer": "✓ Acknowledge",
+      "evacuar": "↗ Start evacuation",
+      "resolver": "✓ Resolve alert",
+      "errReconocer": "The alert could not be acknowledged. Refresh the list and try again.",
+      "errEvacuar": "The plan could not be generated. Refresh the list and try again.",
+      "errResolver": "The alert could not be resolved. Refresh the list and try again.",
+      "paginacion": "Pagination",
+      "anterior": "← Previous",
+      "siguiente": "Next →",
+      "pagina": "Page {{p}} / {{t}}",
+      "plan": {
+        "titulo": "Evacuation plan",
+        "estrategia": "Strategy",
+        "zona": "Zone",
+        "sensor": "Sensor",
+        "personas": "Estimated people",
+        "radio": "Affected radius",
+        "metros": "{{n}} m",
+        "centro": "Area center",
+        "puntos": "Reference meeting points",
+        "instrucciones": "Instructions",
+        "nota": "Plan started for alert #{{id}}. The alert stays acknowledged until an operator resolves it.",
+        "supuesto": "Estimated people use 5,000 inhabitants/km² as a reference density: it is an assumption, not census data.",
+        "estrategias": {
+          "ZONAL": "Zonal evacuation",
+          "MASIVA": "Mass evacuation",
+          "REFUGIO_IN_SITU": "Shelter in place"
+        },
+        "pasos": {
+          "ZONAL": [
+            "Cordon off the {{radio}} m perimeter around sensor #{{sensor}}",
+            "Evacuate the buildings inside the radius",
+            "Go to the nearest meeting point",
+            "Follow the signage and Civil Defense staff"
+          ],
+          "MASIVA": [
+            "Immediately evacuate a {{radioKm}} km radius around sensor #{{sensor}}",
+            "Use the main evacuation routes",
+            "Bring documents, medication and water; do not use elevators",
+            "Follow the instructions of Civil Defense and Firefighters"
+          ],
+          "REFUGIO_IN_SITU": [
+            "Stay indoors and close doors and windows",
+            "Stay away from windows",
+            "Tune in to the emergency radio",
+            "Do not go out until Civil Defense gives a new instruction"
+          ]
+        }
+      }
+    },
+    "sensores": {
+      "titulo": "Sensors",
+      "subtitulo": "IoT sensor network — real-time data via WebSocket",
+      "errCarga": "The sensors could not be loaded.",
+      "errLectura": "The simulated reading could not be recorded.",
+      "resumen": {
+        "normales": "Normal",
+        "advertencia": "Warning",
+        "criticos": "Critical",
+        "total": "Total"
+      },
+      "tabla": {
+        "tipo": "Type",
+        "serial": "Serial",
+        "distrito": "District",
+        "estado": "Status",
+        "ultima": "Last reading",
+        "acciones": "Actions"
+      },
+      "cargando": "Loading sensors…",
+      "vacio": "There are no sensors for this filter.",
+      "sinDatos": "NO DATA",
+      "sinLecturas": "No readings",
+      "sinHora": "Time not available",
+      "simular": "⚡ Simulate",
+      "forzar": "Force a simulated reading",
+      "soloRoles": "Authorized roles only",
+      "real": "Real sensor"
+    },
+    "simulacion": {
+      "titulo": "Simulation engine",
+      "subtitulo": "Mocking Engine — generates synthetic telemetry for all simulated sensors",
+      "errLista": "The sensor list could not be loaded.",
+      "errIniciar": "The scenario could not be started. Select simulated sensors and check the parameters.",
+      "errDetener": "The scenario could not be stopped.",
+      "errSimular": "This sensor could not be simulated. Confirm it is enabled for exercises.",
+      "errVarios": "{{n}} sensor(s) could not be simulated. Check their configuration and permissions.",
+      "escenarios": "Configurable scenarios",
+      "nombre": "Name",
+      "nombreDefecto": "Urban exercise",
+      "sensoresSim": "Simulated sensors",
+      "ayudaMultiple": "On a computer: Ctrl/Cmd + click to select several.",
+      "intensidad": "Intensity",
+      "intensidades": {
+        "NORMAL": "Normal",
+        "WARNING": "Warning",
+        "CRITICAL": "Critical"
+      },
+      "intervalo": "Interval (sec.)",
+      "duracion": "Duration (min.)",
+      "crear": "Create and start scenario",
+      "iniciando": "Starting…",
+      "detener": "Stop",
+      "min": "min",
+      "motorActivo": "Engine active",
+      "ciclo": "cycle #{{n}}",
+      "proximo": "{{s}}s until next cycle",
+      "simularTodos": "⚡ Simulate all sensors now",
+      "simulandoTodos": "Simulating all…",
+      "sensoresTitulo": "Simulated sensors",
+      "tabla": {
+        "tipo": "Type",
+        "serial": "Serial",
+        "ultimo": "Last value"
+      },
+      "log": "Simulation log",
+      "logVacio": "Press ▶ on a sensor or “Simulate all” to see results here.",
+      "sensorN": "Sensor #{{id}}",
+      "estrategiasTitulo": "Strategy pattern — Evacuation strategies",
+      "estrategiasDesc": "The evacuation context automatically selects the strategy according to the alert level and type. Each class implements the same interface.",
+      "nivel": "Level: {{v}}",
+      "personas": "People: {{v}}",
+      "radio": "Radius: {{v}}",
+      "estr": {
+        "zonal": {
+          "nivel": "WARNING / CRITICAL",
+          "personas": "≈ 3,900",
+          "radio": "500 m (750 m for fires)",
+          "desc": "Evacuates only the area around the affected sensor, centered on its real location. Minimizes the impact on the rest of the city.",
+          "pasos": [
+            "Cordon off the perimeter",
+            "Evacuate the buildings in the radius",
+            "Activate nearby shelters",
+            "Notify the response teams"
+          ]
+        },
+        "masiva": {
+          "nivel": "CRITICAL / CATASTROPHIC",
+          "personas": "≈ 62,800",
+          "radio": "2 km (3 km for fires)",
+          "desc": "Evacuation of a wide area. Activated when the crisis exceeds zonal capacity and requires coordination between neighborhoods.",
+          "pasos": [
+            "Activate the full-city protocol",
+            "Coordinate public transport",
+            "Open all shelters in the area",
+            "Activate the municipal chain of command"
+          ]
+        },
+        "refugio": {
+          "nivel": "wind, air, power",
+          "personas": "0 (in place)",
+          "radio": "1 km",
+          "desc": "Shelter in place. For wind, air quality or power outages: people stay indoors with the windows closed.",
+          "pasos": [
+            "Close windows and doors",
+            "Turn off ventilation",
+            "Wait for official instructions",
+            "Monitor values every 5 min"
+          ]
+        }
+      }
+    },
+    "admin": {
+      "titulo": "Administration",
+      "subtitulo": "Management of users, families, DVH/DVV integrity and backups",
+      "verificar": "🔐 Verify integrity",
+      "verificando": "Verifying…",
+      "tabs": {
+        "usuarios": "Users",
+        "familias": "Families",
+        "bitacora": "Audit log",
+        "integridad": "DVH/DVV integrity",
+        "respaldos": "Backups"
+      },
+      "errCarga": "This data could not be loaded. Check your connection or permissions and try again.",
+      "errVerificar": "The audit log could not be verified. Check your connection or permissions and try again.",
+      "usuarios": {
+        "id": "ID",
+        "usuario": "User",
+        "email": "Email",
+        "familia": "Family",
+        "estado": "Status",
+        "ultimo": "Last access",
+        "activo": "Active",
+        "inactivo": "Inactive"
+      },
+      "familias": {
+        "id": "ID",
+        "nombre": "Name",
+        "descripcion": "Description",
+        "usuarios": "Users",
+        "creada": "Created"
+      },
+      "bitacora": {
+        "log": "#Log",
+        "accion": "Action",
+        "entidad": "Entity",
+        "id": "ID",
+        "ip": "IP",
+        "fecha": "Date"
+      },
+      "integridad": {
+        "vacio1": "Click <1>“Verify integrity”</1> to recalculate DVH + DVV for every audit log record.",
+        "vacio2": "The system walks through every row of the audit log, recalculates the individual hash (DVH) and the chained hash (DVV), and compares them with the stored values. Any altered row is identified.",
+        "valida": "Integrity VALID",
+        "comprometida": "Integrity COMPROMISED",
+        "filas": "{{n}} rows analyzed",
+        "filaComp": " — row #{{f}} compromised",
+        "sinAlt": " — no tampering detected",
+        "totalFilas": "Total rows",
+        "resultado": "Result",
+        "filaCorrupta": "Corrupted row",
+        "explicacion": "Each row has a <1>DVH</1> (SHA-256 hash of its own fields) and a <1>DVV</1> (chained hash that includes the previous row’s DVV). If any field of a row is altered, the DVH changes and breaks the whole DVV chain from that row on.",
+        "inmutable": "In addition, the audit log is immutable: a database trigger rejects UPDATE, DELETE and TRUNCATE, even for the superuser."
+      }
+    },
+    "respaldos": {
+      "titulo": "Database backups",
+      "automatico": "Automatic: <1>{{valor}}</1> · the last {{n}} are kept · mode {{modo}}",
+      "cada24": "yes, every 24 h",
+      "no": "no",
+      "crear": "Create backup now",
+      "creando": "Creating…",
+      "creado": "Backup created: {{archivo}} ({{tam}})",
+      "vacio": "There are no backups yet.",
+      "tabla": {
+        "archivo": "File",
+        "creado": "Created",
+        "tamano": "Size",
+        "bitacora": "Audit log when backed up",
+        "acciones": "Actions"
+      },
+      "integra": "intact · {{n}} rows",
+      "sinDatos": "no data",
+      "simulacro": "Drill",
+      "probando": "Testing…",
+      "restaurar": "Restore…",
+      "resultado": {
+        "aprobado": "PASSED",
+        "problemas": "WITH PROBLEMS",
+        "archivoIntegro": "file intact",
+        "archivoAlterado": "file TAMPERED",
+        "bitacora": "DVH/DVV audit log: {{motivo}}",
+        "nota": "It was restored into a temporary database that has already been deleted: the live database was not touched.",
+        "titulo": "Restore drill: {{estado}}"
+      },
+      "confirmar": "You are about to REPLACE the current data with backup {{archivo}}.\nA safety backup is created first.\n\nType RESTAURAR to confirm:",
+      "restaurado": "Restore complete from {{archivo}}.",
+      "errLista": "The backup list could not be loaded",
+      "errOperacion": "The operation failed"
+    }
+  },
+  "ayuda": {
+    "titulo": "Help",
+    "subtitulo": "How to use AEGIS Urban according to your role",
+    "abrir": "Help",
+    "cerrar": "Close help",
+    "mas": "More information",
+    "emergencias": {
+      "titulo": "In a real emergency",
+      "texto": "AEGIS Urban is a prototype and does not replace the official agencies. Call 911 (police), 100 (fire) or 103 (Civil Defense)."
+    },
+    "rolesTitulo": "Getting started by role",
+    "roles": {
+      "ciudadano": {
+        "titulo": "Citizens",
+        "pasos": [
+          "Open “View as a citizen” on the sign-in screen: no account is needed.",
+          "Check the current weather and the alerts. Each alert says whether it is REAL (weather) or SIMULATED (demo sensors).",
+          "If you want location alerts, tap “Allow location”. You can revoke it at any time.",
+          "If you are inside a danger zone you will see a red screen telling you which way to move away.",
+          "To have an account: “Create account”, accept the terms and verify your email and phone with the codes."
+        ]
+      },
+      "operador": {
+        "titulo": "Operations and traffic",
+        "pasos": [
+          "Sign in with your username and password.",
+          "On the Dashboard check the summary of sensors and alerts.",
+          "On the Map locate the sensors by zone.",
+          "On Alerts filter by severity, zone or date to find what you need."
+        ]
+      },
+      "defensa": {
+        "titulo": "Civil Defense",
+        "pasos": [
+          "Acknowledge the alert before starting an evacuation.",
+          "Start the evacuation: the system picks the strategy by severity and type, and centers the plan on the sensor.",
+          "In Simulation create exercises with simulated sensors and stop them whenever you want.",
+          "Resolve the alert when the emergency is over."
+        ]
+      },
+      "auditoria": {
+        "titulo": "Audit",
+        "pasos": [
+          "Go to Administration → Audit log to see the recorded actions.",
+          "Use “Verify integrity” to recalculate DVH and DVV.",
+          "Your access is read-only: you cannot change the status of alerts."
+        ]
+      },
+      "admin": {
+        "titulo": "Administration",
+        "pasos": [
+          "Users and Families: review who has access and with which role.",
+          "Backups: create a backup and run the restore drill regularly.",
+          "Restoring replaces the current data: it asks for written confirmation and first creates a safety backup.",
+          "Automatic backups run every 24 h and the last 7 are kept."
+        ]
+      }
+    },
+    "faqTitulo": "Frequently asked questions",
+    "faq": [
+      {
+        "p": "What do REAL and SIMULATED mean?",
+        "r": "REAL is data from an external source (Open-Meteo weather). SIMULATED is generated by the virtual demo sensors. Simulations are not official alerts."
+      },
+      {
+        "p": "How does the location alert work?",
+        "r": "With your permission, the browser sends your position only to calculate the distance to each risk zone. It is not stored."
+      },
+      {
+        "p": "Why am I asked to verify my profile?",
+        "r": "To confirm that the email and the phone are yours: you receive a 6-digit code on each. In this version the SMS is simulated: the code appears on screen."
+      },
+      {
+        "p": "I did not receive the code",
+        "r": "Check your spam folder and wait 30 seconds to request another. Each code expires after 10 minutes and allows 5 attempts."
+      },
+      {
+        "p": "How do I change the language?",
+        "r": "With the ES / EN selector. Your choice is remembered in this browser."
+      },
+      {
+        "p": "What are DVH and DVV?",
+        "r": "They are fingerprints (hashes) of each audit log row: the DVH protects each row and the DVV chains them together. If someone tampers with the log, the system detects it."
+      },
+      {
+        "p": "How do I make a backup?",
+        "r": "Administration → Backups → “Create backup now”. An automatic one is also made every 24 h."
+      },
+      {
+        "p": "How do I download my data or delete my account?",
+        "r": "In the citizen view, “My data” section: “Download my data” and “Delete my account”."
+      }
+    ],
+    "glosarioTitulo": "Glossary",
+    "glosario": [
+      {
+        "t": "Risk zone",
+        "d": "Circular area around a sensor with an active alert; its radius grows with severity."
+      },
+      {
+        "t": "Family and patent",
+        "d": "A patent is a specific permission; a family groups patents (it is a role)."
+      },
+      {
+        "t": "Evacuation strategy",
+        "d": "The way the plan is calculated: zonal, mass or shelter in place."
+      },
+      {
+        "t": "Scenario",
+        "d": "A simulation exercise with the chosen sensors, intensity and duration."
+      }
+    ],
+    "tooltips": {
+      "modoPrueba": "Simulate your position relative to a zone to see the danger screen without moving.",
+      "respaldos": "The drill restores the backup into a temporary database and verifies integrity, without touching the live database.",
+      "evacuar": "The plan is centered on the sensor’s real location. The strategy depends on the alert’s severity and type."
+    },
+    "ayudaContextual": "Help about this topic"
   }
 }

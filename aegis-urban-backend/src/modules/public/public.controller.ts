@@ -74,6 +74,7 @@ async function zonasDeRiesgo(): Promise<ZonaRiesgo[]> {
       id: a.id_alert,
       nombre: a.zona,
       tipo: ETIQUETA_TIPO[a.alert_type] ?? a.alert_type,
+      tipoCodigo: a.alert_type,
       nivel: a.level,
       lat: Number(a.lat),
       lon: Number(a.lon),
@@ -83,20 +84,26 @@ async function zonasDeRiesgo(): Promise<ZonaRiesgo[]> {
   return zonas;
 }
 
+// Los datos públicos se pueden guardar en el navegador un rato: menos peticiones al servidor.
+const cachear = (segundos: number) => (_req: Request, res: Response, next: NextFunction) => {
+  res.setHeader("Cache-Control", `public, max-age=${segundos}`);
+  next();
+};
+
 // GET /api/publico/clima?lat=&lon=
-router.get("/clima", async (req: Request, res: Response) => {
+router.get("/clima", cachear(120), async (req: Request, res: Response) => {
   const { lat, lon } = leerCoordenadas(req);
   const clima = await obtenerClima(lat, lon);
   res.json({ disponible: clima !== null, lat, lon, fuente: "Open-Meteo", clima });
 });
 
 // GET /api/publico/zonas — zonas de riesgo vigentes (para dibujar en el mapa)
-router.get("/zonas", async (_req: Request, res: Response) => {
+router.get("/zonas", cachear(10), async (_req: Request, res: Response) => {
   res.json({ zonas: await zonasDeRiesgo() });
 });
 
 // GET /api/publico/avisos?lat=&lon= — avisos reales (clima) + simulados (sensores)
-router.get("/avisos", async (req: Request, res: Response) => {
+router.get("/avisos", cachear(30), async (req: Request, res: Response) => {
   const { lat, lon } = leerCoordenadas(req);
   const [clima, alertas] = await Promise.all([obtenerClima(lat, lon), alertasVigentes()]);
   const avisos: Aviso[] = clima ? avisosDesdeClima(clima) : [];

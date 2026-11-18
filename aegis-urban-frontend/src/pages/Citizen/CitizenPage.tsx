@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { Trans, useTranslation } from "react-i18next";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useAuth } from "../../context/AuthContext";
@@ -7,25 +8,26 @@ import { useAuthStore } from "../../store/authStore";
 import { useUbicacionStore } from "../../store/ubicacionStore";
 import { useUbicacion } from "../../hooks/useUbicacion";
 import DangerOverlay from "../../components/DangerOverlay/DangerOverlay";
-import { CONSENTIMIENTO_UBICACION } from "../../legal/textos";
+import LanguageSwitcher from "../../components/LanguageSwitcher/LanguageSwitcher";
+import HelpTooltip from "../../components/HelpTooltip/HelpTooltip";
+import { grupoClima, tipoDeZona, direccionTraducida } from "../../i18n/ayudas";
 import { publicoApi, type Aviso, type Clima, type EvaluacionRiesgo, type ZonaRiesgo } from "../../services/publico";
 import { verificacionApi } from "../../services/verificacion";
 import styles from "./CitizenPage.module.css";
 
 const BUENOS_AIRES = { lat: -34.6037, lon: -58.3816 };
 const COLOR_NIVEL = { WARNING: "#FFB020", CRITICAL: "#FF4D6D", CATASTROPHIC: "#FF2D55" } as const;
-const ETIQUETA_TIPO: Record<string, string> = {
-  HEAT: "Calor", COLD: "Frío", WIND: "Viento", RAIN: "Lluvia", STORM: "Tormenta", AIR_QUALITY: "Aire",
-  FOG: "Niebla", SNOW: "Nieve", FLOOD: "Inundación", FIRE: "Incendio", POWER_OUT: "Energía",
-};
+const CLAVE_GPS = { inactivo: "inactivo", buscando: "buscando", activo: "activo", denegado: "denegado", "no-soportado": "noSoportado", error: "error" } as const;
 
 interface PosicionPrueba { lat: number; lon: number; etiqueta: string }
 const METROS_POR_GRADO = 111_320;
 
 export default function CitizenPage() {
+  const { t, i18n } = useTranslation();
   const { cerrarSesion } = useAuth();
   const { autenticado, usuario } = useAuthStore();
   const { consentida, notificaciones, fijarConsentimiento, fijarNotificaciones } = useUbicacionStore();
+  const locale = i18n.resolvedLanguage?.startsWith("en") ? "en-GB" : "es-AR";
 
   const [prueba, setPrueba] = useState<PosicionPrueba | null>(null);
   const { posicion: gps, estado: estadoGps } = useUbicacion(consentida === true && !prueba);
@@ -80,6 +82,24 @@ export default function CitizenPage() {
     return () => clearInterval(id);
   }, [evaluar]);
 
+  // ── Textos que dependen del idioma, armados a partir de códigos y valores del servidor
+  const textoRiesgo = useCallback((ev: EvaluacionRiesgo): string => {
+    if (ev.estado === "SEGURO" || !ev.zona) return t("ciudadano.mensajeSeguro");
+    const direccion = direccionTraducida(t, ev.direccion);
+    if (ev.estado === "PELIGRO") return t("ciudadano.mensajePeligro", { zona: ev.zona.nombre, tipo: tipoDeZona(t, ev.zona), direccion });
+    const dentro = (ev.distanciaM ?? Infinity) <= ev.zona.radioM;
+    return dentro
+      ? t("ciudadano.mensajePrecaucionDentro", { zona: ev.zona.nombre, direccion })
+      : t("ciudadano.mensajePrecaucionCerca", { metros: ev.distanciaM, zona: ev.zona.nombre });
+  }, [t]);
+
+  const tituloAviso = (a: Aviso) => a.origen === "real"
+    ? t(`avisosClima.${a.tipo}.${a.nivel}.titulo`, { defaultValue: a.titulo })
+    : t("ciudadano.avisos.enZona", { tipo: t(`tipos.${a.tipo}`, { defaultValue: a.tipo }), zona: a.zona });
+  const detalleAviso = (a: Aviso) => a.origen === "real"
+    ? t(`avisosClima.${a.tipo}.${a.nivel}.detalle`, { valor: a.valor, defaultValue: a.detalle })
+    : t("ciudadano.avisos.detalleSimulado");
+
   // ── Notificaciones del navegador: avisos críticos nuevos y entrada a zona de peligro
   const vistos = useRef<Set<string> | null>(null);
   const estadoPrevio = useRef<string>("SEGURO");
@@ -94,15 +114,20 @@ export default function CitizenPage() {
     const criticos = avisos.filter((a) => a.nivel === "CRITICAL");
     if (vistos.current === null) { vistos.current = new Set(criticos.map((a) => a.id)); return; }
     for (const a of criticos) {
-      if (!vistos.current.has(a.id)) { vistos.current.add(a.id); notificar(`AEGIS: ${a.titulo}`, a.detalle); }
+      if (!vistos.current.has(a.id)) { vistos.current.add(a.id); notificar(`AEGIS: ${tituloAviso(a)}`, detalleAviso(a)); }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [avisos, notificar]);
 
   useEffect(() => {
     const estado = evaluacion?.estado ?? "SEGURO";
-    if (estado === "PELIGRO" && estadoPrevio.current !== "PELIGRO") notificar("¡Estás en una zona peligrosa!", evaluacion?.mensaje ?? "");
+    if (estado === "PELIGRO" && estadoPrevio.current !== "PELIGRO" && evaluacion?.zona) {
+      notificar(t("peligro.titulo"), t("peligro.notificacion", {
+        tipo: tipoDeZona(t, evaluacion.zona), zona: evaluacion.zona.nombre, direccion: direccionTraducida(t, evaluacion.direccion),
+      }));
+    }
     estadoPrevio.current = estado;
-  }, [evaluacion, notificar]);
+  }, [evaluacion, notificar, t]);
 
   // ── Consentimiento de ubicación (se guarda en el servidor si hay cuenta)
   async function decidirUbicacion(acepta: boolean) {
@@ -112,17 +137,17 @@ export default function CitizenPage() {
   }
 
   async function activarNotificaciones() {
-    if (!("Notification" in window)) { setMensaje("Tu navegador no soporta notificaciones."); return; }
+    if (!("Notification" in window)) { setMensaje(t("ciudadano.ubicacion.sinSoporte")); return; }
     const permiso = await Notification.requestPermission();
     fijarNotificaciones(permiso === "granted");
-    setMensaje(permiso === "granted" ? "Notificaciones activadas." : "No se activaron las notificaciones (permiso denegado).");
+    setMensaje(permiso === "granted" ? t("ciudadano.ubicacion.activadas") : t("ciudadano.ubicacion.denegadas"));
   }
 
   // ── Modo prueba: ubicarse en/cerca de una zona sin moverse
   function probar(zona: ZonaRiesgo, donde: "dentro" | "cerca" | "lejos") {
     const grados = (m: number) => m / METROS_POR_GRADO;
     const desplazamiento = donde === "dentro" ? 100 : donde === "cerca" ? zona.radioM * 1.3 : zona.radioM * 6;
-    setPrueba({ lat: zona.lat + grados(desplazamiento), lon: zona.lon, etiqueta: `${donde} de ${zona.nombre}` });
+    setPrueba({ lat: zona.lat + grados(desplazamiento), lon: zona.lon, etiqueta: t(`ciudadano.prueba.etiquetas.${donde}`, { zona: zona.nombre }) });
     setDescartado(null);
   }
 
@@ -145,14 +170,14 @@ export default function CitizenPage() {
     capa.current.clearLayers();
     for (const z of zonas) {
       L.circle([z.lat, z.lon], { radius: z.radioM, color: COLOR_NIVEL[z.nivel], fillOpacity: 0.18, weight: 2 })
-        .bindPopup(`<strong>${z.tipo}</strong><br/>${z.nombre}`).addTo(capa.current);
+        .bindPopup(`<strong>${tipoDeZona(t, z)}</strong><br/>${z.nombre}`).addTo(capa.current);
     }
     if (posicion) {
       L.circleMarker([posicion.lat, posicion.lon], { radius: 8, color: "#fff", weight: 2, fillColor: "#22E5FF", fillOpacity: 1 })
-        .bindTooltip("Vos").addTo(capa.current);
+        .bindTooltip(t("ciudadano.mapa.vos")).addTo(capa.current);
       if (!centradoEnUsuario.current || prueba) { mapa.current.setView([posicion.lat, posicion.lon], 14); centradoEnUsuario.current = true; }
     }
-  }, [zonas, posicion, prueba]);
+  }, [zonas, posicion, prueba, t]);
 
   const mostrarCartel = evaluacion?.estado === "PELIGRO" && evaluacion.zona &&
     !(descartado && descartado.id === evaluacion.zona.id && Date.now() < descartado.hasta);
@@ -170,15 +195,18 @@ export default function CitizenPage() {
       const a = document.createElement("a");
       a.href = url; a.download = "mis-datos-aegis.json"; a.click();
       URL.revokeObjectURL(url);
-    } catch { setMensaje("No se pudieron descargar tus datos."); }
+    } catch { setMensaje(t("ciudadano.misDatos.errDescarga")); }
   }
 
   async function eliminarCuenta() {
-    if (!window.confirm("¿Dar de baja tu cuenta? Se anonimizarán tus datos personales y no podrás volver a entrar con ella.")) return;
-    try { await publicoApi.darDeBaja(); await cerrarSesion(); } catch { setMensaje("No se pudo dar de baja la cuenta."); }
+    if (!window.confirm(t("ciudadano.misDatos.confirmarBaja"))) return;
+    try { await publicoApi.darDeBaja(); await cerrarSesion(); } catch { setMensaje(t("ciudadano.misDatos.errBaja")); }
   }
 
   const esStaff = autenticado && usuario?.familia !== "CIUDADANO";
+  const dondeClima = posicion
+    ? (prueba ? t("ciudadano.clima.dondePrueba", { etiqueta: prueba.etiqueta }) : t("ciudadano.clima.dondeDispositivo"))
+    : t("ciudadano.clima.dondeDefecto");
 
   return (
     <div className={styles.page}>
@@ -189,20 +217,21 @@ export default function CitizenPage() {
 
       <header className={styles.top}>
         <div>
-          <p className={styles.kicker}>AEGIS URBAN · CIUDADANO</p>
-          <h1>Clima y zonas de riesgo</h1>
+          <p className={styles.kicker}>{t("ciudadano.kicker")}</p>
+          <h1>{t("ciudadano.titulo")}</h1>
         </div>
         <nav className={styles.nav}>
+          <LanguageSwitcher />
           {autenticado
-            ? <>{esStaff && <Link to="/dashboard">Panel de gestión</Link>}<button onClick={() => void cerrarSesion()}>Cerrar sesión</button></>
-            : <><Link to="/login">Ingresar</Link><Link to="/registro" className={styles.cta}>Crear cuenta</Link></>}
+            ? <>{esStaff && <Link to="/dashboard">{t("ciudadano.panelGestion")}</Link>}<button onClick={() => void cerrarSesion()}>{t("ciudadano.salir")}</button></>
+            : <><Link to="/login">{t("ciudadano.ingresar")}</Link><Link to="/registro" className={styles.cta}>{t("ciudadano.crearCuenta")}</Link></>}
         </nav>
       </header>
 
       {perfilVerificado === false && (
         <section className={`${styles.estado} ${styles.precaucion}`} role="status">
-          <strong>PERFIL SIN VERIFICAR</strong>
-          <span>Confirmá los códigos de tu correo y tu celular para completar tu cuenta. <Link to="/verificar">Verificar ahora</Link></span>
+          <strong>{t("ciudadano.sinVerificar.titulo")}</strong>
+          <span>{t("ciudadano.sinVerificar.texto")} <Link to="/verificar">{t("ciudadano.sinVerificar.enlace")}</Link></span>
         </section>
       )}
 
@@ -211,25 +240,25 @@ export default function CitizenPage() {
       {/* ── Estado de riesgo en la ubicación */}
       {evaluacion && evaluacion.estado !== "SEGURO" && (
         <section className={`${styles.estado} ${evaluacion.estado === "PELIGRO" ? styles.peligro : styles.precaucion}`} role="alert">
-          <strong>{evaluacion.estado === "PELIGRO" ? "ZONA PELIGROSA" : "PRECAUCIÓN"}</strong>
-          <span>{evaluacion.mensaje}</span>
+          <strong>{evaluacion.estado === "PELIGRO" ? t("ciudadano.estado.peligro") : t("ciudadano.estado.precaucion")}</strong>
+          <span>{textoRiesgo(evaluacion)}</span>
         </section>
       )}
       {evaluacion?.estado === "SEGURO" && posicion && (
-        <section className={`${styles.estado} ${styles.seguro}`}><strong>SEGURO</strong><span>{evaluacion.mensaje}</span></section>
+        <section className={`${styles.estado} ${styles.seguro}`}><strong>{t("ciudadano.estado.seguro")}</strong><span>{textoRiesgo(evaluacion)}</span></section>
       )}
 
       {/* ── Consentimiento de ubicación */}
       {consentida === null && (
         <section className={styles.consent}>
-          <h2>¿Querés que te avisemos si estás cerca de una zona de peligro?</h2>
-          <ul>{CONSENTIMIENTO_UBICACION.map((t) => <li key={t}>{t}</li>)}</ul>
+          <h2>{t("ciudadano.consent.titulo")}</h2>
+          <ul><li>{t("ciudadano.consent.p1")}</li><li>{t("ciudadano.consent.p2")}</li><li>{t("ciudadano.consent.p3")}</li></ul>
           <p className={styles.legalMini}>
-            Al permitirlo aceptás el uso de tu ubicación según la <Link to="/privacidad">Política de Privacidad</Link> (Ley 25.326).
+            <Trans i18nKey="ciudadano.consent.legal" components={[<span key="0" />, <Link key="1" to="/privacidad" />]} />
           </p>
           <div className={styles.acciones}>
-            <button className={styles.primario} onClick={() => void decidirUbicacion(true)}>Permitir ubicación</button>
-            <button className={styles.secundario} onClick={() => void decidirUbicacion(false)}>Ahora no</button>
+            <button className={styles.primario} onClick={() => void decidirUbicacion(true)}>{t("ciudadano.consent.permitir")}</button>
+            <button className={styles.secundario} onClick={() => void decidirUbicacion(false)}>{t("ciudadano.consent.ahoraNo")}</button>
           </div>
         </section>
       )}
@@ -238,45 +267,45 @@ export default function CitizenPage() {
         {/* ── Clima real */}
         <section className={styles.card}>
           <div className={styles.cardHead}>
-            <h2>Clima ahora</h2>
-            <span className={styles.chipReal}>REAL · Open-Meteo</span>
+            <h2>{t("ciudadano.clima.titulo")}</h2>
+            <span className={styles.chipReal}>{t("ciudadano.clima.real")}</span>
           </div>
           {clima ? (
             <>
-              <div className={styles.temp}>{Math.round(clima.temperaturaC)}°<small>{clima.descripcion}</small></div>
+              <div className={styles.temp}>{Math.round(clima.temperaturaC)}°<small>{t(`condiciones.${grupoClima(clima.codigo)}`)}</small></div>
               <dl className={styles.datos}>
-                <div><dt>Sensación</dt><dd>{Math.round(clima.sensacionC)}°</dd></div>
-                <div><dt>Viento</dt><dd>{Math.round(clima.vientoKmh)} km/h</dd></div>
-                <div><dt>Ráfagas</dt><dd>{Math.round(clima.rafagasKmh)} km/h</dd></div>
-                <div><dt>Lluvia</dt><dd>{clima.precipitacionMm} mm</dd></div>
-                <div><dt>Aire (AQI)</dt><dd>{clima.aqi ?? "—"}</dd></div>
+                <div><dt>{t("ciudadano.clima.sensacion")}</dt><dd>{Math.round(clima.sensacionC)}°</dd></div>
+                <div><dt>{t("ciudadano.clima.viento")}</dt><dd>{Math.round(clima.vientoKmh)} km/h</dd></div>
+                <div><dt>{t("ciudadano.clima.rafagas")}</dt><dd>{Math.round(clima.rafagasKmh)} km/h</dd></div>
+                <div><dt>{t("ciudadano.clima.lluvia")}</dt><dd>{clima.precipitacionMm} mm</dd></div>
+                <div><dt>{t("ciudadano.clima.aire")}</dt><dd>{clima.aqi ?? "—"}</dd></div>
               </dl>
             </>
-          ) : <p className={styles.vacio}>{climaOk ? "Cargando clima…" : "El servicio de clima no está disponible por el momento."}</p>}
-          <p className={styles.nota}>Ubicación: {posicion ? (prueba ? `modo prueba (${prueba.etiqueta})` : "tu dispositivo") : "Buenos Aires (por defecto)"}</p>
+          ) : <p className={styles.vacio}>{climaOk ? t("ciudadano.clima.cargando") : t("ciudadano.clima.noDisponible")}</p>}
+          <p className={styles.nota}>{t("ciudadano.clima.ubicacion", { donde: dondeClima })}</p>
         </section>
 
         {/* ── Ubicación y notificaciones */}
         <section className={styles.card}>
-          <div className={styles.cardHead}><h2>Mi ubicación</h2></div>
+          <div className={styles.cardHead}><h2>{t("ciudadano.ubicacion.titulo")}</h2></div>
           {consentida === true && (
             <>
               <p className={styles.nota}>
-                Estado del GPS: <strong>{{ inactivo: "inactivo", buscando: "buscando señal…", activo: "activo", denegado: "bloqueado por el navegador", "no-soportado": "no soportado", error: "sin señal" }[estadoGps]}</strong>
+                {t("ciudadano.ubicacion.gps")}: <strong>{t(`ciudadano.ubicacion.estados.${CLAVE_GPS[estadoGps]}`)}</strong>
               </p>
-              {estadoGps === "denegado" && <p className={styles.mensajeChico}>Habilitá la ubicación en la configuración del navegador (candado junto a la dirección).</p>}
-              <button className={styles.secundario} onClick={() => void decidirUbicacion(false)}>Revocar permiso de ubicación</button>
+              {estadoGps === "denegado" && <p className={styles.mensajeChico}>{t("ciudadano.ubicacion.ayudaBloqueo")}</p>}
+              <button className={styles.secundario} onClick={() => void decidirUbicacion(false)}>{t("ciudadano.ubicacion.revocar")}</button>
             </>
           )}
           {consentida === false && (
             <>
-              <p className={styles.nota}>No estás compartiendo tu ubicación.</p>
-              <button className={styles.primario} onClick={() => void decidirUbicacion(true)}>Permitir ubicación</button>
+              <p className={styles.nota}>{t("ciudadano.ubicacion.noComparte")}</p>
+              <button className={styles.primario} onClick={() => void decidirUbicacion(true)}>{t("ciudadano.ubicacion.permitir")}</button>
             </>
           )}
-          {consentida === null && <p className={styles.nota}>Respondé la pregunta de arriba para activar los avisos por ubicación.</p>}
+          {consentida === null && <p className={styles.nota}>{t("ciudadano.ubicacion.responder")}</p>}
           <button className={styles.secundario} onClick={() => void activarNotificaciones()} disabled={notificaciones}>
-            {notificaciones ? "Notificaciones activadas ✓" : "Activar notificaciones del navegador"}
+            {notificaciones ? t("ciudadano.ubicacion.notifOn") : t("ciudadano.ubicacion.notif")}
           </button>
         </section>
       </div>
@@ -284,8 +313,8 @@ export default function CitizenPage() {
       {/* ── Mapa */}
       <section className={styles.card}>
         <div className={styles.cardHead}>
-          <h2>Mapa de zonas de riesgo</h2>
-          <span className={styles.chipSim}>{zonas.length} zona(s) activa(s)</span>
+          <h2>{t("ciudadano.mapa.titulo")}</h2>
+          <span className={styles.chipSim}>{t("ciudadano.mapa.zonas", { n: zonas.length })}</span>
         </div>
         <div ref={contenedorMapa} className={styles.mapa} />
       </section>
@@ -293,19 +322,19 @@ export default function CitizenPage() {
       {/* ── Avisos */}
       <section className={styles.card}>
         <div className={styles.cardHead}>
-          <h2>Avisos</h2>
-          <span className={styles.nota}>{resumen.total} en total · {resumen.criticos} críticos</span>
+          <h2>{t("ciudadano.avisos.titulo")}</h2>
+          <span className={styles.nota}>{t("ciudadano.avisos.resumen", { total: resumen.total, criticos: resumen.criticos })}</span>
         </div>
-        {avisos.length === 0 ? <p className={styles.vacio}>Sin avisos por el momento. ¡Todo tranquilo!</p> : (
+        {avisos.length === 0 ? <p className={styles.vacio}>{t("ciudadano.avisos.vacio")}</p> : (
           <ul className={styles.avisos}>
             {avisos.map((a) => (
               <li key={a.id} className={`${styles.aviso} ${styles[`nivel${a.nivel}`]}`}>
                 <div className={styles.avisoHead}>
-                  <strong>{a.titulo}</strong>
-                  <span className={a.origen === "real" ? styles.chipReal : styles.chipSim}>{a.origen === "real" ? "REAL" : "SIMULADO"}</span>
+                  <strong>{tituloAviso(a)}</strong>
+                  <span className={a.origen === "real" ? styles.chipReal : styles.chipSim}>{a.origen === "real" ? t("ciudadano.avisos.real") : t("ciudadano.avisos.simulado")}</span>
                 </div>
-                <p>{a.detalle}</p>
-                <small>{ETIQUETA_TIPO[a.tipo] ?? a.tipo} · {new Date(a.fecha).toLocaleString("es-AR")}</small>
+                <p>{detalleAviso(a)}</p>
+                <small>{t(`tipos.${a.tipo}`, { defaultValue: a.tipo })} · {new Date(a.fecha).toLocaleString(locale)}</small>
               </li>
             ))}
           </ul>
@@ -315,19 +344,19 @@ export default function CitizenPage() {
       {/* ── Modo prueba */}
       <section className={styles.card}>
         <div className={styles.cardHead}>
-          <h2>Modo prueba</h2>
-          {prueba && <button className={styles.secundario} onClick={() => setPrueba(null)}>Salir del modo prueba</button>}
+          <h2>{t("ciudadano.prueba.titulo")}<HelpTooltip texto={t("ayuda.tooltips.modoPrueba")} /></h2>
+          {prueba && <button className={styles.secundario} onClick={() => setPrueba(null)}>{t("ciudadano.prueba.salir")}</button>}
         </div>
-        <p className={styles.nota}>Simulá tu posición respecto de una zona de riesgo para ver el cartel de peligro sin moverte. Se crean zonas iniciando un escenario desde el panel de Simulación.</p>
-        {zonas.length === 0 ? <p className={styles.vacio}>No hay zonas de riesgo activas ahora.</p> : (
+        <p className={styles.nota}>{t("ciudadano.prueba.descripcion")}</p>
+        {zonas.length === 0 ? <p className={styles.vacio}>{t("ciudadano.prueba.sinZonas")}</p> : (
           <ul className={styles.pruebas}>
             {zonas.map((z) => (
               <li key={z.id}>
-                <span>{z.tipo} · {z.nombre}</span>
+                <span>{tipoDeZona(t, z)} · {z.nombre}</span>
                 <div>
-                  <button onClick={() => probar(z, "dentro")}>Dentro</button>
-                  <button onClick={() => probar(z, "cerca")}>Cerca</button>
-                  <button onClick={() => probar(z, "lejos")}>Lejos</button>
+                  <button onClick={() => probar(z, "dentro")}>{t("ciudadano.prueba.dentro")}</button>
+                  <button onClick={() => probar(z, "cerca")}>{t("ciudadano.prueba.cerca")}</button>
+                  <button onClick={() => probar(z, "lejos")}>{t("ciudadano.prueba.lejos")}</button>
                 </div>
               </li>
             ))}
@@ -338,19 +367,20 @@ export default function CitizenPage() {
       {/* ── Mis datos */}
       {autenticado && usuario?.familia === "CIUDADANO" && (
         <section className={styles.card}>
-          <div className={styles.cardHead}><h2>Mis datos</h2></div>
-          <p className={styles.nota}>Cuenta: <strong>{usuario.username}</strong> · {perfilVerificado ? "perfil verificado ✓" : <>perfil sin verificar · <Link to="/verificar">verificar</Link></>}</p>
+          <div className={styles.cardHead}><h2>{t("ciudadano.misDatos.titulo")}</h2></div>
+          <p className={styles.nota}>{t("ciudadano.misDatos.cuenta")} <strong>{usuario.username}</strong> · {perfilVerificado ? t("ciudadano.misDatos.verificado") : <>{t("ciudadano.misDatos.sinVerificar")} · <Link to="/verificar">{t("ciudadano.misDatos.verificar")}</Link></>}</p>
           <div className={styles.acciones}>
-            <button className={styles.secundario} onClick={() => void descargarDatos()}>Descargar mis datos</button>
-            <button className={styles.peligroBtn} onClick={() => void eliminarCuenta()}>Dar de baja mi cuenta</button>
+            <button className={styles.secundario} onClick={() => void descargarDatos()}>{t("ciudadano.misDatos.descargar")}</button>
+            <button className={styles.peligroBtn} onClick={() => void eliminarCuenta()}>{t("ciudadano.misDatos.baja")}</button>
           </div>
         </section>
       )}
 
       <footer className={styles.pie}>
-        <Link to="/terminos">Términos y Condiciones</Link>
-        <Link to="/privacidad">Política de Privacidad</Link>
-        <span>Información orientativa. En una emergencia llamá al 911.</span>
+        <Link to="/terminos">{t("ciudadano.pie.terminos")}</Link>
+        <Link to="/privacidad">{t("ciudadano.pie.privacidad")}</Link>
+        <Link to="/ayuda">{t("ayuda.abrir")}</Link>
+        <span>{t("ciudadano.pie.orientativo")}</span>
       </footer>
     </div>
   );

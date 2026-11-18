@@ -40,6 +40,11 @@ describe.each([
 });
 
 describe("tamaño del plan", () => {
+  it("cada plan informa su radio en metros", () => {
+    expect(new EstrategiaZonal().calcularPlan(belgrano).radioMetros).toBe(500);
+    expect(new EstraategiaMasiva().calcularPlan(belgrano).radioMetros).toBe(2000);
+    expect(new EstrategiaRefugio().calcularPlan(belgrano).radioMetros).toBe(1000);
+  });
   it("la evacuación masiva abarca más personas que la zonal", () => {
     expect(new EstraategiaMasiva().calcularPlan(belgrano).personasEstimadas)
       .toBeGreaterThan(new EstrategiaZonal().calcularPlan(belgrano).personasEstimadas);

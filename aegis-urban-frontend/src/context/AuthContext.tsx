@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
 import api, { RespuestaLogin } from "../services/api";
 import { useUbicacionStore } from "../store/ubicacionStore";
+import { invalidar } from "../services/cache";
 import { useVerificacionStore } from "../store/verificacionStore";
 import { verificacionApi, type CodigoEmitido } from "../services/verificacion";
 
@@ -32,6 +33,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         username:  data.user.username,
         idFamilia: data.user.familyId,
         familia:   data.user.familyName,
+        permisos:  data.permisos ?? [],
       },
       data.token
     );
@@ -65,6 +67,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       limpiarSesion();
       useVerificacionStore.getState().limpiar();
+      invalidar(); // al cerrar sesión no queda nada guardado de la sesión anterior
       navegar("/login", { replace: true });
     }
   }, [token, limpiarSesion, navegar]);

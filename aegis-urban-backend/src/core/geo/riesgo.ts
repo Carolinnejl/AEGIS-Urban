@@ -9,6 +9,8 @@ export interface ZonaRiesgo {
   id:        number;
   nombre:    string;
   tipo:      string;
+  /** Código del tipo de evento (FLOOD, FIRE…): la interfaz lo traduce. */
+  tipoCodigo?: string;
   nivel:     "WARNING" | "CRITICAL" | "CATASTROPHIC";
   lat:       number;
   lon:       number;

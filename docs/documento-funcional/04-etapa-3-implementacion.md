@@ -55,20 +55,21 @@ La suite automatizada cubre cálculo de integridad, matriz de autorización por 
 
 | Verificación | Resultado registrado |
 |---|---|
-| Pruebas backend | 113 pruebas aprobadas en 12 suites |
-| Pruebas frontend | 8 pruebas aprobadas (almacenes de sesión y de verificación) |
+| Pruebas backend (unitarias) | 133 pruebas aprobadas en 13 suites |
+| Pruebas frontend | 18 pruebas aprobadas (sesión, verificación, caché y paridad de traducciones) |
+| Integración y seguridad contra API y PostgreSQL reales | 39 pruebas aprobadas (`npm run test:live`); ver [pruebas y rendimiento](../05-pruebas-y-rendimiento.md) |
 | Compilación TypeScript backend | Aprobada |
 | Compilación TypeScript y bundle frontend | Aprobada |
-| Pruebas conectadas a PostgreSQL real | Pendientes |
+| Job de CI con PostgreSQL de servicio | Definido; aún no ejecutado en GitHub |
 | Pruebas de aceptación con operadores y ciudadanía | Pendientes |
 
-Las pruebas de roles actuales simulan las respuestas de la capa de datos. Antes de un release hay que complementar con pruebas de integración sobre la configuración de permisos aplicada en PostgreSQL.
+Las pruebas unitarias de roles simulan la capa de datos; las pruebas en vivo (`tests/live`) cubren API y PostgreSQL reales, incluida la inmutabilidad de la bitácora y las particiones.
 
 ## 3.4 Migraciones y puesta en marcha
 
-El esquema se versiona en `aegis-urban-backend/database/migrations/`. Las migraciones 006 a 014 son repetibles y se aplican en orden. La `010_configurable_scenarios.sql` amplía los tipos de escenario y sus permisos; la `012_citizen_role.sql` agrega el rol `CIUDADANO`, la tabla `user_consent` y la columna `users.terms_verified_at`. La `013_profile_verification.sql` agrega la tabla `verification_code`, las marcas `email_verified_at`, `phone_verified_at` y `verified_at`, y los permisos de verificación. La `014_evacuation_strategies.sql` corrige la restricción de `evacuation_plan.strategy_used`, que solo aceptaba nombres que ninguna estrategia usaba y hacía fallar todo plan de evacuación.
+El esquema se versiona en `aegis-urban-backend/database/migrations/`. Las migraciones 006 a 016 son repetibles y se aplican en orden. La `010_configurable_scenarios.sql` amplía los tipos de escenario y sus permisos; la `012_citizen_role.sql` agrega el rol `CIUDADANO`, la tabla `user_consent` y la columna `users.terms_verified_at`. La `013_profile_verification.sql` agrega la tabla `verification_code`, las marcas `email_verified_at`, `phone_verified_at` y `verified_at`, y los permisos de verificación. La `014_evacuation_strategies.sql` corrige la restricción de `evacuation_plan.strategy_used`, que solo aceptaba nombres que ninguna estrategia usaba y hacía fallar todo plan de evacuación.
 
-`arrancar.bat` (Windows) reutiliza el contenedor `aegis_postgres` si ya existe, aplica las migraciones 006–014, carga los datos iniciales, genera el `.env` si falta y abre backend y frontend.
+`arrancar.bat` (Windows) reutiliza el contenedor `aegis_postgres` si ya existe, aplica las migraciones 006–016, carga los datos iniciales, genera el `.env` si falta y abre backend y frontend.
 
 Docker Compose monta las migraciones en la inicialización de un volumen vacío; no vuelve a ejecutarlas en un volumen ya creado. Confirmar la migración aplicada antes de probar filtros y escenarios. Configuración, secretos y comandos de desarrollo están en el [README principal](../../README.md).
 

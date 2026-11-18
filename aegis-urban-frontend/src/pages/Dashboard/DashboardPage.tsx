@@ -4,7 +4,8 @@ import Sidebar from "../../components/Layout/Sidebar";
 import { useWebSocket } from "../../hooks/useWebSocket";
 import api from "../../services/api";
 import { NavLink } from "react-router-dom";
-import { useAuthStore } from "../../store/authStore";
+import { usePatente } from "../../store/authStore";
+import { accionEtiqueta } from "../../i18n/ayudas";
 import styles from "./DashboardPage.module.css";
 
 interface Estadisticas {
@@ -28,21 +29,11 @@ interface EstadoSalud {
   baseDatos: "conectada" | "desconectada" | "desconocida";
 }
 
-const ACCION_LABEL: Record<string, string> = {
-  USER_LOGIN:              "Sesión iniciada",
-  USER_LOGOUT:             "Sesión cerrada",
-  SENSOR_READING_ANOMALY:  "Anomalía detectada",
-  ALERT_CREATED:           "Alerta creada",
-  ALERT_ACKNOWLEDGED:      "Alerta reconocida",
-  ALERT_RESOLVED:          "Alerta resuelta",
-  EVACUATION_INITIATED:    "Evacuación iniciada",
-};
-
 export default function DashboardPage() {
-  const { t }                 = useTranslation();
+  const { t, i18n }           = useTranslation();
+  const locale = i18n.resolvedLanguage?.startsWith("en") ? "en-GB" : "es-AR";
   const { conectado, ultimaAlerta } = useWebSocket();
-  const familia = useAuthStore(s => s.usuario?.familia);
-  const puedeSimular = familia === "ADMIN_SISTEMA" || familia === "DEFENSA_CIVIL";
+  const puedeSimular = usePatente("SIMULATION_SCENARIOS_CREATE");
 
   const [stats, setStats]       = useState<Estadisticas | null>(null);
   const [actividad, setActividad] = useState<EntradaActividad[]>([]);
@@ -95,25 +86,25 @@ export default function DashboardPage() {
       etiqueta: t("dashboard.activeSensors"),
       valor:    cargando ? "…" : (stats ? `${stats.sensoresActivos}/${stats.sensoresTotal}` : "—"),
       variante: "cyan",
-      sub:      "sensores activos",
+      sub:      t("gestion.dashboard.subSensores"),
     },
     {
       etiqueta: t("dashboard.activeAlerts"),
       valor:    cargando ? "…" : (stats?.alertasActivas ?? "—"),
       variante: stats?.alertasActivas ? "warning" : "safe",
-      sub:      "alertas en curso",
+      sub:      t("gestion.dashboard.subAlertas"),
     },
     {
       etiqueta: t("dashboard.criticalAlerts"),
       valor:    cargando ? "…" : (stats?.alertasCriticas ?? "—"),
       variante: stats?.alertasCriticas ? "danger" : "safe",
-      sub:      "críticas activas",
+      sub:      t("gestion.dashboard.subCriticas"),
     },
     {
-      etiqueta: "Lecturas 24h",
+      etiqueta: t("gestion.dashboard.lecturas"),
       valor:    cargando ? "…" : (stats?.lecturas24h ?? "—"),
       variante: "cyan",
-      sub:      "registros de telemetría",
+      sub:      t("gestion.dashboard.subLecturas"),
     },
   ];
 
@@ -124,12 +115,12 @@ export default function DashboardPage() {
       <main className={styles.main}>
         <header className={styles.topbar}>
           <div>
-            <p className={styles.eyebrow}>CENTRO DE OPERACIONES · BUENOS AIRES</p>
+            <p className={styles.eyebrow}>{t("gestion.dashboard.eyebrow")}</p>
             <h1 className={styles.pageTitle}>{t("dashboard.title")}</h1>
-            <p className={styles.subtitle}>Estado de sensores, alertas y actividad de la ciudad.</p>
+            <p className={styles.subtitle}>{t("gestion.dashboard.subtitulo")}</p>
           </div>
           <div className={styles.topbarRight}>
-            <div className={styles.healthStrip} aria-label="Estado de los servicios">
+            <div className={styles.healthStrip} aria-label={t("gestion.dashboard.salud")}>
               <span className={`${styles.healthBadge} ${salud.api ? styles.healthOk : salud.api === false ? styles.healthError : styles.healthUnknown}`}>
                 API {salud.api === null ? "…" : salud.api ? "OK" : "ERROR"}
               </span>
@@ -138,22 +129,22 @@ export default function DashboardPage() {
               </span>
             </div>
             <span className={`${styles.wsBadge} ${conectado ? styles.wsOn : styles.wsOff}`}>
-              <span aria-hidden="true">●</span> {conectado ? "EN VIVO" : "SIN CONEXIÓN"}
+              <span aria-hidden="true">●</span> {conectado ? t("gestion.comun.enVivo") : t("gestion.comun.sinConexion")}
             </span>
-            <button onClick={cargarDatos} className={styles.refreshBtn} title="Actualizar datos" aria-label="Actualizar datos">
-              ↻ <span>Actualizar</span>
+            <button onClick={cargarDatos} className={styles.refreshBtn} title={t("gestion.dashboard.actualizarDatos")} aria-label={t("gestion.dashboard.actualizarDatos")}>
+              ↻ <span>{t("gestion.comun.actualizar")}</span>
             </button>
           </div>
         </header>
 
         {errorCarga && <div className={styles.errorBanner} role="status">
-          <span>No se pudieron actualizar los datos. Puede que la API no esté disponible.</span>
-          <button onClick={cargarDatos}>Reintentar</button>
+          <span>{t("gestion.dashboard.error")}</span>
+          <button onClick={cargarDatos}>{t("gestion.comun.reintentar")}</button>
         </div>}
 
         <section className={styles.sectionIntro}>
-          <div><span className={styles.sectionKicker}>SITUACIÓN ACTUAL</span><h2>Resumen operativo</h2></div>
-          <span className={styles.updatedAt}>{actualizado ? `Actualizado ${actualizado.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })}` : "Esperando datos"}</span>
+          <div><span className={styles.sectionKicker}>{t("gestion.dashboard.kicker")}</span><h2>{t("gestion.dashboard.resumen")}</h2></div>
+          <span className={styles.updatedAt}>{actualizado ? t("gestion.dashboard.actualizado", { hora: actualizado.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" }) }) : t("gestion.dashboard.esperando")}</span>
         </section>
 
         {/* ── Tarjetas de estadísticas */}
@@ -168,35 +159,35 @@ export default function DashboardPage() {
           ))}
         </section>
 
-        <section className={styles.quickActions} aria-label="Accesos rápidos">
-          <NavLink to="/mapa" className={styles.quickAction}><span className={styles.quickIcon}>⌖</span><span><strong>Abrir mapa</strong><small>Ver sensores por zona</small></span><span aria-hidden="true">→</span></NavLink>
-          <NavLink to="/alertas" className={styles.quickAction}><span className={styles.quickIcon}>!</span><span><strong>Gestionar alertas</strong><small>Revisar eventos activos</small></span><span aria-hidden="true">→</span></NavLink>
-          {puedeSimular && <NavLink to="/simulacion" className={styles.quickAction}><span className={styles.quickIcon}>↗</span><span><strong>Probar escenario</strong><small>Simular lecturas de sensores</small></span><span aria-hidden="true">→</span></NavLink>}
+        <section className={styles.quickActions} aria-label={t("gestion.dashboard.accesos")}>
+          <NavLink to="/mapa" className={styles.quickAction}><span className={styles.quickIcon}>⌖</span><span><strong>{t("gestion.dashboard.abrirMapa")}</strong><small>{t("gestion.dashboard.abrirMapaSub")}</small></span><span aria-hidden="true">→</span></NavLink>
+          <NavLink to="/alertas" className={styles.quickAction}><span className={styles.quickIcon}>!</span><span><strong>{t("gestion.dashboard.gestionar")}</strong><small>{t("gestion.dashboard.gestionarSub")}</small></span><span aria-hidden="true">→</span></NavLink>
+          {puedeSimular && <NavLink to="/simulacion" className={styles.quickAction}><span className={styles.quickIcon}>↗</span><span><strong>{t("gestion.dashboard.probar")}</strong><small>{t("gestion.dashboard.probarSub")}</small></span><span aria-hidden="true">→</span></NavLink>}
         </section>
 
         {/* ── Actividad reciente */}
         <section className={styles.panel}>
           <div className={styles.panelHeader}>
-            <h2 className={styles.panelTitle}>Actividad Reciente</h2>
-            <span className={styles.panelBadge}>{actividad.length} eventos</span>
+            <h2 className={styles.panelTitle}>{t("gestion.dashboard.actividad")}</h2>
+            <span className={styles.panelBadge}>{t("gestion.dashboard.eventos", { n: actividad.length })}</span>
           </div>
 
           {actividad.length === 0 && !cargando ? (
             <div className={styles.emptyState}>
               <p>{t("common.noData")}</p>
-              <small>El motor de simulación genera actividad cada 15 segundos.</small>
+              <small>{t("gestion.dashboard.vacio")}</small>
             </div>
           ) : (
             <ul className={styles.actividadList}>
               {actividad.map((e) => (
                 <li key={e.id_log} className={styles.actividadItem}>
                   <span className={`${styles.actTag} ${styles[`actTag--${e.action}`]}`}>
-                    {ACCION_LABEL[e.action] ?? e.action}
+                    {accionEtiqueta(t, e.action)}
                   </span>
                   <span className={styles.actEntidad}>
                     {e.entity_name} #{e.entity_id}
                   </span>
-                  <span className={styles.actTime}>{new Date(e.created_at).toLocaleString("es-AR", { dateStyle: "short", timeStyle: "short" })}</span>
+                  <span className={styles.actTime}>{new Date(e.created_at).toLocaleString(locale, { dateStyle: "short", timeStyle: "short" })}</span>
                 </li>
               ))}
             </ul>
@@ -206,7 +197,7 @@ export default function DashboardPage() {
         {/* ── Alerta recibida por WS */}
         {ultimaAlerta && (
           <div className={`${styles.wsAlert} ${styles[`wsAlert--${ultimaAlerta.nivel.toLowerCase()}`]}`}>
-            <strong>⚠ Nueva alerta:</strong> {ultimaAlerta.mensaje}
+            <strong>{t("gestion.dashboard.nueva")}</strong> {ultimaAlerta.mensaje}
           </div>
         )}
       </main>

@@ -29,6 +29,7 @@ export class EstrategiaRefugio implements IEstrategiaEvacuacion {
         ],
       }),
       personasEstimadas: 0, // no se mueve gente
+      radioMetros: RADIO_AFECTACION_M,
       instrucciones:
         `REFUGIO EN EL LUGAR — ${alerta.tipo}${donde}. ` +
         "Permanecer en interiores. Cerrar puertas y ventanas. " +

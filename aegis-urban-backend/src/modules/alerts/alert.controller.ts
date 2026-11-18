@@ -156,7 +156,8 @@ router.post("/:id/evacuar", requiereAutenticacion, requierePermiso("/api/alertas
     req.ip || "127.0.0.1",
   );
 
-  res.status(201).json({ plan });
+  // Se agregan los datos con los que se calculó, para que la pantalla muestre el plan sin depender del texto.
+  res.status(201).json({ plan: { ...plan, zona: alerta.zona, idSensor: alerta.id_sensor, tipoAlerta: alerta.alert_type, centro: { lat, lon }, puntosEncuentro } });
 });
 
 // PATCH /api/alertas/:id/reconocer — reconoce una alerta

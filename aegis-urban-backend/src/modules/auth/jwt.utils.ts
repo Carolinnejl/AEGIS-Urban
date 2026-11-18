@@ -18,6 +18,9 @@ export class GestorJwt {
   static firmar(payload: Omit<PayloadToken, "iat" | "exp">): string {
     return jwt.sign(payload, env.jwt.secret, {
       expiresIn: env.jwt.expiresIn as jwt.SignOptions["expiresIn"],
+      // jti único: dos inicios de sesión del mismo usuario en el mismo segundo darían un JWT idéntico
+      // y chocarían con la restricción UNIQUE de session_token.token_hash.
+      jwtid: crypto.randomUUID(),
     });
   }
 

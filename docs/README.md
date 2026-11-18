@@ -27,6 +27,10 @@ El índice completo, con cada apartado, está en [documento-funcional/README.md]
 
 - [Arquitectura detallada](01-arquitectura.md): carpetas, modelo de datos y decisiones técnicas.
 - [Análisis y diseño original](02-analisis-diseno.md): casos de uso, diagramas y matriz de permisos. Esta guía los ordena y añade trazabilidad funcional.
+- [Especificación del sistema](03-especificacion-sistema.md): visión, usuarios, RF y RNF con trazabilidad, escalabilidad, diagramas de secuencia (DSS) y casos de uso especificados.
+- [Manual de usuario](04-manual-de-usuario.md): guía por rol, idioma y problemas frecuentes (también disponible dentro de la app en `/ayuda`).
+- [Pruebas y rendimiento](05-pruebas-y-rendimiento.md): estrategia, seguridad, integración, carga y automatización en CI, con resultados medidos.
+- [Operación de la base de datos](06-base-de-datos.md): respaldo, restauración, particiones, integridad y cifrado.
 - [Marco legal y consentimientos](documento-funcional/06-anexos.md#anexo-e--marco-legal-y-consentimientos): cómo se aplica la Ley 25.326 en el registro, la ubicación y los derechos del titular.
 - [Contratos de API](documento-funcional/06-anexos.md#anexo-b--contratos-de-api): endpoints de gestión, públicos y de cuenta.
 

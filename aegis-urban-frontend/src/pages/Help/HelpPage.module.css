@@ -1,0 +1,20 @@
+.page { display: flex; min-height: 100vh; }
+.main { flex: 1; min-width: 0; max-width: 960px; margin: 0 auto; padding: 2rem clamp(1rem, 3vw, 2.5rem) 3rem; display: flex; flex-direction: column; gap: 1.75rem; }
+.kicker { color: var(--color-cyan); font: 700 .68rem var(--font-mono); letter-spacing: .12em; }
+.main h1 { font-size: clamp(1.6rem, 3vw, 2.1rem); margin-top: .3rem; }
+.sub { color: var(--color-muted); margin-top: .4rem; font-size: .9rem; }
+.main h2 { font-size: 1.1rem; margin-bottom: .8rem; }
+.emergencia { display: flex; flex-direction: column; gap: .2rem; padding: .9rem 1.1rem; border-radius: var(--radius-lg); font-size: .88rem; color: #ffd9de; background: rgba(255,77,109,.1); border: 1px solid rgba(255,77,109,.4); }
+.emergencia strong { color: var(--color-danger); }
+.roles { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; }
+.rol { padding: 1rem 1.2rem; border-radius: var(--radius-lg); background: var(--color-surface); border: 1px solid var(--color-border); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); }
+.rol h3 { font-size: .95rem; color: var(--color-cyan); margin-bottom: .5rem; }
+.rol ol { padding-left: 1.2rem; display: flex; flex-direction: column; gap: .35rem; font-size: .85rem; color: var(--color-text); }
+.faq { border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: .7rem 1rem; margin-bottom: .5rem; background: var(--color-surface); }
+.faq summary { cursor: pointer; font-weight: 600; font-size: .9rem; }
+.faq p { margin-top: .5rem; color: var(--color-muted); font-size: .85rem; line-height: 1.6; }
+.glosario { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: .7rem; }
+.glosario div { padding: .75rem 1rem; border-radius: var(--radius-md); border: 1px solid var(--color-border); background: var(--color-surface); }
+.glosario dt { font-weight: 700; font-size: .85rem; color: var(--color-cyan); }
+.glosario dd { font-size: .82rem; color: var(--color-muted); margin-top: .25rem; line-height: 1.5; }
+.volver { font-size: .85rem; }

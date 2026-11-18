@@ -64,7 +64,7 @@ cd aegis-urban-backend  && npm install && node scripts/crear-env.js && npm run d
 cd aegis-urban-frontend && npm install && npm run dev
 ```
 
-Las migraciones están en `aegis-urban-backend/database/migrations/` (001 a 012) y los datos de ejemplo en `database/seeds/`. Docker las aplica solo al crear un volumen vacío; en una base existente aplicalas en orden (el `arrancar.bat` se ocupa de 006 a 014).
+Las migraciones están en `aegis-urban-backend/database/migrations/` (001 a 016) y los datos de ejemplo en `database/seeds/`. Docker las aplica solo al crear un volumen vacío; en una base existente aplicalas en orden (el `arrancar.bat` se ocupa de 006 a 014).
 
 El backend **no arranca** sin `JWT_SECRET` (mínimo 32 caracteres) ni `AES_SECRET_KEY` (64 caracteres hexadecimales): no hay valores por defecto. `node scripts/crear-env.js` los genera aleatorios.
 
@@ -73,10 +73,12 @@ El backend **no arranca** sin `JWT_SECRET` (mínimo 32 caracteres) ni `AES_SECRE
 | Dónde | Comando | Qué hace |
 |---|---|---|
 | backend | `npm run dev` | API con recarga automática en `:3001` |
-| backend | `npm test` | Pruebas unitarias (102) |
+| backend | `npm test` | Pruebas unitarias (133) |
+| backend | `npm run test:live` | Integración y seguridad contra la API y PostgreSQL levantados (39) |
+| backend | `npm run test:perf` | Prueba de carga: latencia, throughput y compresión |
 | backend | `npm run build` | Compila a JavaScript |
 | frontend | `npm run dev` | Web con Vite en `:5173` |
-| frontend | `npm test` | Pruebas del frontend (7) |
+| frontend | `npm test` | Pruebas del frontend (18) |
 | frontend | `npm run build` | Verifica tipos y genera el bundle |
 
 ---
@@ -179,7 +181,7 @@ flowchart TB
 ```text
 AEGIS-Urban/
 ├── aegis-urban-backend/
-│   ├── database/migrations/    # Esquema SQL versionado (001–014)
+│   ├── database/migrations/    # Esquema SQL versionado (001–016)
 │   ├── database/seeds/         # Datos iniciales y de ejemplo
 │   ├── scripts/                # crear-env.js (genera el .env)
 │   ├── src/
@@ -224,6 +226,10 @@ Toda la documentación se lee directamente en GitHub, por páginas:
 | [Documento funcional](docs/documento-funcional/README.md) | Las cuatro etapas del ciclo de vida, con índice por apartado |
 | [Arquitectura](docs/01-arquitectura.md) | Carpetas, modelo de datos y decisiones técnicas |
 | [Análisis y diseño original](docs/02-analisis-diseno.md) | Casos de uso, diagramas y matriz de permisos |
+| [Especificación del sistema](docs/03-especificacion-sistema.md) | Visión, RF/RNF, escalabilidad, diagramas de secuencia y casos de uso |
+| [Manual de usuario](docs/04-manual-de-usuario.md) | Guía por rol (también en la app, `/ayuda`) |
+| [Pruebas y rendimiento](docs/05-pruebas-y-rendimiento.md) | Unitarias, integración, seguridad, carga y CI, con resultados |
+| [Operación de la base de datos](docs/06-base-de-datos.md) | Respaldo, restauración, particiones, integridad y cifrado |
 
 ---
 

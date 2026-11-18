@@ -25,6 +25,8 @@ export interface Aviso {
   nivel:     "INFO" | "WARNING" | "CRITICAL";
   titulo:    string;
   detalle:   string;
+  /** Valor numérico del aviso (temperatura, ráfagas, mm, AQI): permite que la interfaz lo traduzca. */
+  valor?:    number;
   zona?:     string;
   fecha:     string;
 }
@@ -92,20 +94,20 @@ export async function obtenerClima(lat: number, lon: number): Promise<ClimaActua
 export function avisosDesdeClima(c: ClimaActual, ahora = new Date()): Aviso[] {
   const fecha = ahora.toISOString();
   const avisos: Aviso[] = [];
-  const add = (tipo: TipoAviso, nivel: Aviso["nivel"], titulo: string, detalle: string) =>
-    avisos.push({ id: `clima-${tipo}`, origen: "real", tipo, nivel, titulo, detalle, fecha });
+  const add = (tipo: TipoAviso, nivel: Aviso["nivel"], titulo: string, detalle: string, valor?: number) =>
+    avisos.push({ id: `clima-${tipo}`, origen: "real", tipo, nivel, titulo, detalle, fecha, ...(valor !== undefined && { valor }) });
 
   if (c.codigo >= 95) add("STORM", "CRITICAL", "Tormenta eléctrica", "Buscá refugio en un lugar cerrado y evitá árboles y zonas abiertas.");
-  if (c.sensacionC >= 38) add("HEAT", "CRITICAL", "Calor extremo", `Sensación térmica de ${Math.round(c.sensacionC)} °C. Hidratate y evitá el sol entre 11 y 17 h.`);
-  else if (c.sensacionC >= 33) add("HEAT", "WARNING", "Calor intenso", `Sensación térmica de ${Math.round(c.sensacionC)} °C. Tomá agua y buscá sombra.`);
-  if (c.sensacionC <= 0) add("COLD", "CRITICAL", "Frío extremo", `Sensación térmica de ${Math.round(c.sensacionC)} °C. Abrigate y evitá exponerte.`);
-  else if (c.sensacionC <= 5) add("COLD", "WARNING", "Frío intenso", `Sensación térmica de ${Math.round(c.sensacionC)} °C. Abrigate bien.`);
-  if (c.rafagasKmh >= 80) add("WIND", "CRITICAL", "Ráfagas muy fuertes", `Ráfagas de ${Math.round(c.rafagasKmh)} km/h. Alejate de árboles, carteles y cables.`);
-  else if (c.rafagasKmh >= 50) add("WIND", "WARNING", "Viento fuerte", `Ráfagas de ${Math.round(c.rafagasKmh)} km/h. Asegurá objetos sueltos.`);
-  if (c.precipitacionMm >= 10) add("RAIN", "CRITICAL", "Lluvia intensa", `${c.precipitacionMm} mm en la última hora. Riesgo de anegamientos: evitá zonas bajas.`);
-  else if (c.precipitacionMm >= 2.5) add("RAIN", "WARNING", "Lluvia moderada", `${c.precipitacionMm} mm en la última hora. Manejá con precaución.`);
-  if (c.aqi !== null && c.aqi >= 150) add("AIR_QUALITY", "CRITICAL", "Mala calidad del aire", `Índice AQI ${c.aqi}. Evitá actividad física al aire libre.`);
-  else if (c.aqi !== null && c.aqi >= 100) add("AIR_QUALITY", "WARNING", "Calidad del aire regular", `Índice AQI ${c.aqi}. Personas sensibles deben limitar el esfuerzo al aire libre.`);
+  if (c.sensacionC >= 38) add("HEAT", "CRITICAL", "Calor extremo", `Sensación térmica de ${Math.round(c.sensacionC)} °C. Hidratate y evitá el sol entre 11 y 17 h.`, Math.round(c.sensacionC));
+  else if (c.sensacionC >= 33) add("HEAT", "WARNING", "Calor intenso", `Sensación térmica de ${Math.round(c.sensacionC)} °C. Tomá agua y buscá sombra.`, Math.round(c.sensacionC));
+  if (c.sensacionC <= 0) add("COLD", "CRITICAL", "Frío extremo", `Sensación térmica de ${Math.round(c.sensacionC)} °C. Abrigate y evitá exponerte.`, Math.round(c.sensacionC));
+  else if (c.sensacionC <= 5) add("COLD", "WARNING", "Frío intenso", `Sensación térmica de ${Math.round(c.sensacionC)} °C. Abrigate bien.`, Math.round(c.sensacionC));
+  if (c.rafagasKmh >= 80) add("WIND", "CRITICAL", "Ráfagas muy fuertes", `Ráfagas de ${Math.round(c.rafagasKmh)} km/h. Alejate de árboles, carteles y cables.`, Math.round(c.rafagasKmh));
+  else if (c.rafagasKmh >= 50) add("WIND", "WARNING", "Viento fuerte", `Ráfagas de ${Math.round(c.rafagasKmh)} km/h. Asegurá objetos sueltos.`, Math.round(c.rafagasKmh));
+  if (c.precipitacionMm >= 10) add("RAIN", "CRITICAL", "Lluvia intensa", `${c.precipitacionMm} mm en la última hora. Riesgo de anegamientos: evitá zonas bajas.`, c.precipitacionMm);
+  else if (c.precipitacionMm >= 2.5) add("RAIN", "WARNING", "Lluvia moderada", `${c.precipitacionMm} mm en la última hora. Manejá con precaución.`, c.precipitacionMm);
+  if (c.aqi !== null && c.aqi >= 150) add("AIR_QUALITY", "CRITICAL", "Mala calidad del aire", `Índice AQI ${c.aqi}. Evitá actividad física al aire libre.`, c.aqi);
+  else if (c.aqi !== null && c.aqi >= 100) add("AIR_QUALITY", "WARNING", "Calidad del aire regular", `Índice AQI ${c.aqi}. Personas sensibles deben limitar el esfuerzo al aire libre.`, c.aqi);
   if (c.codigo === 45 || c.codigo === 48) add("FOG", "WARNING", "Niebla", "Visibilidad reducida. Usá luces bajas y reducí la velocidad.");
   if (c.codigo >= 71 && c.codigo <= 77) add("SNOW", "WARNING", "Nevadas", "Calzadas resbaladizas. Evitá viajes innecesarios.");
 

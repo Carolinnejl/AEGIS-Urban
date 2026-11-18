@@ -19,6 +19,7 @@ export class EstrategiaZonal implements IEstrategiaEvacuacion {
         geometry: { type: "Polygon", coordinates: [anilloCircular(alerta.lat, alerta.lon, radio)] },
       }),
       personasEstimadas: Math.round(areaCirculoKm2(radio) * DENSIDAD_REFERENCIA_HAB_KM2),
+      radioMetros: radio,
       instrucciones:
         `EVACUACIÓN ZONAL — Sensor #${alerta.idSensor} (${alerta.tipo})${donde}. ` +
         `Desalojar un radio de ${radio} m alrededor de ${alerta.lat.toFixed(4)}, ${alerta.lon.toFixed(4)}. ` +

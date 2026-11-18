@@ -1,4 +1,5 @@
 import api from "./api";
+import { conCache } from "./cache";
 
 export interface Clima {
   temperaturaC: number; sensacionC: number; precipitacionMm: number;
@@ -8,11 +9,11 @@ export interface Clima {
 
 export interface Aviso {
   id: string; origen: "real" | "simulado"; tipo: string;
-  nivel: "INFO" | "WARNING" | "CRITICAL"; titulo: string; detalle: string; zona?: string; fecha: string;
+  nivel: "INFO" | "WARNING" | "CRITICAL"; titulo: string; detalle: string; valor?: number; zona?: string; fecha: string;
 }
 
 export interface ZonaRiesgo {
-  id: number; nombre: string; tipo: string; nivel: "WARNING" | "CRITICAL" | "CATASTROPHIC";
+  id: number; nombre: string; tipo: string; tipoCodigo?: string; nivel: "WARNING" | "CRITICAL" | "CATASTROPHIC";
   lat: number; lon: number; radioM: number;
 }
 
@@ -34,11 +35,14 @@ export interface MisDatos {
 export const aproximar = (n: number) => Math.round(n * 100) / 100;
 
 export const publicoApi = {
+  // Caché en memoria: el clima cambia despacio (5 min), los avisos y las zonas más rápido (20 s y 10 s).
   clima: (lat?: number, lon?: number) =>
-    api.get<{ disponible: boolean; clima: Clima | null }>("/publico/clima", { params: coords(lat, lon) }).then(r => r.data),
+    conCache(`clima:${lat},${lon}`, 5 * 60_000, () =>
+      api.get<{ disponible: boolean; clima: Clima | null }>("/publico/clima", { params: coords(lat, lon) }).then(r => r.data)),
   avisos: (lat?: number, lon?: number) =>
-    api.get<{ avisos: Aviso[]; climaDisponible: boolean }>("/publico/avisos", { params: coords(lat, lon) }).then(r => r.data),
-  zonas: () => api.get<{ zonas: ZonaRiesgo[] }>("/publico/zonas").then(r => r.data.zonas),
+    conCache(`avisos:${lat},${lon}`, 20_000, () =>
+      api.get<{ avisos: Aviso[]; climaDisponible: boolean }>("/publico/avisos", { params: coords(lat, lon) }).then(r => r.data)),
+  zonas: () => conCache("zonas", 10_000, () => api.get<{ zonas: ZonaRiesgo[] }>("/publico/zonas").then(r => r.data.zonas)),
   // POST: la ubicación exacta va en el cuerpo, no en la URL (no queda en logs de acceso).
   riesgo: (lat: number, lon: number) =>
     api.post<EvaluacionRiesgo>("/publico/riesgo", { lat, lon }).then(r => r.data),
