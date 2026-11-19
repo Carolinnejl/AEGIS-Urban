@@ -1,6 +1,6 @@
 # AEGIS Urban — Operación de la base de datos
 
-PostgreSQL 16. El esquema se versiona en `aegis-urban-backend/database/migrations/` (001–016); una migración aplicada no se edita.
+PostgreSQL 16. El esquema se versiona en `aegis-urban-backend/database/migrations/` (001–017); una migración aplicada no se edita.
 
 ## Respaldo y restauración
 
@@ -22,6 +22,10 @@ PostgreSQL 16. El esquema se versiona en `aegis-urban-backend/database/migration
 - **DVH** (dígito verificador horizontal): hash de cada fila de `audit_log`. **DVV** (vertical): cadena que encadena cada fila con la anterior. Ver [fundamento matemático](01-arquitectura.md).
 - `GET /api/admin/integridad` las recalcula; el simulacro de restauración también.
 - **Inmutabilidad** (migración 016): triggers que rechazan `UPDATE`, `DELETE` y `TRUNCATE` sobre `audit_log`. Un `REVOKE` no alcanza porque el usuario de la aplicación es superusuario del contenedor de desarrollo. Un superusuario aún podría desactivar el trigger; por eso DVH/DVV sigue siendo la segunda defensa, que detecta la alteración.
+
+## Estado compartido
+
+La migración 017 crea `rate_limit` (contadores del limitador) y `shared_cache` (caché con vencimiento). Permiten que varias instancias de la API compartan límites y caché. El mantenimiento borra las filas vencidas cada 6 horas.
 
 ## Cifrado
 

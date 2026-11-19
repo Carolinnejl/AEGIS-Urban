@@ -140,6 +140,15 @@ jobs:
       - name: Prueba de rendimiento (corta)
         working-directory: aegis-urban-backend
         run: node scripts/rendimiento.mjs 4 10
+      - name: Reiniciar el limitador de login (lo consumen las pruebas anteriores)
+        run: psql -h localhost -U aegis_app_user -d aegis_urban_db -c "DELETE FROM rate_limit"
+      - name: Pruebas de punta a punta (Playwright + Chrome)
+        working-directory: aegis-urban-frontend
+        run: |
+          npm ci
+          nohup npm run dev > ../web.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://localhost:5173 >/dev/null && break; sleep 1; done
+          npm run test:e2e
       - name: Log de la API si algo falla
         if: failure()
         run: tail -n 100 api.log

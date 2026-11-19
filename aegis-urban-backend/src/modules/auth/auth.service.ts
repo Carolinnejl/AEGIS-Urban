@@ -27,6 +27,13 @@ export interface ResultadoLogin {
 
 export class AuthService {
 
+  /** Deja constancia en la bitácora de un intento fallido (nunca se guarda la contraseña). */
+  private registrarFallo(username: string, idUsuario: number | null, motivo: string, ip: string): void {
+    void eventBus.emitir(EVENTOS.LOGIN_FALLIDO, {
+      evento: EVENTOS.LOGIN_FALLIDO, idUsuario, username: String(username).slice(0, 80), motivo, ip,
+    });
+  }
+
   async iniciarSesion(
     username:     string,
     contrasena:   string,
@@ -43,18 +50,21 @@ export class AuthService {
     `, [username]);
 
     if (resultado.rows.length === 0) {
+      this.registrarFallo(username, null, "USUARIO_INEXISTENTE", direccionIp);
       throw new UnauthorizedError("Credenciales incorrectas");
     }
 
     const usuario = resultado.rows[0];
 
     if (!usuario.is_active) {
+      this.registrarFallo(username, usuario.id_user, "USUARIO_INACTIVO", direccionIp);
       throw new UnauthorizedError("Usuario inactivo. Contactá al administrador.");
     }
 
     // 2. Verificar contraseña con BCrypt
     const contrasenaCorrecta = await BCryptHasher.verificarContrasena(contrasena, usuario.password_hash);
     if (!contrasenaCorrecta) {
+      this.registrarFallo(username, usuario.id_user, "CONTRASENA_INCORRECTA", direccionIp);
       throw new UnauthorizedError("Credenciales incorrectas");
     }
 

@@ -13,9 +13,9 @@
 | Campo | Detalle |
 |---|---|
 | Materia | Prácticas Profesionalizantes |
-| Curso | *(completar con el curso y la institución)* |
+| Curso | 6°3 |
 | Metodología | Ciclo de vida del software en 4 etapas, con revisión SQA al cierre de cada una; ejecución ágil en 5 sprints de 2 semanas |
-| Duración | 10 semanas (19/05/2026 – 25/07/2026) |
+| Duración | 10 semanas (14/09/2026 – 20/11/2026) |
 | Versión del documento | v1.0.0 |
 | Fecha de edición | 19/11/2026 |
 | Estado del producto | Prototipo en desarrollo: no sustituye protocolos ni autoridad de emergencia |
@@ -58,7 +58,7 @@
 
 **Stack.** Node.js + TypeScript + Express (API REST y socket.io), React 18 + Vite + TypeScript (interfaz), PostgreSQL 16 (datos), Docker (base de datos local), GitHub Actions (integración continua).
 
-**Estado.** Prototipo funcional con 190 pruebas automatizadas aprobadas: 133 unitarias de backend, 18 de frontend y 39 de integración y seguridad contra la API y PostgreSQL reales. Compilación de backend y frontend aprobada. Pendientes: pruebas de aceptación con usuarios, pruebas de punta a punta con navegador y la primera ejecución del job de CI «en vivo» en GitHub.
+**Estado.** Prototipo funcional con 198 pruebas automatizadas aprobadas: 133 unitarias de backend, 18 de frontend, 41 de integración y seguridad contra la API y PostgreSQL reales, y 6 de punta a punta con un navegador real. Compilación de backend y frontend aprobada. Pendientes: la sesión de aceptación con usuarios (el guion y el acta están en la sección 5.3) y la primera ejecución del job de CI «en vivo» en GitHub.
 
 **Equipo.** Cinco integrantes con roles de Product Owner/QA, frontend, backend, seguridad y base de datos, e integración (ver portada).
 
@@ -87,7 +87,7 @@
 |---|---|---|---|
 | 1 — Análisis y factibilidad | Problema, objetivos, actores, fuentes de alertas, factibilidades y planificación | Objetivos, factibilidades, plan de 5 sprints y riesgos | Alcance acordado y riesgos identificados |
 | 2 — Diseño y arquitectura | Stack, base de datos, requisitos, UML, seguridad e interfaz | RF-01 a RF-13, RNF-01 a RNF-11, DER, clases, casos de uso, DSS y matriz de patentes | Trazabilidad de cada requisito a un módulo del código |
-| 3 — Implementación y testing | Construcción por módulos, pruebas, operación de BD | Código, migraciones 001–016, 190 pruebas, script de carga, CI y respaldos | Pruebas automatizadas aprobadas y compilación limpia |
+| 3 — Implementación y testing | Construcción por módulos, pruebas, operación de BD | Código, migraciones 001–017, 198 pruebas, script de carga, CI y respaldos | Pruebas automatizadas aprobadas y compilación limpia |
 | 4 — Release y mantenimiento | Versión, aceptación, reversión, manuales y cierre | Notas v1.0.0, manuales, plan de mantenimiento y anexos | Checklist de pre-release y brechas declaradas |
 
 <div class="salto"></div>
@@ -155,7 +155,7 @@ El proyecto se planificó en **5 sprints de 2 semanas (10 semanas)**. El detalle
 | Fallo de la fuente de clima | Media | Medio | Caché con TTL y mensaje de degradación en la vista ciudadana |
 | Pérdida o corrupción de datos | Baja | Alto | Respaldo diario con SHA-256, simulacro de restauración y DVH/DVV |
 | Incumplimiento de la Ley 25.326 | Media | Alto | Consentimientos versionados, ubicación opcional y baja con anonimización; revisión legal pendiente |
-| Estado en memoria (limitador, caché, simulaciones) si se escala a varias instancias | Alta al escalar | Medio | Documentado; requiere Redis o un worker persistente |
+| Estado en memoria si se escala a varias instancias | Media al escalar | Medio | Limitador y caché ya compartidos en PostgreSQL (migración 017); las simulaciones activas aún requieren un worker persistente |
 | Alcance mayor que el tiempo disponible | Alta | Medio | Priorización por sprint; brechas declaradas en la sección 5.1 |
 
 **Revisión SQA de la etapa 1:** objetivos medibles definidos; actores identificados; riesgos con mitigación; factibilidad legal tratada.
@@ -187,6 +187,7 @@ El modelo lógico (DER) y su descripción detallada se incluyen en la sección 3
 | 014 | Estrategias de evacuación |
 | 015 | Particiones futuras automáticas y respaldos |
 | 016 | Bitácora inmutable (triggers contra UPDATE, DELETE y TRUNCATE) |
+| 017 | Estado compartido entre instancias: `rate_limit` (limitador) y `shared_cache` (caché) |
 
 **Particionamiento trimestral.** `sensor_reading` se particiona por rango de fecha, una partición por trimestre. La función `asegurar_particiones_sensor_reading(n)` crea las futuras; corre al arrancar y cada 6 horas. Antes de la migración 015 la última partición terminaba el 31/12/2026 y las lecturas habrían fallado desde el 01/01/2027.
 
@@ -271,16 +272,17 @@ Las patentes también gobiernan la interfaz: el login devuelve las patentes efec
 
 ## 4.1 Preparación del entorno
 
-Requisitos: Node.js 20+, Docker Desktop y Git. En Windows, `arrancar.bat` reutiliza o crea el contenedor `aegis_postgres`, aplica las migraciones 006–016 y los datos iniciales, genera el `.env` con secretos aleatorios si falta, instala dependencias y abre el backend (puerto 3001) y el frontend (puerto 5173). `detener.bat` los detiene. `docker-compose.yml` monta las migraciones solo al crear un volumen vacío.
+Requisitos: Node.js 20+, Docker Desktop y Git. En Windows, `arrancar.bat` reutiliza o crea el contenedor `aegis_postgres`, aplica las migraciones 006–017 y los datos iniciales, genera el `.env` con secretos aleatorios si falta, instala dependencias y abre el backend (puerto 3001) y el frontend (puerto 5173). `detener.bat` los detiene. `docker-compose.yml` monta las migraciones solo al crear un volumen vacío.
 
 | Dónde | Comando | Qué hace |
 |---|---|---|
 | backend | `npm run dev` | API con recarga automática |
 | backend | `npm test` | 133 pruebas unitarias |
-| backend | `npm run test:live` | 39 pruebas de integración y seguridad contra la API y PostgreSQL |
+| backend | `npm run test:live` | 41 pruebas de integración y seguridad contra la API y PostgreSQL |
 | backend | `npm run test:perf` | Prueba de carga con percentiles |
 | backend | `npm run build` | Compila a JavaScript |
 | frontend | `npm run dev` / `npm test` / `npm run build` | Web en Vite, 18 pruebas y bundle de producción |
+| frontend | `npm run test:e2e` | 6 pruebas de punta a punta con Chrome real (requiere backend y frontend levantados) |
 
 ## 4.2 Construcción por módulos y estándares de codificación
 
@@ -305,7 +307,7 @@ Requisitos: Node.js 20+, Docker Desktop y Git. En Windows, `arrancar.bat` reutil
 @@include 06-base-de-datos.md | Verificación de integridad | 1 | skipTitle
 @@include 06-base-de-datos.md | Cifrado | 1 | skipTitle
 
-**Revisión SQA de la etapa 3:** compilación de backend y frontend aprobada; 190 pruebas aprobadas (133 + 18 + 39); simulacro de restauración disponible; prueba de carga con 0 errores; job de CI definido (sin ejecutar aún en GitHub).
+**Revisión SQA de la etapa 3:** compilación de backend y frontend aprobada; 198 pruebas aprobadas (133 + 18 + 41 + 6); simulacro de restauración disponible; prueba de carga con 0 errores; job de CI definido (sin ejecutar aún en GitHub).
 
 <div class="salto"></div>
 
@@ -315,6 +317,8 @@ Requisitos: Node.js 20+, Docker Desktop y Git. En Windows, `arrancar.bat` reutil
 
 **Incluye:** panel operativo, mapa, sensores y alertas con filtros; ciclo de alerta con plan de evacuación por estrategia; escenarios de simulación; vista ciudadana con clima real y alerta por ubicación; registro con consentimientos y verificación por correo (real, opcional) y celular (simulado); bitácora inmutable con DVH/DVV; respaldos, simulacro y restauración; particiones automáticas; interfaz ES/EN con ayuda; patentes aplicadas a la interfaz; pruebas de integración, seguridad y carga.
 
+**Mejoras de cierre:** los inicios de sesión fallidos se registran en la bitácora (`USER_LOGIN_FAILED`, sin la contraseña); el limitador de tasa y la caché del clima se comparten entre instancias vía PostgreSQL; hay pruebas de punta a punta con navegador real.
+
 **Corrección incluida:** dos inicios de sesión del mismo usuario en el mismo segundo producían un error 500 por token duplicado; ahora cada token lleva un identificador único.
 
 **Planificado y no realizado (declarado):**
@@ -323,12 +327,11 @@ Requisitos: Node.js 20+, Docker Desktop y Git. En Windows, `arrancar.bat` reutil
 |---|---|
 | Documentación con Swagger | No realizado; la API se documenta en los anexos |
 | Stress test con k6 y pgbench | Reemplazado por `scripts/rendimiento.mjs` (Node, sin dependencias); pgbench no ejecutado |
-| Pruebas de punta a punta con Playwright | No realizado |
+| Pruebas de punta a punta con Playwright | Realizado: 6 flujos con Chrome real (`npm run test:e2e`) |
 | Despliegue en Render y Vercel con HTTPS | No realizado; solo ejecución local |
 | Respaldo con node-cron y `BackupScheduler` | Implementado con un temporizador propio (`backup/mantenimiento.ts`) |
 | UC-16 exportar reporte, UC-19 gestionar sensores, UC-20 gestionar nodos | No implementados |
 | Verificación periódica de DVH/DVV por cron | La verificación es bajo demanda y en el simulacro de restauración |
-| Registro de inicios de sesión fallidos en la bitácora | No implementado |
 
 ## 5.2 Checklist pre-release
 
@@ -336,8 +339,9 @@ Requisitos: Node.js 20+, Docker Desktop y Git. En Windows, `arrancar.bat` reutil
 |---|---|
 | Compilación TypeScript de backend y frontend | Aprobada |
 | 133 pruebas unitarias backend y 18 de frontend | Aprobadas |
-| 39 pruebas de integración y seguridad en vivo | Aprobadas |
-| Migraciones 001–016 aplicadas en la base local | Aprobado |
+| 41 pruebas de integración y seguridad en vivo | Aprobadas |
+| 6 pruebas de punta a punta con navegador (Playwright) | Aprobadas |
+| Migraciones 001–017 aplicadas en la base local | Aprobado |
 | Respaldo con restauración verificada (simulacro) | Disponible |
 | Secretos fuera del código y validados al arrancar | Aprobado |
 | Datos simulados rotulados | Aprobado |
@@ -348,6 +352,22 @@ Requisitos: Node.js 20+, Docker Desktop y Git. En Windows, `arrancar.bat` reutil
 ## 5.3 Pruebas de aceptación (UAT)
 
 @@include documento-funcional/05-etapa-4-release.md | 4.2 Pruebas de aceptación con usuarios | 1 | skipTitle
+
+### Guion y acta de la sesión de aceptación
+
+Los escenarios de la tabla anterior se ejecutan con personas reales (una por perfil) siguiendo este guion. El resultado se registra en el acta y **solo entonces** el estado pasa de «Pendiente» a «Aprobado».
+
+| Paso | Qué hace la persona | Qué se observa | Aprobado | Observaciones |
+|---|---|---|---|---|
+| 1 | Entra como ciudadanía y mira el clima y los avisos | Entiende qué es REAL y qué es SIMULADO sin ayuda | ☐ Sí ☐ No | |
+| 2 | Activa «Permitir ubicación» y prueba el modo prueba | Comprende el cartel de peligro y hacia dónde alejarse | ☐ Sí ☐ No | |
+| 3 | Se registra y verifica correo y celular | Completa el registro en menos de 5 minutos | ☐ Sí ☐ No | |
+| 4 | Como Defensa Civil reconoce una alerta e inicia la evacuación | Interpreta el plan y sus supuestos | ☐ Sí ☐ No | |
+| 5 | Como auditoría verifica la integridad | Entiende el resultado VÁLIDA / COMPROMETIDA | ☐ Sí ☐ No | |
+| 6 | Como administración crea un respaldo y hace el simulacro | Distingue el simulacro de la restauración real | ☐ Sí ☐ No | |
+| 7 | Cambia el idioma y abre la ayuda | Encuentra la ayuda sin asistencia | ☐ Sí ☐ No | |
+
+**Acta:** fecha ____ / ____ / ______ · Participantes: __________________ · Incidencias: __________________ · Conformidad: ☐ Aprobado ☐ Aprobado con observaciones ☐ Rechazado · Firmas: __________________
 
 ## 5.4 Plan de reversión (vuelta atrás)
 
@@ -406,6 +426,6 @@ La misma guía está dentro de la aplicación, en `/ayuda`.
 
 AEGIS Urban cumple, como prototipo, el ciclo de vida completo: se analizó el problema, se diseñó y modeló, se construyó con los patrones exigidos, se probó de forma automatizada y se dejó documentado. No está conectado a fuentes oficiales y no debe presentarse como canal de instrucciones de emergencia.
 
-**Prioridades siguientes:** envío real de SMS; catastro de refugios y rutas por calles; revisión legal de los textos; integrar una fuente oficial por CAP; suscripciones por zona y avisos con la aplicación cerrada (PWA); pruebas de aceptación y de punta a punta con navegador; registrar los inicios de sesión fallidos en la bitácora; mover limitador, caché y simulaciones a un almacén compartido (Redis o worker persistente) para escalar a varias instancias.
+**Prioridades siguientes:** envío real de SMS; catastro de refugios y rutas por calles; revisión legal de los textos; integrar una fuente oficial por CAP; suscripciones por zona y avisos con la aplicación cerrada (PWA); realizar la sesión de aceptación con usuarios; pasar limitador y caché a Redis si el tráfico lo exige; y un worker persistente para las simulaciones activas al escalar a varias instancias.
 
 **Revisión SQA de la etapa 4:** brechas respecto del plan original declaradas (sección 5.1); checklist de pre-release con estado verdadero; manuales por perfil; plan de reversión probado con el simulacro de restauración.

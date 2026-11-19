@@ -2,6 +2,7 @@ import { db } from "../../config/database";
 import { env } from "../../config/env";
 import { backupService } from "./backup.service";
 import { debeCrearBackup } from "./backup.util";
+import { limpiarVencidos } from "../../shared/store/almacen";
 
 const CADA_HORAS = 6;
 
@@ -19,6 +20,8 @@ export async function cicloMantenimiento(): Promise<void> {
   } catch (e) {
     console.error("[MANTENIMIENTO] no se pudieron asegurar las particiones:", e instanceof Error ? e.message : e);
   }
+
+  await limpiarVencidos();
 
   if (!env.backup.automatico) return;
   try {

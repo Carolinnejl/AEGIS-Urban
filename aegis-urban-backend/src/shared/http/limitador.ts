@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { AppError } from "../errors/AppError";
+import { contarIntento } from "../store/almacen";
 
 /** Contador de intentos por clave en una ventana fija de tiempo. Puro y testeable. */
 export class ContadorVentana {
@@ -26,12 +27,15 @@ export class ContadorVentana {
   }
 }
 
-/** Middleware que responde 429 cuando la clave supera el máximo de intentos en la ventana. */
-export function limitar(opciones: { ventanaMs: number; max: number; clave: (req: Request) => string; mensaje: string }) {
-  const contador = new ContadorVentana(opciones.ventanaMs, opciones.max);
-  return (req: Request, res: Response, next: NextFunction): void => {
-    const r = contador.intentar(opciones.clave(req));
-    if (!r.permitido) {
+/**
+ * Middleware que responde 429 cuando la clave supera el máximo de intentos en la ventana.
+ * El contador vive en PostgreSQL (tabla rate_limit), así que se comparte entre instancias de la API.
+ */
+export function limitar(opciones: { ventanaMs: number; max: number; clave: (req: Request) => string; mensaje: string; prefijo?: string }) {
+  const prefijo = opciones.prefijo ?? opciones.mensaje.slice(0, 20);
+  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const r = await contarIntento(`${prefijo}|${opciones.clave(req)}`.slice(0, 200), opciones.ventanaMs);
+    if (r.intentos > opciones.max) {
       res.setHeader("Retry-After", String(r.reintentarEnS));
       return next(new AppError(`${opciones.mensaje} Reintentá en ${r.reintentarEnS} s.`, 429));
     }

@@ -2,6 +2,7 @@
  * Clima real vía Open-Meteo (gratuito, sin clave de API).
  * Se cachea por ubicación para no saturar la API externa.
  */
+import { cacheLeer, cacheEscribir } from "../../shared/store/almacen";
 
 export interface ClimaActual {
   temperaturaC:   number;
@@ -32,7 +33,6 @@ export interface Aviso {
 }
 
 const TTL_MS = 10 * 60_000;
-const cache = new Map<string, { expira: number; valor: ClimaActual | null }>();
 
 /** Códigos WMO de Open-Meteo → texto en español. */
 export function describirCodigo(codigo: number): string {
@@ -57,8 +57,9 @@ async function pedirJson(url: string): Promise<any> {
 
 export async function obtenerClima(lat: number, lon: number): Promise<ClimaActual | null> {
   const clave = `${lat.toFixed(2)},${lon.toFixed(2)}`;
-  const hit = cache.get(clave);
-  if (hit && hit.expira > Date.now()) return hit.valor;
+  // Caché compartida entre instancias (tabla shared_cache): un solo pedido a Open-Meteo por ubicación.
+  const hit = await cacheLeer<ClimaActual>(`clima:${clave}`);
+  if (hit && hit.vigente) return hit.valor;
 
   try {
     const [meteo, aire] = await Promise.all([
@@ -80,12 +81,12 @@ export async function obtenerClima(lat: number, lon: number): Promise<ClimaActua
       pm25:            aire?.current?.pm2_5 ?? null,
       actualizado:     new Date().toISOString(),
     };
-    cache.set(clave, { expira: Date.now() + TTL_MS, valor });
+    await cacheEscribir(`clima:${clave}`, valor, TTL_MS);
     return valor;
   } catch {
     // Si la API externa falla, devuelve el último dato conocido (aunque esté vencido) o null.
     if (hit) return hit.valor;
-    cache.set(clave, { expira: Date.now() + 60_000, valor: null });
+    await cacheEscribir(`clima:${clave}`, null, 60_000);
     return null;
   }
 }

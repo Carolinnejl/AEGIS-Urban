@@ -43,7 +43,7 @@ Las familias agrupan **patentes** (permisos atómicos, p. ej. `EVACUATION_CREATE
 | ID | Categoría | Requerimiento | Cómo se cumple / verifica |
 |---|---|---|---|
 | RNF-01 | Seguridad | Contraseñas con hash irreversible; datos personales con cifrado reversible | bcrypt (factor 12) y AES-256 (el teléfono se cifra al registrarse; las columnas `full_name_enc` y `dni_enc` están previstas pero hoy el registro no las completa); `integracion.test.ts` |
-| RNF-02 | Seguridad | Fuerza bruta limitada | Limitador: 10 intentos / 15 min por usuario e IP; `seguridad.test.ts` |
+| RNF-02 | Seguridad | Fuerza bruta limitada y registrada | Limitador compartido (PostgreSQL): 10 intentos / 15 min por usuario e IP; los fallos quedan en la bitácora; `seguridad.test.ts` |
 | RNF-03 | Seguridad | Sin inyección SQL ni manipulación de JWT | Consultas parametrizadas, `algorithms: ["HS256"]`; `seguridad.test.ts` |
 | RNF-04 | Integridad | La bitácora no se puede alterar sin que se detecte | DVH/DVV + triggers que rechazan UPDATE/DELETE/TRUNCATE |
 | RNF-05 | Disponibilidad de datos | Respaldo diario con retención y restauración probada | `backup/*`, simulacro en base temporal |
@@ -58,7 +58,8 @@ Las familias agrupan **patentes** (permisos atómicos, p. ej. `EVACUATION_CREATE
 
 - **Datos:** `sensor_reading` está particionada por rango trimestral. La función `asegurar_particiones_sensor_reading(n)` crea las particiones futuras y se ejecuta al arrancar y cada 6 horas; antes de la migración 015 las lecturas habrían fallado al llegar a 2027. Escalar el volumen = más particiones, y archivar/borrar una partición vieja es instantáneo.
 - **API sin estado:** la sesión vive en JWT + `session_token`, así que se pueden poner varias instancias detrás de un balanceador.
-- **Límites actuales (honestos):** el limitador de tasa, la caché del clima y los temporizadores de simulación están **en memoria de un proceso**. Para varias instancias hay que moverlos a Redis o a un worker con exclusión entre instancias.
+- **Estado compartido (migración 017):** el limitador de tasa y la caché del clima viven en PostgreSQL (`rate_limit` y `shared_cache`), con una sola sentencia atómica por intento, así que todas las instancias cuentan sobre los mismos datos. Si la base falla, degradan a memoria local en lugar de tumbar la petición.
+- **Límites actuales (honestos):** los escenarios de simulación siguen en temporizadores del proceso Node; con varias instancias hace falta un worker persistente con exclusión entre instancias. Para tráfico muy alto conviene pasar limitador y caché a Redis (la interfaz está aislada en `shared/store/almacen.ts`).
 - **Lecturas calientes:** caché de clima con TTL (120 s) y de avisos (30 s) en el servidor, y caché + deduplicación de peticiones en el cliente.
 - **Base de datos:** pool de conexiones configurable; el camino de crecimiento es réplica de lectura para el panel y la vista pública.
 

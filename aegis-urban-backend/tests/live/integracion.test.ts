@@ -46,6 +46,29 @@ describe("Integración — API + BD", () => {
     expect(r.body.permisos).toEqual(expect.arrayContaining(["ALERT_ACKNOWLEDGE", "EVACUATION_CREATE", "BACKUP_RESTORE", "AUDIT_VIEW"]));
   });
 
+  test("un inicio de sesión fallido queda en la bitácora (sin la contraseña) y la integridad sigue válida", async () => {
+    const usuario = `intruso_${Date.now()}`;
+    const secreta = "contrasena-que-no-debe-guardarse";
+    expect((await llamar("POST", "/api/auth/login", { body: { username: usuario, password: secreta } })).status).toBe(401);
+    let fila: any;
+    for (let i = 0; i < 20 && !fila; i++) {
+      const { rows } = await pool.query("SELECT action, new_values FROM audit_log WHERE action = 'USER_LOGIN_FAILED' AND new_values LIKE $1 ORDER BY id_log DESC LIMIT 1", [`%${usuario}%`]);
+      fila = rows[0];
+      if (!fila) await new Promise((r) => setTimeout(r, 150));
+    }
+    expect(fila).toBeDefined();
+    expect(fila.new_values).toContain("USUARIO_INEXISTENTE");
+    expect(fila.new_values).not.toContain(secreta);
+    expect((await llamar("GET", "/api/admin/integridad", { token })).body.integridad.esValida).toBe(true);
+  });
+
+  test("el limitador guarda su estado en PostgreSQL (compartido entre instancias)", async () => {
+    const usuario = `contador_${Date.now()}`;
+    for (let i = 0; i < 3; i++) await llamar("POST", "/api/auth/login", { body: { username: usuario, password: "x" } });
+    const { rows } = await pool.query("SELECT intentos FROM rate_limit WHERE clave LIKE $1", [`%${usuario}%`]);
+    expect(rows[0].intentos).toBe(3);
+  });
+
   test("sensores y estadísticas devuelven datos de la BD", async () => {
     const s = await llamar("GET", "/api/sensores", { token });
     expect(s.status).toBe(200);

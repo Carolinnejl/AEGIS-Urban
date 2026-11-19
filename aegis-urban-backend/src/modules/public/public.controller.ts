@@ -2,6 +2,7 @@ import { Router, Request, Response, NextFunction } from "express";
 import { db } from "../../config/database";
 import { AppError } from "../../shared/errors/AppError";
 import { evaluarRiesgo, radioPorAlerta, ZonaRiesgo } from "../../core/geo/riesgo";
+import { limitar } from "../../shared/http/limitador";
 import { obtenerClima, avisosDesdeClima, Aviso } from "./clima.service";
 
 /**
@@ -14,17 +15,12 @@ const router = Router();
 const DEFECTO = { lat: -34.6037, lon: -58.3816 };
 const VENTANA_ALERTAS_HORAS = 6;
 
-// ── Límite simple por IP (60 req/min) para proteger la API pública y la externa.
-const visitas = new Map<string, { n: number; reinicia: number }>();
-function limitar(req: Request, _res: Response, next: NextFunction) {
-  const ip = req.ip ?? "?";
-  const ahora = Date.now();
-  const v = visitas.get(ip);
-  if (!v || v.reinicia < ahora) visitas.set(ip, { n: 1, reinicia: ahora + 60_000 });
-  else if (++v.n > 60) return next(new AppError("Demasiadas solicitudes, intentá en un minuto", 429));
-  next();
-}
-router.use(limitar);
+// ── Límite por IP (60 req/min) para proteger la API pública y la externa; contador compartido en PostgreSQL.
+router.use(limitar({
+  ventanaMs: 60_000, max: 60, prefijo: "publico",
+  clave: (req) => req.ip ?? "?",
+  mensaje: "Demasiadas solicitudes.",
+}));
 
 function validarCoordenadas(rawLat: unknown, rawLon: unknown): { lat: number; lon: number } {
   const lat = Number(rawLat);

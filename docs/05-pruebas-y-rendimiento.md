@@ -7,11 +7,12 @@
 | Unitarias backend | Lógica pura: integridad DVH, geometría, estrategias de evacuación, validación de registro, secretos, límite de intentos, respaldos | `aegis-urban-backend/tests/unit` | `npm test` | 133 en 13 suites |
 | Unitarias frontend | Almacenes de sesión y verificación, caché de peticiones, **paridad de traducciones es/en** | `aegis-urban-frontend/src/**/*.test.ts` | `npm test` | 18 en 4 archivos |
 | Integración | API + PostgreSQL reales: sesiones, patentes, bitácora e integridad, inmutabilidad, particiones, hashes | `tests/live/integracion.test.ts` | `npm run test:live` | 10 |
+| Punta a punta (E2E) | Flujos reales en Chrome: ciudadanía, cambio de idioma, login inválido, ruta protegida, Administración con verificación de integridad, alerta → plan de evacuación | `aegis-urban-frontend/e2e/flujos.spec.ts` | `npm run test:e2e` | 6 |
 | Seguridad | Autenticación, manipulación de JWT, inyección SQL, recorrido de directorios, cabeceras, CORS, fuerza bruta | `tests/live/seguridad.test.ts` | `npm run test:live` | 29 |
 | Rendimiento | Latencia y throughput bajo carga concurrente, compresión | `scripts/rendimiento.mjs` | `npm run test:perf` | 5 endpoints |
 | Automatización | Todo lo anterior en cada push y Pull Request | `.github/workflows/ci.yml` | GitHub Actions | 3 jobs |
 
-Las pruebas «en vivo» necesitan el servidor y PostgreSQL levantados (`arrancar.bat`). Cada ejecución consume intentos del limitador de login del usuario `admin` (10 cada 15 min); si se repiten muchas veces seguidas conviene reiniciar el backend. Las credenciales se pueden cambiar con `TEST_ADMIN_USER` y `TEST_ADMIN_PASS`.
+Las pruebas E2E usan el Chrome instalado (Playwright con `channel: "chrome"`, sin descargar navegadores) y necesitan backend y frontend levantados. Las pruebas «en vivo» necesitan el servidor y PostgreSQL levantados (`arrancar.bat`). Cada ejecución consume intentos del limitador de login del usuario `admin` (10 cada 15 min); si se repiten muchas veces seguidas conviene reiniciar el backend. Las credenciales se pueden cambiar con `TEST_ADMIN_USER` y `TEST_ADMIN_PASS`.
 
 ### Qué cubre la suite de seguridad
 
@@ -20,7 +21,8 @@ Las pruebas «en vivo» necesitan el servidor y PostgreSQL levantados (`arrancar
 - Cuatro cargas de inyección SQL en login y parámetros de consulta no dan 500 ni inician sesión, y las tablas siguen intactas.
 - Un nombre de respaldo con `../` no recorre directorios.
 - Helmet activo (sin `X-Powered-By`), CORS no refleja orígenes ajenos, la API no devuelve hashes de contraseña ni trazas de pila.
-- 12 intentos de login seguidos terminan en **429**.
+- 12 intentos de login seguidos terminan en **429**, y el contador vive en PostgreSQL.
+- Un inicio de sesión fallido queda en la bitácora como `USER_LOGIN_FAILED` (con el motivo, nunca la contraseña) y la integridad DVH/DVV sigue válida.
 
 ### Defecto encontrado y corregido gracias a estas pruebas
 
@@ -59,7 +61,8 @@ Medido en el equipo de desarrollo (API en `ts-node-dev` y PostgreSQL en Docker e
 |---|---|
 | Pruebas unitarias backend | 133 aprobadas |
 | Pruebas unitarias frontend | 18 aprobadas |
-| Integración + seguridad (en vivo) | 39 aprobadas |
+| Integración + seguridad (en vivo) | 41 aprobadas |
+| Punta a punta con navegador (Playwright) | 6 aprobadas |
 | Compilación TypeScript backend y frontend | Ver sección de cierre del README |
 | Job de CI «en vivo» en GitHub Actions | Definido, aún no ejecutado en GitHub (requiere subir los cambios) |
-| Pruebas de aceptación con usuarios | Pendientes |
+| Pruebas de aceptación con usuarios | Guion y acta listos en el documento unificado (5.3); falta realizarlas con personas |
