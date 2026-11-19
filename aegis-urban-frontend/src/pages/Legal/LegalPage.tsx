@@ -1,19 +1,25 @@
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "../../components/LanguageSwitcher/LanguageSwitcher";
 import { LEGAL, TERMINOS, PRIVACIDAD, type SeccionLegal } from "../../legal/textos";
 import styles from "./LegalPage.module.css";
 
 function Documento({ titulo, version, secciones }: { titulo: string; version: string; secciones: SeccionLegal[] }) {
+  const { t, i18n } = useTranslation();
+  const esIngles = i18n.resolvedLanguage?.startsWith("en");
   return (
     <div className={styles.page}>
+      <LanguageSwitcher flotante />
       <main className={styles.doc}>
         <nav className={styles.nav}>
-          <Link to="/registro">← Volver al registro</Link>
-          <Link to="/ciudadano">Vista ciudadana</Link>
+          <Link to="/registro">{t("legalPagina.volver")}</Link>
+          <Link to="/ciudadano">{t("legalPagina.ciudadana")}</Link>
         </nav>
         <h1>{titulo}</h1>
-        <p className={styles.meta}>Versión {version} · Argentina</p>
+        <p className={styles.meta}>{t("legalPagina.version", { version })}</p>
+        {esIngles && <p className={styles.aviso} role="note">{t("legalPagina.soloEspanol")}</p>}
         <p className={styles.aviso} role="note">
-          Texto base del prototipo: pendiente de revisión legal antes de un uso real con público.
+          {t("legalPagina.base")}
         </p>
         {secciones.map((s) => (
           <section key={s.titulo}>

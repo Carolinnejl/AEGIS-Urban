@@ -1,8 +1,10 @@
 import { useEffect, useState, useCallback, useRef, type FormEvent } from "react";
+import { useTranslation } from "react-i18next";
+import HelpTooltip from "../../components/HelpTooltip/HelpTooltip";
 import Sidebar from "../../components/Layout/Sidebar";
 import { useWebSocket } from "../../hooks/useWebSocket";
 import api from "../../services/api";
-import { useAuthStore } from "../../store/authStore";
+import { usePatente } from "../../store/authStore";
 import styles from "./SimulationPage.module.css";
 
 interface Sensor {
@@ -35,45 +37,15 @@ const TIPO_ICON: Record<string, string> = {
 };
 
 const ESTRATEGIAS = [
-  {
-    nombre: "EstrategiaZonal",
-    patron: "Strategy",
-    nivel: "HIGH / CRITICAL",
-    icono: "🏘",
-    personas: "800",
-    radio: "500m",
-    color: "high",
-    descripcion: "Evacúa sólo la zona de 500m de radio alrededor del sensor afectado. Minimiza el impacto en el resto de la ciudad.",
-    instrucciones: ["Acordonar perímetro 500m", "Evacuar edificios del radio", "Activar refugios cercanos", "Notificar a equipos de respuesta"],
-  },
-  {
-    nombre: "EstraategiaMasiva",
-    patron: "Strategy",
-    nivel: "CRITICAL (FIRE/FLOOD)",
-    icono: "🏙",
-    personas: "45.000",
-    radio: "Distrito",
-    color: "critical",
-    descripcion: "Evacuación de todo el distrito. Activa cuando la crisis supera la capacidad zonal y requiere coordinación inter-barrial.",
-    instrucciones: ["Activar protocolo ciudad completa", "Coordinar transporte público", "Abrir todos los refugios del distrito", "Activar cadena de mando municipal"],
-  },
-  {
-    nombre: "EstrategiaRefugio",
-    patron: "Strategy",
-    nivel: "LOW / MEDIUM",
-    icono: "🏠",
-    personas: "0 (in situ)",
-    radio: "—",
-    color: "safe",
-    descripcion: "Refugio en el lugar. Para crisis de calidad de aire o viento, las personas permanecen en interiores con ventanas selladas.",
-    instrucciones: ["Cerrar ventanas y puertas", "Apagar ventilación", "Esperar instrucciones oficiales", "Monitorear valores cada 5 min"],
-  },
-];
+  { nombre: "EstrategiaZonal",   clave: "zonal",   icono: "🏘", color: "high" },
+  { nombre: "EstraategiaMasiva", clave: "masiva",  icono: "🏙", color: "critical" },
+  { nombre: "EstrategiaRefugio", clave: "refugio", icono: "🏠", color: "safe" },
+] as const;
 
 export default function SimulationPage() {
+  const { t } = useTranslation();
   const { conectado, ultimaLectura } = useWebSocket();
-  const familia = useAuthStore(s => s.usuario?.familia);
-  const puedeSimular = familia === "ADMIN_SISTEMA" || familia === "DEFENSA_CIVIL";
+  const puedeSimular = usePatente("SIMULATION_SCENARIOS_CREATE");
   const [sensores, setSensores]       = useState<Sensor[]>([]);
   const [simulando, setSimulando]     = useState<number | "todos" | null>(null);
   const [resultados, setResultados]   = useState<ResultadoSimulacion[]>([]);
@@ -82,7 +54,7 @@ export default function SimulationPage() {
   const [ciclo, setCiclo]             = useState(0);
   const [countdown, setCountdown]     = useState(15);
   const [escenarios, setEscenarios] = useState<Escenario[]>([]);
-  const [nombreEscenario, setNombreEscenario] = useState("Ejercicio urbano");
+  const [nombreEscenario, setNombreEscenario] = useState(() => t("gestion.simulacion.nombreDefecto"));
   const [sensoresEscenario, setSensoresEscenario] = useState<number[]>([]);
   const [intensidad, setIntensidad] = useState("WARNING");
   const [intervaloSegundos, setIntervaloSegundos] = useState(15);
@@ -98,7 +70,7 @@ export default function SimulationPage() {
       setErrorMensaje(null);
     } catch {
       setErrorLista(true);
-      setErrorMensaje("No se pudo cargar la lista de sensores.");
+      setErrorMensaje(t("gestion.simulacion.errLista"));
     }
   }, []);
 
@@ -118,13 +90,13 @@ export default function SimulationPage() {
       });
       await api.post(`/simulation/scenarios/${creado.data.escenario.id_scenario}/iniciar`);
       await cargarEscenarios();
-    } catch { setErrorMensaje("No se pudo iniciar el escenario. Seleccioná sensores simulados y revisá los parámetros."); }
+    } catch { setErrorMensaje(t("gestion.simulacion.errIniciar")); }
     finally { setGuardandoEscenario(false); }
   };
 
   const detenerEscenario = async (id: number) => {
     try { await api.delete(`/simulation/scenarios/${id}`); await cargarEscenarios(); }
-    catch { setErrorMensaje("No se pudo detener el escenario."); }
+    catch { setErrorMensaje(t("gestion.simulacion.errDetener")); }
   };
 
   // Countdown del motor (cada 15s el backend ejecuta un ciclo)
@@ -156,7 +128,7 @@ export default function SimulationPage() {
       const res = await api.post<RespuestaSimulacion>(`/sensores/${id}/simular`);
       setResultados(prev => [{ idSensor: id, tipo: res.data.tipo, valor: res.data.valor }, ...prev.slice(0, 19)]);
     } catch {
-      setErrorMensaje("No se pudo simular este sensor. Confirmá que esté habilitado para ejercicios.");
+      setErrorMensaje(t("gestion.simulacion.errSimular"));
     } finally {
       setSimulando(null);
     }
@@ -174,7 +146,7 @@ export default function SimulationPage() {
       } catch { fallos += 1; }
     }
     setResultados(prev => [...resultadosBatch, ...prev].slice(0, 20));
-    if (fallos) setErrorMensaje(`${fallos} sensor(es) no pudieron simularse. Revisá su configuración y permisos.`);
+    if (fallos) setErrorMensaje(t("gestion.simulacion.errVarios", { n: fallos }));
     setSimulando(null);
   };
 
@@ -186,36 +158,36 @@ export default function SimulationPage() {
       <main className={styles.main}>
         <header className={styles.topbar}>
           <div>
-            <h1 className={styles.pageTitle}>Motor de Simulación</h1>
-            <p className={styles.subtitle}>Mocking Engine — genera telemetría sintética para todos los sensores SIMULATED</p>
+            <h1 className={styles.pageTitle}>{t("gestion.simulacion.titulo")}<HelpTooltip texto={t("help.simulation")} /></h1>
+            <p className={styles.subtitle}>{t("gestion.simulacion.subtitulo")}</p>
           </div>
           <span className={`${styles.wsBadge} ${conectado ? styles.wsOn : styles.wsOff}`}>
-            {conectado ? "● LIVE" : "○ offline"}
+            {conectado ? t("gestion.comun.live") : t("gestion.comun.offline")}
           </span>
         </header>
 
         {errorMensaje && <div className={styles.errorBanner} role="alert">
           <span>{errorMensaje}</span>
           {errorLista
-            ? <button onClick={cargarSensores}>Reintentar</button>
-            : <button onClick={() => setErrorMensaje(null)}>Cerrar</button>}
+            ? <button onClick={cargarSensores}>{t("gestion.comun.reintentar")}</button>
+            : <button onClick={() => setErrorMensaje(null)}>{t("gestion.comun.cerrar")}</button>}
         </div>}
 
         <section className={styles.panel}>
-          <div className={styles.panelHeader}><h2 className={styles.panelTitle}>Escenarios configurables</h2></div>
+          <div className={styles.panelHeader}><h2 className={styles.panelTitle}>{t("gestion.simulacion.escenarios")}</h2></div>
           {puedeSimular && <form onSubmit={crearEscenario} className={styles.estrategiasGrid}>
-            <label>Nombre<input required maxLength={200} value={nombreEscenario} onChange={e => setNombreEscenario(e.target.value)} /></label>
-            <label>Sensores simulados<select multiple required value={sensoresEscenario.map(String)} onChange={e => setSensoresEscenario(Array.from(e.target.selectedOptions, o => Number(o.value)))}>
+            <label>{t("gestion.simulacion.nombre")}<input required maxLength={200} value={nombreEscenario} onChange={e => setNombreEscenario(e.target.value)} /></label>
+            <label>{t("gestion.simulacion.sensoresSim")}<select multiple required value={sensoresEscenario.map(String)} onChange={e => setSensoresEscenario(Array.from(e.target.selectedOptions, o => Number(o.value)))}>
               {sensores.map(s => <option key={s.id_sensor} value={s.id_sensor}>{s.city_node_name} · {s.sensor_type_code} · {s.serial_code}</option>)}
-            </select><small>En computadora: Ctrl/Cmd + clic para elegir varios.</small></label>
-            <label>Intensidad<select value={intensidad} onChange={e => setIntensidad(e.target.value)}><option value="NORMAL">Normal</option><option value="WARNING">Advertencia</option><option value="CRITICAL">Crítica</option></select></label>
-            <label>Intervalo (seg.)<input type="number" min={5} max={300} value={intervaloSegundos} onChange={e => setIntervaloSegundos(Number(e.target.value))}/></label>
-            <label>Duración (min.)<input type="number" min={1} max={240} value={duracionMinutos} onChange={e => setDuracionMinutos(Number(e.target.value))}/></label>
-            <button className={styles.btnTodos} type="submit" disabled={guardandoEscenario || sensoresEscenario.length === 0}>{guardandoEscenario ? "Iniciando…" : "Crear e iniciar escenario"}</button>
+            </select><small>{t("gestion.simulacion.ayudaMultiple")}</small></label>
+            <label>{t("gestion.simulacion.intensidad")}<select value={intensidad} onChange={e => setIntensidad(e.target.value)}><option value="NORMAL">{t("gestion.simulacion.intensidades.NORMAL")}</option><option value="WARNING">{t("gestion.simulacion.intensidades.WARNING")}</option><option value="CRITICAL">{t("gestion.simulacion.intensidades.CRITICAL")}</option></select></label>
+            <label>{t("gestion.simulacion.intervalo")}<input type="number" min={5} max={300} value={intervaloSegundos} onChange={e => setIntervaloSegundos(Number(e.target.value))}/></label>
+            <label>{t("gestion.simulacion.duracion")}<input type="number" min={1} max={240} value={duracionMinutos} onChange={e => setDuracionMinutos(Number(e.target.value))}/></label>
+            <button className={styles.btnTodos} type="submit" disabled={guardandoEscenario || sensoresEscenario.length === 0}>{guardandoEscenario ? t("gestion.simulacion.iniciando") : t("gestion.simulacion.crear")}</button>
           </form>}
           {escenarios.length > 0 && <ul className={styles.logList}>{escenarios.map(esc => <li className={styles.logItem} key={esc.id_scenario}>
-            <span>{esc.name} · {esc.scenario_type} · {esc.status} · {esc.config.intensidad ?? "—"} · {esc.config.duracionMinutos ?? "—"} min</span>
-            {puedeSimular && esc.status === "RUNNING" && <button className={styles.btnSimular} onClick={() => void detenerEscenario(esc.id_scenario)}>Detener</button>}
+            <span>{esc.name} · {esc.scenario_type} · {esc.status} · {esc.config.intensidad ?? "—"} · {esc.config.duracionMinutos ?? "—"} {t("gestion.simulacion.min")}</span>
+            {puedeSimular && esc.status === "RUNNING" && <button className={styles.btnSimular} onClick={() => void detenerEscenario(esc.id_scenario)}>{t("gestion.simulacion.detener")}</button>}
           </li>)}</ul>}
         </section>
 
@@ -223,21 +195,21 @@ export default function SimulationPage() {
         <div className={styles.motorPanel}>
           <div className={styles.motorStatus}>
             <div className={styles.motorDot} />
-            <span className={styles.motorLabel}>Motor activo</span>
-            <span className={styles.motorCiclo}>ciclo #{ciclo}</span>
+            <span className={styles.motorLabel}>{t("gestion.simulacion.motorActivo")}</span>
+            <span className={styles.motorCiclo}>{t("gestion.simulacion.ciclo", { n: ciclo })}</span>
           </div>
           <div className={styles.countdownWrap}>
             <div className={styles.countdownBar}>
               <div className={styles.countdownFill} style={{ width: `${pct}%` }} />
             </div>
-            <span className={styles.countdownNum}>{countdown}s hasta próximo ciclo</span>
+            <span className={styles.countdownNum}>{t("gestion.simulacion.proximo", { s: countdown })}</span>
           </div>
           {puedeSimular && <button
             className={styles.btnTodos}
             onClick={simularTodos}
             disabled={simulando !== null}
           >
-            {simulando === "todos" ? "Simulando todos…" : "⚡ Simular todos los sensores ahora"}
+            {simulando === "todos" ? t("gestion.simulacion.simulandoTodos") : t("gestion.simulacion.simularTodos")}
           </button>}
         </div>
 
@@ -245,22 +217,22 @@ export default function SimulationPage() {
           {/* Tabla de sensores */}
           <div className={styles.panel}>
             <div className={styles.panelHeader}>
-              <h2 className={styles.panelTitle}>Sensores SIMULATED</h2>
+              <h2 className={styles.panelTitle}>{t("gestion.simulacion.sensoresTitulo")}</h2>
               <span className={styles.panelBadge}>{sensores.length}</span>
             </div>
             <table className={styles.tabla}>
               <thead>
                 <tr>
-                  <th>Tipo</th>
-                  <th>Serial</th>
-                  <th>Último valor</th>
+                  <th>{t("gestion.simulacion.tabla.tipo")}</th>
+                  <th>{t("gestion.simulacion.tabla.serial")}</th>
+                  <th>{t("gestion.simulacion.tabla.ultimo")}</th>
                   <th></th>
                 </tr>
               </thead>
               <tbody>
                 {sensores.map(s => (
                   <tr key={s.id_sensor}>
-                    <td>{TIPO_ICON[s.sensor_type_code]} {s.sensor_type_code}</td>
+                    <td>{TIPO_ICON[s.sensor_type_code]} {t(`tipos.${s.sensor_type_code}`, { defaultValue: s.sensor_type_code })}</td>
                     <td className={styles.mono}>{s.serial_code}</td>
                     <td className={styles.mono}>
                       {s.last_value != null
@@ -285,18 +257,18 @@ export default function SimulationPage() {
           {/* Log de simulaciones manuales */}
           <div className={styles.panel}>
             <div className={styles.panelHeader}>
-              <h2 className={styles.panelTitle}>Log de simulaciones</h2>
+              <h2 className={styles.panelTitle}>{t("gestion.simulacion.log")}</h2>
               <span className={styles.panelBadge}>{resultados.length}</span>
             </div>
             {resultados.length === 0 ? (
-              <div className={styles.logEmpty}>Presioná ▶ en un sensor o "Simular todos" para ver resultados aquí.</div>
+              <div className={styles.logEmpty}>{t("gestion.simulacion.logVacio")}</div>
             ) : (
               <ul className={styles.logList}>
                 {resultados.map((r, i) => (
                   <li key={i} className={styles.logItem}>
                     <span className={styles.logIcon}>{TIPO_ICON[r.tipo] ?? "📡"}</span>
-                    <span className={styles.logSensor}>Sensor #{r.idSensor}</span>
-                    <span className={styles.logTipo}>{r.tipo}</span>
+                    <span className={styles.logSensor}>{t("gestion.simulacion.sensorN", { id: r.idSensor })}</span>
+                    <span className={styles.logTipo}>{t(`tipos.${r.tipo}`, { defaultValue: r.tipo })}</span>
                     <span className={styles.logValor}>{typeof r.valor === "number" ? r.valor.toFixed(1) : "—"}</span>
                   </li>
                 ))}
@@ -307,11 +279,8 @@ export default function SimulationPage() {
 
         {/* Estrategias */}
         <div className={styles.estrategiasSection}>
-          <h2 className={styles.seccionTitle}>Patrón Strategy — Estrategias de Evacuación</h2>
-          <p className={styles.seccionDesc}>
-            El <code>ContextoEvacuacion</code> selecciona automáticamente la estrategia según nivel y tipo de alerta.
-            Cada clase implementa la interfaz <code>IEstrategiaEvacuacion</code>.
-          </p>
+          <h2 className={styles.seccionTitle}>{t("gestion.simulacion.estrategiasTitulo")}</h2>
+          <p className={styles.seccionDesc}>{t("gestion.simulacion.estrategiasDesc")}</p>
           <div className={styles.estrategiasGrid}>
             {ESTRATEGIAS.map(e => (
               <div key={e.nombre} className={`${styles.estrategiaCard} ${styles[`estrategiaCard--${e.color}`]}`}>
@@ -319,17 +288,17 @@ export default function SimulationPage() {
                   <span className={styles.estrategiaIcon}>{e.icono}</span>
                   <div>
                     <div className={styles.estrategiaNombre}>{e.nombre}</div>
-                    <div className={styles.estrategiaPatron}>«{e.patron}»</div>
+                    <div className={styles.estrategiaPatron}>«Strategy»</div>
                   </div>
                 </div>
                 <div className={styles.estrategiaMeta}>
-                  <span className={styles.metaChip}>Nivel: {e.nivel}</span>
-                  <span className={styles.metaChip}>Personas: {e.personas}</span>
-                  <span className={styles.metaChip}>Radio: {e.radio}</span>
+                  <span className={styles.metaChip}>{t("gestion.simulacion.nivel", { v: t(`gestion.simulacion.estr.${e.clave}.nivel`) })}</span>
+                  <span className={styles.metaChip}>{t("gestion.simulacion.personas", { v: t(`gestion.simulacion.estr.${e.clave}.personas`) })}</span>
+                  <span className={styles.metaChip}>{t("gestion.simulacion.radio", { v: t(`gestion.simulacion.estr.${e.clave}.radio`) })}</span>
                 </div>
-                <p className={styles.estrategiaDesc}>{e.descripcion}</p>
+                <p className={styles.estrategiaDesc}>{t(`gestion.simulacion.estr.${e.clave}.desc`)}</p>
                 <ul className={styles.estrategiaInst}>
-                  {e.instrucciones.map((inst, i) => <li key={i}>{inst}</li>)}
+                  {(t(`gestion.simulacion.estr.${e.clave}.pasos`, { returnObjects: true }) as unknown as string[]).map((inst, i) => <li key={i}>{inst}</li>)}
                 </ul>
               </div>
             ))}

@@ -1,21 +1,23 @@
 import React, { lazy, Suspense } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
+import { paginas } from "./paginas";
 
 // ── Lazy loading — cada página carga su chunk JS solo cuando se navega a ella.
 // CityMap carga Leaflet (~500kb) únicamente cuando el usuario abre el mapa.
 const PaginaLogin      = lazy(() => import("../pages/Login/LoginPage"));
-const PaginaDashboard  = lazy(() => import("../pages/Dashboard/DashboardPage"));
-const PaginaMapa       = lazy(() => import("../pages/CityMap/CityMapPage"));
-const PaginaSensores   = lazy(() => import("../pages/Sensors/SensorsPage"));
-const PaginaAlertas    = lazy(() => import("../pages/Alerts/AlertsPage"));
-const PaginaSimulacion = lazy(() => import("../pages/Simulation/SimulationPage"));
+const PaginaDashboard  = lazy(paginas["/dashboard"]);
+const PaginaMapa       = lazy(paginas["/mapa"]);
+const PaginaSensores   = lazy(paginas["/sensores"]);
+const PaginaAlertas    = lazy(paginas["/alertas"]);
+const PaginaSimulacion = lazy(paginas["/simulacion"]);
 const PaginaRegistro    = lazy(() => import("../pages/Register/RegisterPage"));
 const PaginaVerificar    = lazy(() => import("../pages/Verify/VerifyPage"));
+const PaginaAyuda      = lazy(() => import("../pages/Help/HelpPage"));
 const PaginaCiudadano   = lazy(() => import("../pages/Citizen/CitizenPage"));
 const PaginaTerminos    = lazy(() => import("../pages/Legal/LegalPage").then(m => ({ default: m.PaginaTerminos })));
 const PaginaPrivacidad  = lazy(() => import("../pages/Legal/LegalPage").then(m => ({ default: m.PaginaPrivacidad })));
-const PaginaAdmin      = lazy(() => import("../pages/Admin/AdminPage"));
+const PaginaAdmin      = lazy(paginas["/admin"]);
 
 function CargadorPagina() {
   return (
@@ -52,6 +54,7 @@ export default function AppRouter() {
         <Route path="/login" element={<PaginaLogin />} />
         <Route path="/registro" element={<PaginaRegistro />} />
         <Route path="/ciudadano" element={<PaginaCiudadano />} />
+        <Route path="/ayuda" element={<PaginaAyuda />} />
         <Route path="/verificar" element={<RutaCiudadano><PaginaVerificar /></RutaCiudadano>} />
         <Route path="/terminos" element={<PaginaTerminos />} />
         <Route path="/privacidad" element={<PaginaPrivacidad />} />

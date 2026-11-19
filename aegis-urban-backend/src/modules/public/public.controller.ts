@@ -2,6 +2,7 @@ import { Router, Request, Response, NextFunction } from "express";
 import { db } from "../../config/database";
 import { AppError } from "../../shared/errors/AppError";
 import { evaluarRiesgo, radioPorAlerta, ZonaRiesgo } from "../../core/geo/riesgo";
+import { limitar } from "../../shared/http/limitador";
 import { obtenerClima, avisosDesdeClima, Aviso } from "./clima.service";
 
 /**
@@ -14,17 +15,12 @@ const router = Router();
 const DEFECTO = { lat: -34.6037, lon: -58.3816 };
 const VENTANA_ALERTAS_HORAS = 6;
 
-// ── Límite simple por IP (60 req/min) para proteger la API pública y la externa.
-const visitas = new Map<string, { n: number; reinicia: number }>();
-function limitar(req: Request, _res: Response, next: NextFunction) {
-  const ip = req.ip ?? "?";
-  const ahora = Date.now();
-  const v = visitas.get(ip);
-  if (!v || v.reinicia < ahora) visitas.set(ip, { n: 1, reinicia: ahora + 60_000 });
-  else if (++v.n > 60) return next(new AppError("Demasiadas solicitudes, intentá en un minuto", 429));
-  next();
-}
-router.use(limitar);
+// ── Límite por IP (60 req/min) para proteger la API pública y la externa; contador compartido en PostgreSQL.
+router.use(limitar({
+  ventanaMs: 60_000, max: 60, prefijo: "publico",
+  clave: (req) => req.ip ?? "?",
+  mensaje: "Demasiadas solicitudes.",
+}));
 
 function validarCoordenadas(rawLat: unknown, rawLon: unknown): { lat: number; lon: number } {
   const lat = Number(rawLat);
@@ -74,6 +70,7 @@ async function zonasDeRiesgo(): Promise<ZonaRiesgo[]> {
       id: a.id_alert,
       nombre: a.zona,
       tipo: ETIQUETA_TIPO[a.alert_type] ?? a.alert_type,
+      tipoCodigo: a.alert_type,
       nivel: a.level,
       lat: Number(a.lat),
       lon: Number(a.lon),
@@ -83,20 +80,26 @@ async function zonasDeRiesgo(): Promise<ZonaRiesgo[]> {
   return zonas;
 }
 
+// Los datos públicos se pueden guardar en el navegador un rato: menos peticiones al servidor.
+const cachear = (segundos: number) => (_req: Request, res: Response, next: NextFunction) => {
+  res.setHeader("Cache-Control", `public, max-age=${segundos}`);
+  next();
+};
+
 // GET /api/publico/clima?lat=&lon=
-router.get("/clima", async (req: Request, res: Response) => {
+router.get("/clima", cachear(120), async (req: Request, res: Response) => {
   const { lat, lon } = leerCoordenadas(req);
   const clima = await obtenerClima(lat, lon);
   res.json({ disponible: clima !== null, lat, lon, fuente: "Open-Meteo", clima });
 });
 
 // GET /api/publico/zonas — zonas de riesgo vigentes (para dibujar en el mapa)
-router.get("/zonas", async (_req: Request, res: Response) => {
+router.get("/zonas", cachear(10), async (_req: Request, res: Response) => {
   res.json({ zonas: await zonasDeRiesgo() });
 });
 
 // GET /api/publico/avisos?lat=&lon= — avisos reales (clima) + simulados (sensores)
-router.get("/avisos", async (req: Request, res: Response) => {
+router.get("/avisos", cachear(30), async (req: Request, res: Response) => {
   const { lat, lon } = leerCoordenadas(req);
   const [clima, alertas] = await Promise.all([obtenerClima(lat, lon), alertasVigentes()]);
   const avisos: Aviso[] = clima ? avisosDesdeClima(clima) : [];

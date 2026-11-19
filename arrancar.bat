@@ -33,11 +33,12 @@ echo [2/4] Esperando que la BD este lista...
 timeout /t 8 /nobreak > nul
 
 echo [3/4] Aplicando migraciones y datos iniciales...
-for %%f in ("%BACKEND%\database\migrations\006*.sql" "%BACKEND%\database\migrations\007*.sql" "%BACKEND%\database\migrations\008*.sql" "%BACKEND%\database\migrations\009*.sql" "%BACKEND%\database\migrations\010*.sql" "%BACKEND%\database\migrations\011*.sql" "%BACKEND%\database\migrations\012*.sql" "%BACKEND%\database\migrations\013*.sql" "%BACKEND%\database\migrations\014*.sql") do (
+for %%f in ("%BACKEND%\database\migrations\006*.sql" "%BACKEND%\database\migrations\007*.sql" "%BACKEND%\database\migrations\008*.sql" "%BACKEND%\database\migrations\009*.sql" "%BACKEND%\database\migrations\010*.sql" "%BACKEND%\database\migrations\011*.sql" "%BACKEND%\database\migrations\012*.sql" "%BACKEND%\database\migrations\013*.sql" "%BACKEND%\database\migrations\014*.sql" "%BACKEND%\database\migrations\015*.sql" "%BACKEND%\database\migrations\016*.sql" "%BACKEND%\database\migrations\017*.sql" "%BACKEND%\database\migrations\018*.sql") do (
     docker exec -i aegis_postgres psql -U aegis_app_user -d aegis_urban_db -1 -v ON_ERROR_STOP=1 < "%%~f" > nul 2>&1
 )
 docker exec -i aegis_postgres psql -U aegis_app_user -d aegis_urban_db < "%BACKEND%\database\seeds\001_initial_data.sql" > nul 2>&1
 docker exec -i aegis_postgres psql -U aegis_app_user -d aegis_urban_db < "%BACKEND%\database\seeds\002_sprint3_data.sql" > nul 2>&1
+docker exec -i aegis_postgres psql -U aegis_app_user -d aegis_urban_db < "%BACKEND%\database\seeds\003_usuarios_por_rol.sql" > nul 2>&1
 echo  Datos iniciales OK (usuario: admin / Admin2026!)
 
 node "%BACKEND%\scripts\crear-env.js"

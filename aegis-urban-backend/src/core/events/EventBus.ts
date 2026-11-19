@@ -45,4 +45,5 @@ export const EVENTOS = {
   EVACUACION_INICIADA:  "evacuacion:iniciada",
   SESION_INICIADA:      "sesion:iniciada",
   SESION_CERRADA:       "sesion:cerrada",
+  LOGIN_FALLIDO:        "sesion:fallida",
 } as const;

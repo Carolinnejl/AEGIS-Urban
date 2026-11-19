@@ -376,52 +376,52 @@ gantt
     excludes    weekends
 
     section Sprint 1 · Fundamentos (19/5–30/5)
-    Boilerplate Backend + estructura carpetas     :s1a, 2026-05-19, 5d
-    Boilerplate Frontend + Router + i18n base     :s1b, 2026-05-19, 5d
-    Docker-compose + GitHub Actions CI            :s1c, 2026-05-19, 3d
-    Migraciones SQL 001-004 + Particiones BD      :s1d, 2026-05-22, 4d
-    Plan de Pruebas v1 + documentación del proyecto v0      :s1e, 2026-05-19, 10d
-    Review Sprint 1                               :milestone, s1m, 2026-05-30, 0d
+    Boilerplate Backend + estructura carpetas     :s1a, 2026-09-14, 5d
+    Boilerplate Frontend + Router + i18n base     :s1b, 2026-09-14, 5d
+    Docker-compose + GitHub Actions CI            :s1c, 2026-09-14, 3d
+    Migraciones SQL 001-004 + Particiones BD      :s1d, 2026-09-17, 4d
+    Plan de Pruebas v1 + documentación del proyecto v0      :s1e, 2026-09-14, 10d
+    Review Sprint 1                               :milestone, s1m, 2026-09-25, 0d
 
     section Sprint 2 · Seguridad y DVH/DVV (2/6–13/6)
-    JWT Auth Service + BCrypt + AES Cipher        :s2a, 2026-06-02, 6d
-    ChecksumCalculator DVH/DVV + BitacoraService  :s2b, 2026-06-02, 5d
-    Login UI + Guards de rutas + AuthStore        :s2c, 2026-06-02, 5d
-    PermissionGuard + Carga Patentes/Familias     :s2d, 2026-06-06, 4d
-    Tests unitarios DVH/DVV (Jest)                :s2e, 2026-06-10, 3d
-    Review Sprint 2                               :milestone, s2m, 2026-06-13, 0d
+    JWT Auth Service + BCrypt + AES Cipher        :s2a, 2026-09-28, 6d
+    ChecksumCalculator DVH/DVV + BitacoraService  :s2b, 2026-09-28, 5d
+    Login UI + Guards de rutas + AuthStore        :s2c, 2026-09-28, 5d
+    PermissionGuard + Carga Patentes/Familias     :s2d, 2026-10-02, 4d
+    Tests unitarios DVH/DVV (Jest)                :s2e, 2026-10-06, 3d
+    Review Sprint 2                               :milestone, s2m, 2026-10-09, 0d
 
     section Sprint 3 · Patrones Core (16/6–27/6)
-    SensorFactory + 4 tipos de sensor             :s3a, 2026-06-16, 5d
-    EventBus + AlertHandler + BitacoraHandler     :s3b, 2026-06-16, 4d
-    EvacuationContext + 3 Strategies              :s3c, 2026-06-19, 5d
-    WebSocket Server + useWebSocket hook          :s3d, 2026-06-16, 8d
-    Índices telemetría + triggers de auditoría    :s3e, 2026-06-23, 3d
-    Tests unitarios Factory + Strategy            :s3f, 2026-06-25, 2d
-    Review Sprint 3                               :milestone, s3m, 2026-06-27, 0d
+    SensorFactory + 4 tipos de sensor             :s3a, 2026-10-12, 5d
+    EventBus + AlertHandler + BitacoraHandler     :s3b, 2026-10-12, 4d
+    EvacuationContext + 3 Strategies              :s3c, 2026-10-15, 5d
+    WebSocket Server + useWebSocket hook          :s3d, 2026-10-12, 8d
+    Índices telemetría + triggers de auditoría    :s3e, 2026-10-19, 3d
+    Tests unitarios Factory + Strategy            :s3f, 2026-10-21, 2d
+    Review Sprint 3                               :milestone, s3m, 2026-10-23, 0d
 
     section Sprint 4 · UI y Simulación (30/6–11/7)
-    CityMapPage Lazy Loading + Leaflet            :s4a, 2026-06-30, 6d
-    Mocking Engine · 3 escenarios de catástrofe   :s4b, 2026-06-30, 6d
-    CityComposite + Composite UI ZoneOverlay      :s4c, 2026-07-01, 4d
-    Backup automático node-cron + cron DVV 6hs    :s4d, 2026-06-30, 3d
-    Cache requests + HelpTooltip + i18n completo  :s4e, 2026-07-04, 4d
-    Stress test k6 · 200 lecturas/seg sensores    :s4f, 2026-07-09, 2d
-    Review Sprint 4                               :milestone, s4m, 2026-07-11, 0d
+    CityMapPage Lazy Loading + Leaflet            :s4a, 2026-10-26, 6d
+    Mocking Engine · 3 escenarios de catástrofe   :s4b, 2026-10-26, 6d
+    CityComposite + Composite UI ZoneOverlay      :s4c, 2026-10-27, 4d
+    Backup automático node-cron + cron DVV 6hs    :s4d, 2026-10-26, 3d
+    Cache requests + HelpTooltip + i18n completo  :s4e, 2026-10-30, 4d
+    Stress test k6 · 200 lecturas/seg sensores    :s4f, 2026-11-04, 2d
+    Review Sprint 4                               :milestone, s4m, 2026-11-06, 0d
 
     section Sprint 5 · Testing y Entrega (14/7–25/7)
-    Tests integración Jest+Supertest              :s5a, 2026-07-14, 4d
-    E2E con Playwright · flujos críticos          :s5b, 2026-07-14, 4d
-    UI Auditoría + visualización DVH/DVV          :s5c, 2026-07-14, 4d
-    Stress test BD con pgbench                    :s5d, 2026-07-17, 3d
-    Deploy producción Render/Railway + HTTPS      :s5e, 2026-07-18, 4d
-    documentación del proyecto final + Manual de usuario    :s5f, 2026-07-14, 10d
-    ENTREGA FINAL                                 :milestone, crit, s5m, 2026-07-25, 0d
+    Tests integración Jest+Supertest              :s5a, 2026-11-09, 4d
+    E2E con Playwright · flujos críticos          :s5b, 2026-11-09, 4d
+    UI Auditoría + visualización DVH/DVV          :s5c, 2026-11-09, 4d
+    Stress test BD con pgbench                    :s5d, 2026-11-12, 3d
+    Deploy producción Render/Railway + HTTPS      :s5e, 2026-11-13, 4d
+    documentación del proyecto final + Manual de usuario    :s5f, 2026-11-09, 10d
+    ENTREGA FINAL                                 :milestone, crit, s5m, 2026-11-20, 0d
 ```
 
 ---
 
-### 3.2 Sprint 1 — Fundamentos e Infraestructura (19/05 – 30/05)
+### 3.2 Sprint 1 — Fundamentos e Infraestructura (14/09 – 25/09)
 
 **Objetivo:** El proyecto compila y corre localmente en la máquina de todos al cierre del sprint.  
 **Testing:** Setup Jest + Vitest. Test: `GET /api/health` devuelve `200 OK`.
@@ -436,7 +436,7 @@ gantt
 
 ---
 
-### 3.3 Sprint 2 — Seguridad y Control de Acceso (02/06 – 13/06)
+### 3.3 Sprint 2 — Seguridad y Control de Acceso (28/09 – 09/10)
 
 **Objetivo:** Auth completo con JWT, Patentes/Familias funcionando, DVH/DVV correctos.  
 **Testing:** Tests unitarios `ChecksumCalculator`: insertar fila → DVH correcto; modificar byte → DVH cambia; borrar fila 1 → DVV₂ inválido.
@@ -451,7 +451,7 @@ gantt
 
 ---
 
-### 3.4 Sprint 3 — Patrones Core y Telemetría Real-time (16/06 – 27/06)
+### 3.4 Sprint 3 — Patrones Core y Telemetría Real-time (12/10 – 23/10)
 
 **Objetivo:** Sensores emiten lecturas, `EventBus` las procesa, alertas se crean, bitácora se escribe, frontend recibe todo via WebSocket sin polling.  
 **Testing:** Tests `SensorFactory` (crea tipo correcto). Tests cada Strategy con grafo mock.
@@ -466,7 +466,7 @@ gantt
 
 ---
 
-### 3.5 Sprint 4 — UI Ciudad y Motor de Simulación (30/06 – 11/07)
+### 3.5 Sprint 4 — UI Ciudad y Motor de Simulación (26/10 – 06/11)
 
 **Objetivo:** Mapa de ciudad funcional con Lazy Loading. Mocking Engine inyecta 3 tipos de catástrofe.  
 **Testing:** Stress test k6: 200 lecturas/seg durante 60s. Medir P95 latencia WebSocket, CPU backend, tiempo inserción `SENSOR_READING`.
@@ -481,7 +481,7 @@ gantt
 
 ---
 
-### 3.6 Sprint 5 — Testing, Auditoría UI y Entrega Final (14/07 – 25/07)
+### 3.6 Sprint 5 — Testing, Auditoría UI y Entrega Final (09/11 – 20/11)
 
 **Objetivo:** Sistema completo, tests pasando, en producción con HTTPS, documentación del proyecto terminada.  
 **Testing:** Jest + Supertest integración completa. Playwright E2E 5 flujos críticos. pgbench stress BD.
@@ -542,25 +542,17 @@ La jerarquía de seguridad usa **Composite** puro: una `FamilyComposite` puede c
 FAMILY_ADMIN_SISTEMA  (FamilyComposite — raíz absoluta)
 ├── Todas las patentes del catálogo anterior
 │
-FAMILY_OPERADOR_CRISIS  (FamilyComposite — 2.° nivel)
-├── AUTH_LOGIN, AUTH_LOGOUT
-├── MAP_VIEW, SENSOR_VIEW, TELEMETRY_VIEW
-├── ALERT_VIEW, ALERT_ACKNOWLEDGE, ALERT_RESOLVE
-├── EVACUATION_VIEW, EVACUATION_CREATE, EVACUATION_ACTIVATE, EVACUATION_STRATEGY
-├── SIMULATION_VIEW, SIMULATION_RUN, SIMULATION_STOP
+FAMILY_TRANSITO  (FamilyComposite — base de la operación, solo lectura)
+├── AUTH_ME, AUTH_LOGOUT
+├── DASHBOARD_VIEW, DASHBOARD_ACTIVITY
+├── MAP_VIEW, SENSOR_VIEW, SENSOR_HISTORY
+├── ALERT_VIEW
 │   │
-│   ├── FAMILY_TRANSITO  (FamilyComposite — hoja operativa limitada)
-│   │   ├── AUTH_LOGIN, AUTH_LOGOUT
-│   │   ├── MAP_VIEW
-│   │   ├── SENSOR_VIEW, TELEMETRY_VIEW
-│   │   └── ALERT_VIEW
-│   │
-│   └── FAMILY_DEFENSA_CIVIL  (FamilyComposite — hoja operativa completa)
-│       ├── AUTH_LOGIN, AUTH_LOGOUT
-│       ├── MAP_VIEW, SENSOR_VIEW, TELEMETRY_VIEW
-│       ├── ALERT_VIEW, ALERT_ACKNOWLEDGE, ALERT_RESOLVE
-│       ├── EVACUATION_VIEW, EVACUATION_CREATE, EVACUATION_ACTIVATE, EVACUATION_STRATEGY
-│       └── SIMULATION_VIEW, SIMULATION_RUN, SIMULATION_STOP
+│   └── FAMILY_DEFENSA_CIVIL  (hereda de TRANSITO y suma acciones de respuesta)
+│       ├── ALERT_ACKNOWLEDGE, ALERT_RESOLVE
+│       ├── EVACUATION_CREATE
+│       ├── SENSOR_SIMULATE
+│       └── SIMULATION_SCENARIOS_VIEW, SIMULATION_SCENARIOS_CREATE, SIMULATION_SCENARIOS_STOP
 │
 FAMILY_AUDITOR  (FamilyComposite — rama independiente)
 ├── AUTH_LOGIN, AUTH_LOGOUT
@@ -573,24 +565,24 @@ FAMILY_AUDITOR  (FamilyComposite — rama independiente)
 
 ### 4.4 Tabla de Asignación Familia → Patentes
 
-| Patente | ADMIN | OPERADOR_CRISIS | TRANSITO | DEFENSA_CIVIL | AUDITOR |
-|---|:---:|:---:|:---:|:---:|:---:|
-| `AUTH_LOGIN` / `AUTH_LOGOUT` | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `MAP_VIEW` | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `SENSOR_VIEW` | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `SENSOR_CREATE` / `EDIT` / `DELETE` | ✓ | — | — | — | — |
-| `TELEMETRY_VIEW` | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `TELEMETRY_EXPORT` | ✓ | — | — | — | ✓ |
-| `ALERT_VIEW` | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `ALERT_ACKNOWLEDGE` / `RESOLVE` | ✓ | ✓ | — | ✓ | — |
-| `EVACUATION_VIEW` | ✓ | ✓ | — | ✓ | — |
-| `EVACUATION_CREATE` / `ACTIVATE` / `STRATEGY` | ✓ | ✓ | — | ✓ | — |
-| `SIMULATION_VIEW` | ✓ | ✓ | — | ✓ | — |
-| `SIMULATION_RUN` / `STOP` | ✓ | ✓ | — | ✓ | — |
-| `AUDIT_VIEW_ALL` / `VERIFY` / `EXPORT` | ✓ | — | — | — | ✓ |
-| `USER_CREATE` / `EDIT` / `DELETE` / `PERMISSIONS` | ✓ | — | — | — | — |
-| `CITY_VIEW` | ✓ | — | — | — | ✓ |
-| `CITY_MANAGE` | ✓ | — | — | — | — |
+| Patente | ADMIN | TRANSITO | DEFENSA_CIVIL | AUDITOR |
+|---|:---:|:---:|:---:|:---:|
+| `AUTH_LOGIN` / `AUTH_LOGOUT` | ✓ | ✓ | ✓ | ✓ |
+| `MAP_VIEW` | ✓ | ✓ | ✓ | ✓ |
+| `SENSOR_VIEW` | ✓ | ✓ | ✓ | ✓ |
+| `SENSOR_CREATE` / `EDIT` / `DELETE` | ✓ | — | — | — |
+| `TELEMETRY_VIEW` | ✓ | ✓ | ✓ | ✓ |
+| `TELEMETRY_EXPORT` | ✓ | — | — | ✓ |
+| `ALERT_VIEW` | ✓ | ✓ | ✓ | ✓ |
+| `ALERT_ACKNOWLEDGE` / `RESOLVE` | ✓ | — | ✓ | — |
+| `EVACUATION_VIEW` | ✓ | — | ✓ | — |
+| `EVACUATION_CREATE` / `ACTIVATE` / `STRATEGY` | ✓ | — | ✓ | — |
+| `SIMULATION_VIEW` | ✓ | — | ✓ | — |
+| `SIMULATION_RUN` / `STOP` | ✓ | — | ✓ | — |
+| `AUDIT_VIEW_ALL` / `VERIFY` / `EXPORT` | ✓ | — | — | ✓ |
+| `USER_CREATE` / `EDIT` / `DELETE` / `PERMISSIONS` | ✓ | — | — | — |
+| `CITY_VIEW` | ✓ | — | — | ✓ |
+| `CITY_MANAGE` | ✓ | — | — | — |
 
 ### 4.5 Traza de Evaluación — `FamilyComposite.hasPermission()`
 

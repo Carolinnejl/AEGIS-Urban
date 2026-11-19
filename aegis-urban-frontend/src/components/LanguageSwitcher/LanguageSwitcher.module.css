@@ -1,0 +1,5 @@
+.grupo { display: inline-flex; border: 1px solid var(--color-border); border-radius: 999px; overflow: hidden; background: rgba(6,10,20,.6); }
+.grupo button { padding: .3rem .75rem; font: 700 .72rem var(--font-mono); letter-spacing: .06em; background: transparent; color: var(--color-muted); border-radius: 0; }
+.grupo button:hover { color: var(--color-cyan); }
+.grupo .activo { background: rgba(34,229,255,.16); color: var(--color-cyan); }
+.flotante { position: fixed; top: 1rem; right: 1rem; z-index: 50; backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); }

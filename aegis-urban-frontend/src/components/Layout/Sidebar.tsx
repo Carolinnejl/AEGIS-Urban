@@ -1,7 +1,10 @@
+import { useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../context/AuthContext";
-import { useAuthStore } from "../../store/authStore";
+import { useAuthStore, usePatente } from "../../store/authStore";
+import { precargar, precargarEnReposo } from "../../router/paginas";
+import LanguageSwitcher from "../LanguageSwitcher/LanguageSwitcher";
 import styles from "./Sidebar.module.css";
 
 const NAV_LINKS = [
@@ -11,14 +14,18 @@ const NAV_LINKS = [
   { href: "/alertas",    icono: "🔔", clave: "nav.alerts" },
   { href: "/simulacion", icono: "⚡", clave: "nav.simulation" },
   { href: "/admin",      icono: "⚙", clave: "nav.admin" },
+  { href: "/ayuda",      icono: "?", clave: "ayuda.abrir" },
 ];
 
 export default function Sidebar() {
   const { t }           = useTranslation();
   const { cerrarSesion } = useAuth();
   const usuario          = useAuthStore((s) => s.usuario);
-  const puedeSimular = usuario?.familia === "ADMIN_SISTEMA" || usuario?.familia === "DEFENSA_CIVIL";
-  const puedeAdministrar = usuario?.familia === "ADMIN_SISTEMA" || usuario?.familia === "AUDITOR";
+  const puedeSimular = usePatente("SIMULATION_SCENARIOS_VIEW");
+  const puedeAdministrar = usePatente("AUDIT_VIEW");
+
+  // Precarga las pantallas más usadas cuando el navegador está libre.
+  useEffect(() => { precargarEnReposo(["/alertas", "/mapa", "/sensores"]); }, []);
 
   return (
     <nav className={styles.sidebar}>
@@ -38,6 +45,8 @@ export default function Sidebar() {
           <li key={href}>
             <NavLink
               to={href}
+              onMouseEnter={() => precargar(href)}
+              onFocus={() => precargar(href)}
               className={({ isActive }) =>
                 `${styles.navLink} ${isActive ? styles.active : ""}`
               }
@@ -50,6 +59,7 @@ export default function Sidebar() {
       </ul>
 
       <div className={styles.footer}>
+        <LanguageSwitcher />
         <span className={styles.usuario}>{usuario?.familia}</span>
         <span className={styles.username}>{usuario?.username}</span>
         <button onClick={cerrarSesion} className={styles.logoutBtn}>

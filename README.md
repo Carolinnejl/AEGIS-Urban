@@ -8,14 +8,15 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-22E5FF?style=flat-square&logo=typescript&logoColor=white&labelColor=0B1220)
 ![React](https://img.shields.io/badge/React-18-22E5FF?style=flat-square&logo=react&logoColor=white&labelColor=0B1220)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-8B5CF6?style=flat-square&logo=postgresql&logoColor=white&labelColor=0B1220)
-![Tests](https://img.shields.io/badge/tests-109%20aprobados-19F5A0?style=flat-square&labelColor=0B1220)
+![Tests](https://img.shields.io/badge/tests-256%20aprobados-19F5A0?style=flat-square&labelColor=0B1220)
 ![Estado](https://img.shields.io/badge/estado-prototipo-FFB020?style=flat-square&labelColor=0B1220)
 
 [Documentación](docs/README.md) · [Cómo levantarlo](#cómo-levantarlo) · [Modo ciudadano](#modo-ciudadano) · [Arquitectura](#arquitectura) · [Equipo](#equipo)
 
 </div>
 
-**Proyecto de Carolina Lobo** · Argentina · 2026
+**Proyecto en equipo** · Argentina · 2026 · [ver integrantes](#equipo)
+
 **Estado:** prototipo en desarrollo. No reemplaza a los organismos oficiales: ante una emergencia real llamá al **911**, **100** (bomberos) o **103** (Defensa Civil).
 
 ---
@@ -64,7 +65,7 @@ cd aegis-urban-backend  && npm install && node scripts/crear-env.js && npm run d
 cd aegis-urban-frontend && npm install && npm run dev
 ```
 
-Las migraciones están en `aegis-urban-backend/database/migrations/` (001 a 012) y los datos de ejemplo en `database/seeds/`. Docker las aplica solo al crear un volumen vacío; en una base existente aplicalas en orden (el `arrancar.bat` se ocupa de 006 a 014).
+Las migraciones están en `aegis-urban-backend/database/migrations/` (001 a 018) y los datos de ejemplo en `database/seeds/`. Docker las aplica solo al crear un volumen vacío; en una base existente aplicalas en orden (el `arrancar.bat` se ocupa de 006 a 014).
 
 El backend **no arranca** sin `JWT_SECRET` (mínimo 32 caracteres) ni `AES_SECRET_KEY` (64 caracteres hexadecimales): no hay valores por defecto. `node scripts/crear-env.js` los genera aleatorios.
 
@@ -73,10 +74,13 @@ El backend **no arranca** sin `JWT_SECRET` (mínimo 32 caracteres) ni `AES_SECRE
 | Dónde | Comando | Qué hace |
 |---|---|---|
 | backend | `npm run dev` | API con recarga automática en `:3001` |
-| backend | `npm test` | Pruebas unitarias (102) |
+| backend | `npm test` | Pruebas unitarias (133) |
+| backend | `npm run test:live` | Integración y seguridad contra la API y PostgreSQL levantados (99, incluye 58 por rol) |
+| frontend | `npm run test:e2e` | 6 pruebas de punta a punta con Chrome real (con backend y frontend levantados) |
+| backend | `npm run test:perf` | Prueba de carga: latencia, throughput y compresión |
 | backend | `npm run build` | Compila a JavaScript |
 | frontend | `npm run dev` | Web con Vite en `:5173` |
-| frontend | `npm test` | Pruebas del frontend (7) |
+| frontend | `npm test` | Pruebas del frontend (18) |
 | frontend | `npm run build` | Verifica tipos y genera el bundle |
 
 ---
@@ -159,9 +163,8 @@ flowchart TB
 | Familia | Acceso |
 |---|---|
 | `ADMIN_SISTEMA` | Todo el sistema, usuarios y familias |
-| `OPERADOR_CRISIS` | Mapa, sensores, alertas y panel |
-| `DEFENSA_CIVIL` | Reconocer y resolver alertas, evacuar, ejercicios simulados |
-| `TRANSITO` | Consulta de mapa, sensores y alertas |
+| `TRANSITO` | Operación de solo lectura: panel, mapa, sensores y alertas |
+| `DEFENSA_CIVIL` | Hereda de `TRANSITO` y suma reconocer y resolver alertas, evacuar y ejercicios simulados |
 | `AUDITOR` | Consulta operativa y verificación de bitácora; sin cambios |
 | `CIUDADANO` | Solo su vista pública y sus propios datos; ninguna pantalla de gestión |
 
@@ -179,7 +182,7 @@ flowchart TB
 ```text
 AEGIS-Urban/
 ├── aegis-urban-backend/
-│   ├── database/migrations/    # Esquema SQL versionado (001–014)
+│   ├── database/migrations/    # Esquema SQL versionado (001–018)
 │   ├── database/seeds/         # Datos iniciales y de ejemplo
 │   ├── scripts/                # crear-env.js (genera el .env)
 │   ├── src/
@@ -224,6 +227,10 @@ Toda la documentación se lee directamente en GitHub, por páginas:
 | [Documento funcional](docs/documento-funcional/README.md) | Las cuatro etapas del ciclo de vida, con índice por apartado |
 | [Arquitectura](docs/01-arquitectura.md) | Carpetas, modelo de datos y decisiones técnicas |
 | [Análisis y diseño original](docs/02-analisis-diseno.md) | Casos de uso, diagramas y matriz de permisos |
+| [Especificación del sistema](docs/03-especificacion-sistema.md) | Visión, RF/RNF, escalabilidad, diagramas de secuencia y casos de uso |
+| [Manual de usuario](docs/04-manual-de-usuario.md) | Guía por rol (también en la app, `/ayuda`) |
+| [Pruebas y rendimiento](docs/05-pruebas-y-rendimiento.md) | Unitarias, integración, seguridad, carga y CI, con resultados |
+| [Operación de la base de datos](docs/06-base-de-datos.md) | Respaldo, restauración, particiones, integridad y cifrado |
 
 ---
 
@@ -249,7 +256,17 @@ Toda la documentación se lee directamente en GitHub, por páginas:
 
 <div align="center">
 
-*AEGIS Urban — Advanced Emergency Geographic Intelligence System*
-*Proyecto de Carolina Lobo · 2026*
+*AEGIS Urban · Proyecto en equipo · 2026*
 
 </div>
+
+---
+
+<p align="center">
+  <b>Seguí leyendo</b><br>
+  <a href="docs/documento/00-portada.md"><b>Siguiente → Documento funcional</b></a>
+  &nbsp;·&nbsp;
+  <a href="docs/AEGIS-Urban-Documento-Funcional-Unificado.md">todo en un solo archivo</a>
+  &nbsp;·&nbsp;
+  <a href="docs/pdf/AEGIS-Urban-Documento-Funcional-Unificado.pdf">PDF</a>
+</p>

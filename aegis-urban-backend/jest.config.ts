@@ -5,6 +5,8 @@ const config: Config = {
   testEnvironment: "node",
   roots:           ["<rootDir>/tests"],
   testMatch:       ["**/*.test.ts", "**/*.spec.ts"],
+  // tests/live requiere servidor + BD levantados: se ejecuta con `npm run test:live`
+  testPathIgnorePatterns: ["/node_modules/", "/tests/live/"],
   transform: {
     "^.+\\.tsx?$": ["ts-jest", { tsconfig: "tsconfig.json" }],
   },

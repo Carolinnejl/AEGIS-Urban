@@ -1,5 +1,6 @@
 import "dotenv/config";
 import { validarSecretos } from "./secretos";
+import path from "path";
 import { validarSmtp } from "./smtp";
 
 // Valida en arranque que las variables críticas existan.
@@ -76,6 +77,16 @@ export const env = {
     user:   process.env.SMTP_USER ?? "",
     pass:   process.env.SMTP_PASS ?? "",
     from:   process.env.SMTP_FROM ?? "",
+  },
+
+  // Respaldos de la base: carpeta, modo de invocar pg_dump ("docker" usa el contenedor; "local" usa pg_dump del PATH)
+  // y política automática (un respaldo cada 24 h, conservando los últimos N).
+  backup: {
+    dir:         process.env.BACKUP_DIR ?? path.resolve(__dirname, "../../backups"),
+    modo:        (process.env.BACKUP_MODO === "local" ? "local" : "docker") as "docker" | "local",
+    contenedor:  process.env.PG_CONTAINER ?? "aegis_postgres",
+    automatico:  (process.env.BACKUP_AUTOMATICO ?? "true") !== "false",
+    retencion:   parseInt(process.env.BACKUP_RETENCION ?? "7", 10),
   },
 
   aes: {

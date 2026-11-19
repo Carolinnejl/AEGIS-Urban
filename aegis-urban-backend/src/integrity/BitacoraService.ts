@@ -126,21 +126,7 @@ export class BitacoraService {
 
       await cliente.query("COMMIT");
 
-      const filas: FilaBitacora[] = resultado.rows.map(f => ({
-        id_log:      BigInt(f.id_log),
-        action:      f.action,
-        entity_name: f.entity_name,
-        entity_id:   f.entity_id,
-        id_user:     f.id_user,
-        ip_address:  f.ip_address,
-        old_values:  f.old_values,
-        new_values:  f.new_values,
-        dvh:         f.dvh,
-        dvv:         f.dvv,
-        created_at:  new Date(f.created_at),
-      }));
-
-      return ChecksumCalculator.validarIntegridad(filas);
+      return integridadDesdeFilas(resultado.rows);
     } catch (err) {
       await cliente.query("ROLLBACK");
       throw new IntegrityError(`Error al verificar integridad de bitácora: ${err}`);
@@ -148,6 +134,37 @@ export class BitacoraService {
       cliente.release();
     }
   }
+}
+
+/** Filas crudas de audit_log tal como las devuelve pg. */
+export interface FilaBitacoraCruda {
+  id_log: string; action: string; entity_name: string; entity_id: string; id_user: number | null;
+  ip_address: string; old_values: string | null; new_values: string | null; dvh: string; dvv: string; created_at: string;
+}
+
+/** Consulta que lee toda la bitácora en orden; se usa también para verificar una base restaurada. */
+export const SQL_FILAS_BITACORA = `
+  SELECT id_log, action, entity_name, entity_id, id_user,
+         ip_address, old_values, new_values, dvh, dvv, created_at
+  FROM   audit_log
+  ORDER BY id_log ASC`;
+
+/** Recalcula DVH y DVV sobre las filas dadas y reporta la primera corrupta (si la hay). */
+export function integridadDesdeFilas(rows: FilaBitacoraCruda[]): ResultadoIntegridad {
+  const filas: FilaBitacora[] = rows.map(f => ({
+    id_log:      BigInt(f.id_log),
+    action:      f.action,
+    entity_name: f.entity_name,
+    entity_id:   f.entity_id,
+    id_user:     f.id_user,
+    ip_address:  f.ip_address,
+    old_values:  f.old_values,
+    new_values:  f.new_values,
+    dvh:         f.dvh,
+    dvv:         f.dvv,
+    created_at:  new Date(f.created_at),
+  }));
+  return ChecksumCalculator.validarIntegridad(filas);
 }
 
 export const bitacora = new BitacoraService();

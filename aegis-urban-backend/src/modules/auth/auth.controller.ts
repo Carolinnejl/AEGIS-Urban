@@ -2,7 +2,7 @@ import { Router, Request, Response, NextFunction } from "express";
 import { AuthService } from "./auth.service";
 import { requiereAutenticacion } from "./auth.middleware";
 import { BadRequestError } from "../../shared/errors/AppError";
-import { requierePermiso } from "../../security/access-control/PermissionGuard";
+import { requierePermiso, patentesDeFamilia } from "../../security/access-control/PermissionGuard";
 import { desconectarSesion } from "../websocket/SocketServer";
 import { registroService, validarRegistro } from "./registro.service";
 import { LEGAL } from "../../config/legal";
@@ -44,6 +44,8 @@ router.post("/login", limitarLogin, async (req: Request, res: Response, next: Ne
         familyId:   resultado.usuario.idFamilia,
         familyName: resultado.usuario.familia,
       },
+      // Patentes efectivas de la familia: la interfaz muestra los botones según ellas, no según el nombre del rol.
+      permisos: await patentesDeFamilia(resultado.usuario.idFamilia),
     });
   } catch (err) {
     next(err);

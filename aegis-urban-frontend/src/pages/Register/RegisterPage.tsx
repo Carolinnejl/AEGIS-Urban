@@ -1,12 +1,15 @@
 import { useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
+import { Trans, useTranslation } from "react-i18next";
 import { isAxiosError } from "axios";
 import { useAuth } from "../../context/AuthContext";
-import { LEGAL, CONSENTIMIENTO_UBICACION } from "../../legal/textos";
+import LanguageSwitcher from "../../components/LanguageSwitcher/LanguageSwitcher";
+import { LEGAL } from "../../legal/textos";
 import styles from "../Login/LoginPage.module.css";
 import extra from "./RegisterPage.module.css";
 
 export default function RegisterPage() {
+  const { t } = useTranslation();
   const { registrar } = useAuth();
   const [usuario, setUsuario] = useState("");
   const [email, setEmail] = useState("");
@@ -34,7 +37,8 @@ export default function RegisterPage() {
         versionTerminos: LEGAL.VERSION_TERMINOS, versionPrivacidad: LEGAL.VERSION_PRIVACIDAD,
       });
     } catch (err) {
-      setError(isAxiosError(err) && err.response?.data?.error ? String(err.response.data.error) : "No se pudo crear la cuenta");
+      // Los mensajes de validación vienen del servidor (en español); si no hay, se usa el texto genérico traducido.
+      setError(isAxiosError(err) && err.response?.data?.error ? String(err.response.data.error) : t("registro.errorGenerico"));
     } finally {
       setCargando(false);
     }
@@ -42,59 +46,62 @@ export default function RegisterPage() {
 
   return (
     <div className={styles.page}>
+      <LanguageSwitcher flotante />
       <div className={styles.bgGrid} aria-hidden="true" />
       <main className={`${styles.card} ${extra.ancha}`}>
         <header className={styles.header}>
-          <h1 className={styles.title}>Crear cuenta</h1>
-          <p className={styles.subtitle}>Recibí avisos del clima y de zonas de riesgo cerca tuyo. Después vas a verificar tu perfil con un código para tu correo y otro para tu celular.</p>
+          <h1 className={styles.title}>{t("registro.titulo")}</h1>
+          <p className={styles.subtitle}>{t("registro.subtitulo")}</p>
         </header>
 
         <form onSubmit={enviar} className={styles.form} noValidate>
           <div className={styles.field}>
-            <label htmlFor="r-usuario" className={styles.label}>Usuario</label>
-            <input id="r-usuario" autoComplete="username" placeholder="4 a 30 caracteres (letras, números, _ .)"
+            <label htmlFor="r-usuario" className={styles.label}>{t("registro.usuario")}</label>
+            <input id="r-usuario" autoComplete="username" placeholder={t("registro.usuarioPH")}
               value={usuario} onChange={(e) => setUsuario(e.target.value)} disabled={cargando} />
           </div>
           <div className={styles.field}>
-            <label htmlFor="r-email" className={styles.label}>Email</label>
-            <input id="r-email" type="email" autoComplete="email" placeholder="tu@email.com"
+            <label htmlFor="r-email" className={styles.label}>{t("registro.email")}</label>
+            <input id="r-email" type="email" autoComplete="email" placeholder={t("registro.emailPH")}
               value={email} onChange={(e) => setEmail(e.target.value)} disabled={cargando} />
           </div>
           <div className={styles.field}>
-            <label htmlFor="r-tel" className={styles.label}>Celular</label>
-            <input id="r-tel" type="tel" autoComplete="tel" placeholder="+54 9 11 2233 4455"
+            <label htmlFor="r-tel" className={styles.label}>{t("registro.celular")}</label>
+            <input id="r-tel" type="tel" autoComplete="tel" placeholder={t("registro.celularPH")}
               value={telefono} onChange={(e) => setTelefono(e.target.value)} disabled={cargando} />
           </div>
           <div className={styles.field}>
-            <label htmlFor="r-pass" className={styles.label}>Contraseña</label>
-            <input id="r-pass" type="password" autoComplete="new-password" placeholder="Mínimo 10 caracteres, con letras y números"
+            <label htmlFor="r-pass" className={styles.label}>{t("registro.contrasena")}</label>
+            <input id="r-pass" type="password" autoComplete="new-password" placeholder={t("registro.contrasenaPH")}
               value={contrasena} onChange={(e) => setContrasena(e.target.value)} disabled={cargando} />
           </div>
 
           <fieldset className={extra.consentimientos}>
-            <legend>Consentimientos</legend>
+            <legend>{t("registro.consentimientos")}</legend>
 
             <label className={extra.check}>
               <input type="checkbox" checked={terminos} onChange={(e) => setTerminos(e.target.checked)} />
-              <span>Leí y acepto los <Link to="/terminos" target="_blank">Términos y Condiciones</Link> <em>(obligatorio)</em></span>
+              <span><Trans i18nKey="registro.terminos" components={[<span key="0" />, <Link key="1" to="/terminos" target="_blank" />, <em key="2" />]} /></span>
             </label>
 
             <label className={extra.check}>
               <input type="checkbox" checked={privacidad} onChange={(e) => setPrivacidad(e.target.checked)} />
-              <span>Leí y acepto la <Link to="/privacidad" target="_blank">Política de Privacidad</Link> y el tratamiento de mis datos según la Ley 25.326 <em>(obligatorio)</em></span>
+              <span><Trans i18nKey="registro.privacidad" components={[<span key="0" />, <Link key="1" to="/privacidad" target="_blank" />, <em key="2" />]} /></span>
             </label>
 
             <label className={extra.check}>
               <input type="checkbox" checked={edad} onChange={(e) => setEdad(e.target.checked)} />
-              <span>Soy mayor de {LEGAL.EDAD_MINIMA} años o cuento con autorización de mi madre, padre o tutor/a <em>(obligatorio)</em></span>
+              <span><Trans i18nKey="registro.edad" values={{ edad: LEGAL.EDAD_MINIMA }} components={[<span key="0" />, <em key="1" />]} /></span>
             </label>
 
             <label className={`${extra.check} ${extra.opcional}`}>
               <input type="checkbox" checked={ubicacion} onChange={(e) => setUbicacion(e.target.checked)} />
               <span>
-                <strong>Permitir el uso de mi ubicación</strong> para avisarme si estoy en una zona peligrosa <em>(opcional)</em>
+                <strong>{t("registro.ubicacion")}</strong> <Trans i18nKey="registro.ubicacionDesc" components={[<span key="0" />, <em key="1" />]} />
                 <small>
-                  {CONSENTIMIENTO_UBICACION.map((t) => <span key={t}>{t}</span>)}
+                  <span>{t("registro.ubicacionP1")}</span>
+                  <span>{t("registro.ubicacionP2")}</span>
+                  <span>{t("registro.ubicacionP3")}</span>
                 </small>
               </span>
             </label>
@@ -103,13 +110,13 @@ export default function RegisterPage() {
           {error && <p className={styles.error} role="alert">{error}</p>}
 
           <button type="submit" disabled={!puedeEnviar} className={styles.submitBtn}>
-            {cargando ? <><span className={styles.btnSpinner} />Creando cuenta…</> : "Aceptar y crear cuenta"}
+            {cargando ? <><span className={styles.btnSpinner} />{t("registro.enviando")}</> : t("registro.enviar")}
           </button>
         </form>
 
         <footer className={extra.pie}>
-          <Link to="/login">Ya tengo cuenta</Link>
-          <Link to="/ciudadano">Ver sin cuenta</Link>
+          <Link to="/login">{t("registro.yaTengo")}</Link>
+          <Link to="/ciudadano">{t("registro.verSinCuenta")}</Link>
         </footer>
       </main>
     </div>

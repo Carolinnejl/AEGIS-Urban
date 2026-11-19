@@ -24,6 +24,8 @@ export interface PlanEvacuacion {
   rutaGeojson:       string;       // GeoJSON serializado
   personasEstimadas: number;
   instrucciones:     string;
+  /** Radio del área de evacuación en metros, centrada en el sensor. */
+  radioMetros:       number;
 }
 
 /**

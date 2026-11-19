@@ -44,4 +44,5 @@ export interface RespuestaLogin {
     familyId:   number;
     familyName: string;
   };
+  permisos?: string[];
 }

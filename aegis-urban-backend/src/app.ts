@@ -4,6 +4,7 @@ import "express-async-errors";
 import express, { Application, Request, Response, NextFunction } from "express";
 import cors from "cors";
 import helmet from "helmet";
+import compression from "compression";
 import morgan from "morgan";
 import { createServer } from "http";
 import { env } from "./config/env";
@@ -13,6 +14,7 @@ import { inicializarWebSocket } from "./modules/websocket/SocketServer";
 import { alertHandler } from "./core/events/handlers/AlertHandler";
 import { bitacoraHandler } from "./core/events/handlers/BitacoraHandler";
 import { telemetryService } from "./modules/telemetry/telemetry.service";
+import { iniciarMantenimiento } from "./modules/backup/mantenimiento";
 
 // ── Rutas
 import rutaAuth       from "./modules/auth/auth.controller";
@@ -29,6 +31,8 @@ const servidorHttp = createServer(app);
 
 // ── Middlewares globales ──────────────────────────────────────────────────────
 app.use(helmet());
+// Respuestas JSON comprimidas con gzip: menos bytes por petición (los WebSockets no se ven afectados).
+app.use(compression());
 app.use(cors({
   origin:         env.FRONTEND_URL,
   credentials:    true,
@@ -89,6 +93,9 @@ servidorHttp.listen(env.PORT, async () => {
   }, 15_000);
 
   console.log("⚡ Motor de simulación activo (15s/ciclo)");
+
+  // Particiones de sensor_reading al día + respaldo diario con retención
+  iniciarMantenimiento();
 });
 
 const apagarServidor = async (senal: string) => {

@@ -1,8 +1,9 @@
 import { useEffect, useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import Sidebar from "../../components/Layout/Sidebar";
 import { useWebSocket } from "../../hooks/useWebSocket";
 import api from "../../services/api";
-import { useAuthStore } from "../../store/authStore";
+import { usePatente } from "../../store/authStore";
 import styles from "./SensorsPage.module.css";
 
 interface Sensor {
@@ -27,22 +28,16 @@ const TIPO_ICON: Record<string, string> = {
   AIR_QUALITY: "🌫",
 };
 
-const TIPO_LABEL: Record<string, string> = {
-  FLOOD:       "Inundación",
-  FIRE:        "Incendio",
-  WIND:        "Viento",
-  AIR_QUALITY: "Calidad Aire",
-};
-
 function badgeEstado(estado: string | null) {
   if (!estado) return "ok";
   return estado.toLowerCase();
 }
 
 export default function SensorsPage() {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.resolvedLanguage?.startsWith("en") ? "en-GB" : "es-AR";
   const { conectado, ultimaLectura } = useWebSocket();
-  const familia = useAuthStore(s => s.usuario?.familia);
-  const puedeSimular = familia === "ADMIN_SISTEMA" || familia === "DEFENSA_CIVIL";
+  const puedeSimular = usePatente("SENSOR_SIMULATE");
   const [sensores, setSensores]      = useState<Sensor[]>([]);
   const [cargando, setCargando]      = useState(true);
   const [errorCarga, setErrorCarga]  = useState(false);
@@ -110,21 +105,21 @@ export default function SensorsPage() {
       <main className={styles.main}>
         <header className={styles.topbar}>
           <div>
-            <h1 className={styles.pageTitle}>Sensores</h1>
-            <p className={styles.subtitle}>Red de sensores IoT — datos en tiempo real vía WebSocket</p>
+            <h1 className={styles.pageTitle}>{t("gestion.sensores.titulo")}</h1>
+            <p className={styles.subtitle}>{t("gestion.sensores.subtitulo")}</p>
           </div>
           <div className={styles.topbarRight}>
             <span className={`${styles.wsBadge} ${conectado ? styles.wsOn : styles.wsOff}`}>
-              {conectado ? "● LIVE" : "○ offline"}
+              {conectado ? t("gestion.comun.live") : t("gestion.comun.offline")}
             </span>
-            <button onClick={cargarSensores} className={styles.refreshBtn} title="Actualizar">↻</button>
+            <button onClick={cargarSensores} className={styles.refreshBtn} title={t("gestion.comun.actualizar")}>↻</button>
           </div>
         </header>
 
         {(errorCarga || errorAccion) && <div className={styles.errorBanner} role="alert">
-          <span>{errorCarga ? "No se pudieron cargar los sensores." : "No se pudo registrar la lectura simulada."}</span>
+          <span>{errorCarga ? t("gestion.sensores.errCarga") : t("gestion.sensores.errLectura")}</span>
           <button onClick={errorCarga ? cargarSensores : () => setErrorAccion(false)}>
-            {errorCarga ? "Reintentar" : "Cerrar"}
+            {errorCarga ? t("gestion.comun.reintentar") : t("gestion.comun.cerrar")}
           </button>
         </div>}
 
@@ -132,31 +127,31 @@ export default function SensorsPage() {
         <div className={styles.resumenGrid}>
           <div className={`${styles.resumenCard} ${styles["resumenCard--ok"]}`}>
             <span className={styles.resumenVal}>{resumen.ok}</span>
-            <span className={styles.resumenLabel}>Normales</span>
+            <span className={styles.resumenLabel}>{t("gestion.sensores.resumen.normales")}</span>
           </div>
           <div className={`${styles.resumenCard} ${styles["resumenCard--warning"]}`}>
             <span className={styles.resumenVal}>{resumen.warning}</span>
-            <span className={styles.resumenLabel}>Advertencia</span>
+            <span className={styles.resumenLabel}>{t("gestion.sensores.resumen.advertencia")}</span>
           </div>
           <div className={`${styles.resumenCard} ${styles["resumenCard--critical"]}`}>
             <span className={styles.resumenVal}>{resumen.critical}</span>
-            <span className={styles.resumenLabel}>Críticos</span>
+            <span className={styles.resumenLabel}>{t("gestion.sensores.resumen.criticos")}</span>
           </div>
           <div className={`${styles.resumenCard} ${styles["resumenCard--total"]}`}>
             <span className={styles.resumenVal}>{sensores.length}</span>
-            <span className={styles.resumenLabel}>Total</span>
+            <span className={styles.resumenLabel}>{t("gestion.sensores.resumen.total")}</span>
           </div>
         </div>
 
         {/* Filtros */}
         <div className={styles.filtros}>
-          {tipos.map(t => (
+          {tipos.map(tipo => (
             <button
-              key={t}
-              onClick={() => setFiltroTipo(t)}
-              className={`${styles.filtroBtn} ${filtroTipo === t ? styles.filtroBtnActive : ""}`}
+              key={tipo}
+              onClick={() => setFiltroTipo(tipo)}
+              className={`${styles.filtroBtn} ${filtroTipo === tipo ? styles.filtroBtnActive : ""}`}
             >
-              {t === "TODOS" ? "Todos" : `${TIPO_ICON[t]} ${TIPO_LABEL[t]}`}
+              {tipo === "TODOS" ? t("gestion.comun.todos") : `${TIPO_ICON[tipo]} ${t(`tipos.${tipo}`)}`}
             </button>
           ))}
         </div>
@@ -164,32 +159,32 @@ export default function SensorsPage() {
         {/* Tabla */}
         <div className={styles.panelWrap}>
           {cargando ? (
-            <div className={styles.loading}>Cargando sensores…</div>
+            <div className={styles.loading}>{t("gestion.sensores.cargando")}</div>
           ) : (
             <table className={styles.tabla}>
               <thead>
                 <tr>
-                  <th>Tipo</th>
-                  <th>Serial</th>
-                  <th>Distrito</th>
-                  <th>Estado</th>
-                  <th>Última Lectura</th>
-                  <th>Acciones</th>
+                  <th>{t("gestion.sensores.tabla.tipo")}</th>
+                  <th>{t("gestion.sensores.tabla.serial")}</th>
+                  <th>{t("gestion.sensores.tabla.distrito")}</th>
+                  <th>{t("gestion.sensores.tabla.estado")}</th>
+                  <th>{t("gestion.sensores.tabla.ultima")}</th>
+                  <th>{t("gestion.sensores.tabla.acciones")}</th>
                 </tr>
               </thead>
               <tbody>
-                {filtrados.length === 0 ? <tr><td colSpan={6} className={styles.sinLectura}>No hay sensores para este filtro.</td></tr> : filtrados.map(s => (
+                {filtrados.length === 0 ? <tr><td colSpan={6} className={styles.sinLectura}>{t("gestion.sensores.vacio")}</td></tr> : filtrados.map(s => (
                   <tr key={s.id_sensor} className={flash.has(s.id_sensor) ? styles.flashRow : ""}>
                     <td>
                       <span className={styles.tipoChip}>
-                        {TIPO_ICON[s.sensor_type_code]} {TIPO_LABEL[s.sensor_type_code] ?? s.sensor_type_code}
+                        {TIPO_ICON[s.sensor_type_code]} {t(`tipos.${s.sensor_type_code}`, { defaultValue: s.sensor_type_code })}
                       </span>
                     </td>
                     <td className={styles.monoCell}>{s.serial_code}</td>
                     <td>{s.city_node_name}</td>
                     <td>
                       <span className={`${styles.estadoBadge} ${styles[`estadoBadge--${badgeEstado(s.last_status)}`]}`}>
-                        {s.last_status ?? "SIN DATOS"}
+                        {s.last_status ?? t("gestion.sensores.sinDatos")}
                       </span>
                     </td>
                     <td className={styles.lecturaCell}>
@@ -198,21 +193,21 @@ export default function SensorsPage() {
                           <span className={styles.lecturaVal}>{parseFloat(String(s.last_value)).toFixed(1)}</span>
                           <span className={styles.lecturaUnit}> {s.sensor_unit}</span>
                           <small className={styles.lecturaTime}>{s.last_reading_at
-                            ? new Date(s.last_reading_at).toLocaleString("es-AR", { dateStyle: "short", timeStyle: "short" })
-                            : "Hora no disponible"}</small>
+                            ? new Date(s.last_reading_at).toLocaleString(locale, { dateStyle: "short", timeStyle: "short" })
+                            : t("gestion.sensores.sinHora")}</small>
                         </>
-                      ) : <span className={styles.sinLectura}>Sin lecturas</span>}
+                      ) : <span className={styles.sinLectura}>{t("gestion.sensores.sinLecturas")}</span>}
                     </td>
                     <td>
                       {(s.status === "SIMULATED" || s.is_simulated) ? (puedeSimular ? <button
                         className={styles.simularBtn}
                         onClick={() => simular(s.id_sensor)}
                         disabled={simulando === s.id_sensor}
-                        title="Forzar lectura simulada"
+                        title={t("gestion.sensores.forzar")}
                       >
-                        {simulando === s.id_sensor ? "…" : "⚡ Simular"}
-                      </button> : <span className={styles.sinLectura}>Sólo roles autorizados</span>)
-                        : <span className={styles.sinLectura}>Sensor real</span>}
+                        {simulando === s.id_sensor ? "…" : t("gestion.sensores.simular")}
+                      </button> : <span className={styles.sinLectura}>{t("gestion.sensores.soloRoles")}</span>)
+                        : <span className={styles.sinLectura}>{t("gestion.sensores.real")}</span>}
                     </td>
                   </tr>
                 ))}

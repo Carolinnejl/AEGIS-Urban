@@ -11,6 +11,7 @@ export class BitacoraHandler {
     eventBus.suscribir<DatosLecturaNueva>(EVENTOS.LECTURA_NUEVA, this.manejarLectura.bind(this));
     eventBus.suscribir(EVENTOS.SESION_INICIADA,     this.manejarSesion.bind(this));
     eventBus.suscribir(EVENTOS.SESION_CERRADA,      this.manejarSesion.bind(this));
+    eventBus.suscribir(EVENTOS.LOGIN_FALLIDO,       this.manejarSesion.bind(this));
 
     this.inicializado = true;
   }
@@ -36,15 +37,15 @@ export class BitacoraHandler {
 
   private async manejarSesion(datos: Record<string, unknown>): Promise<void> {
     try {
-      const accion = datos["evento"] === EVENTOS.SESION_INICIADA
-        ? "USER_LOGIN" : "USER_LOGOUT";
+      const accion = datos["evento"] === EVENTOS.SESION_INICIADA ? "USER_LOGIN"
+        : datos["evento"] === EVENTOS.LOGIN_FALLIDO ? "USER_LOGIN_FAILED" : "USER_LOGOUT";
       await bitacora.registrarEvento({
         accion,
         nombreEntidad: "session_token",
         idEntidad:    String(datos["idUsuario"] ?? "0"),
         idUsuario:    datos["idUsuario"] as number | null,
         direccionIp:  String(datos["ip"] ?? "127.0.0.1"),
-        valoresNuevos: { username: datos["username"] },
+        valoresNuevos: { username: datos["username"], ...(datos["motivo"] ? { motivo: datos["motivo"] } : {}) },
       });
     } catch { /* no interrumpir flujo */ }
   }

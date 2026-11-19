@@ -4,80 +4,847 @@
     "tagline": "Plataforma de Orquestación Logística y Alerta Temprana"
   },
   "nav": {
-    "dashboard":  "Panel de Control",
-    "cityMap":    "Mapa Ciudad",
-    "sensors":    "Sensores",
-    "alerts":     "Alertas",
+    "dashboard": "Panel de Control",
+    "cityMap": "Mapa Ciudad",
+    "sensors": "Sensores",
+    "alerts": "Alertas",
     "simulation": "Simulación",
-    "admin":      "Administración",
-    "logout":     "Cerrar Sesión"
+    "admin": "Administración",
+    "logout": "Cerrar Sesión"
   },
   "auth": {
-    "loginTitle":       "Iniciar Sesión",
-    "loginSubtitle":    "Acceso al sistema de monitoreo AEGIS Urban",
-    "username":         "Usuario",
-    "password":         "Contraseña",
+    "loginTitle": "Iniciar Sesión",
+    "loginSubtitle": "Acceso al sistema de monitoreo AEGIS Urban",
+    "username": "Usuario",
+    "password": "Contraseña",
     "usernamePlaceholder": "Tu nombre de usuario",
     "passwordPlaceholder": "Tu contraseña",
-    "loginButton":      "Ingresar",
-    "loggingIn":        "Verificando...",
+    "loginButton": "Ingresar",
+    "loggingIn": "Verificando...",
     "invalidCredentials": "Usuario o contraseña incorrectos",
-    "sessionExpired":   "Tu sesión expiró. Por favor iniciá sesión nuevamente."
+    "sessionExpired": "Tu sesión expiró. Por favor iniciá sesión nuevamente.",
+    "verCiudadano": "Ver como ciudadano"
   },
   "dashboard": {
-    "title":          "Panel de Control",
-    "activeSensors":  "Sensores Activos",
-    "activeAlerts":   "Alertas Activas",
+    "title": "Panel de Control",
+    "activeSensors": "Sensores Activos",
+    "activeAlerts": "Alertas Activas",
     "criticalAlerts": "Alertas Críticas",
-    "lastUpdate":     "Última actualización"
+    "lastUpdate": "Última actualización"
   },
   "alerts": {
     "level": {
-      "INFO":     "Información",
-      "LOW":      "Bajo",
-      "MEDIUM":   "Medio",
-      "HIGH":     "Alto",
+      "INFO": "Información",
+      "LOW": "Bajo",
+      "MEDIUM": "Medio",
+      "HIGH": "Alto",
       "CRITICAL": "Crítico"
     },
-    "noAlerts":   "Sin alertas activas",
+    "noAlerts": "Sin alertas activas",
     "acknowledge": "Reconocer"
   },
   "sensors": {
     "type": {
-      "FLOOD":       "Inundación",
-      "FIRE":        "Incendio",
-      "WIND":        "Viento",
+      "FLOOD": "Inundación",
+      "FIRE": "Incendio",
+      "WIND": "Viento",
       "AIR_QUALITY": "Calidad del Aire"
     },
     "status": {
-      "ACTIVE":   "Activo",
+      "ACTIVE": "Activo",
       "INACTIVE": "Inactivo",
-      "FAULT":    "Falla",
+      "FAULT": "Falla",
       "CALIBRATING": "Calibrando"
     }
   },
   "simulation": {
-    "title":       "Motor de Simulación",
+    "title": "Motor de Simulación",
     "newScenario": "Nuevo Escenario",
-    "runSim":      "Ejecutar Simulación",
-    "stopSim":     "Detener"
+    "runSim": "Ejecutar Simulación",
+    "stopSim": "Detener"
   },
   "common": {
-    "loading":  "Cargando...",
-    "error":    "Ocurrió un error",
-    "save":     "Guardar",
-    "cancel":   "Cancelar",
-    "confirm":  "Confirmar",
-    "delete":   "Eliminar",
-    "edit":     "Editar",
-    "view":     "Ver",
-    "search":   "Buscar",
-    "noData":   "Sin datos disponibles",
+    "loading": "Cargando...",
+    "error": "Ocurrió un error",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "view": "Ver",
+    "search": "Buscar",
+    "noData": "Sin datos disponibles",
     "language": "Idioma"
   },
   "help": {
     "dvhDvv": "DVH/DVV garantizan la inmutabilidad de cada registro de auditoría. Cualquier alteración directa en la base de datos es detectada automáticamente.",
     "composite": "El sistema de permisos usa Patrón Composite: cada familia hereda los permisos de su familia padre más los propios.",
     "simulation": "El Motor de Simulación (Mocking Engine) genera escenarios de catástrofe sin hardware real, usando datos sintéticos calibrados por zona geográfica."
+  },
+  "lang": {
+    "etiqueta": "Idioma",
+    "es": "Español",
+    "en": "English"
+  },
+  "tipos": {
+    "HEAT": "Calor",
+    "COLD": "Frío",
+    "WIND": "Viento",
+    "RAIN": "Lluvia",
+    "STORM": "Tormenta",
+    "AIR_QUALITY": "Calidad del aire",
+    "FOG": "Niebla",
+    "SNOW": "Nieve",
+    "FLOOD": "Inundación",
+    "FIRE": "Incendio",
+    "POWER_OUT": "Corte de energía"
+  },
+  "direcciones": {
+    "norte": "norte",
+    "noreste": "noreste",
+    "este": "este",
+    "sureste": "sureste",
+    "sur": "sur",
+    "suroeste": "suroeste",
+    "oeste": "oeste",
+    "noroeste": "noroeste"
+  },
+  "condiciones": {
+    "despejado": "Despejado",
+    "parcial": "Parcialmente nublado",
+    "nublado": "Nublado",
+    "niebla": "Niebla",
+    "llovizna": "Llovizna",
+    "lluvia": "Lluvia",
+    "nieve": "Nieve",
+    "chubascos": "Chubascos",
+    "chubascosNieve": "Chubascos de nieve",
+    "tormenta": "Tormenta eléctrica",
+    "variable": "Variable"
+  },
+  "avisosClima": {
+    "STORM": {
+      "CRITICAL": {
+        "titulo": "Tormenta eléctrica",
+        "detalle": "Buscá refugio en un lugar cerrado y evitá árboles y zonas abiertas."
+      }
+    },
+    "HEAT": {
+      "CRITICAL": {
+        "titulo": "Calor extremo",
+        "detalle": "Sensación térmica de {{valor}} °C. Hidratate y evitá el sol entre 11 y 17 h."
+      },
+      "WARNING": {
+        "titulo": "Calor intenso",
+        "detalle": "Sensación térmica de {{valor}} °C. Tomá agua y buscá sombra."
+      }
+    },
+    "COLD": {
+      "CRITICAL": {
+        "titulo": "Frío extremo",
+        "detalle": "Sensación térmica de {{valor}} °C. Abrigate y evitá exponerte."
+      },
+      "WARNING": {
+        "titulo": "Frío intenso",
+        "detalle": "Sensación térmica de {{valor}} °C. Abrigate bien."
+      }
+    },
+    "WIND": {
+      "CRITICAL": {
+        "titulo": "Ráfagas muy fuertes",
+        "detalle": "Ráfagas de {{valor}} km/h. Alejate de árboles, carteles y cables."
+      },
+      "WARNING": {
+        "titulo": "Viento fuerte",
+        "detalle": "Ráfagas de {{valor}} km/h. Asegurá objetos sueltos."
+      }
+    },
+    "RAIN": {
+      "CRITICAL": {
+        "titulo": "Lluvia intensa",
+        "detalle": "{{valor}} mm en la última hora. Riesgo de anegamientos: evitá zonas bajas."
+      },
+      "WARNING": {
+        "titulo": "Lluvia moderada",
+        "detalle": "{{valor}} mm en la última hora. Manejá con precaución."
+      }
+    },
+    "AIR_QUALITY": {
+      "CRITICAL": {
+        "titulo": "Mala calidad del aire",
+        "detalle": "Índice AQI {{valor}}. Evitá actividad física al aire libre."
+      },
+      "WARNING": {
+        "titulo": "Calidad del aire regular",
+        "detalle": "Índice AQI {{valor}}. Personas sensibles deben limitar el esfuerzo al aire libre."
+      }
+    },
+    "FOG": {
+      "WARNING": {
+        "titulo": "Niebla",
+        "detalle": "Visibilidad reducida. Usá luces bajas y reducí la velocidad."
+      }
+    },
+    "SNOW": {
+      "WARNING": {
+        "titulo": "Nevadas",
+        "detalle": "Calzadas resbaladizas. Evitá viajes innecesarios."
+      }
+    }
+  },
+  "ciudadano": {
+    "kicker": "AEGIS URBAN · CIUDADANO",
+    "titulo": "Clima y zonas de riesgo",
+    "panelGestion": "Panel de gestión",
+    "salir": "Cerrar sesión",
+    "ingresar": "Ingresar",
+    "crearCuenta": "Crear cuenta",
+    "sinVerificar": {
+      "titulo": "PERFIL SIN VERIFICAR",
+      "texto": "Confirmá los códigos de tu correo y tu celular para completar tu cuenta.",
+      "enlace": "Verificar ahora"
+    },
+    "estado": {
+      "peligro": "ZONA PELIGROSA",
+      "precaucion": "PRECAUCIÓN",
+      "seguro": "SEGURO"
+    },
+    "mensajeSeguro": "No hay zonas de peligro cerca de tu ubicación.",
+    "mensajePeligro": "⚠ Estás en una zona peligrosa ({{zona}}, {{tipo}}). Alejate hacia el {{direccion}}.",
+    "mensajePrecaucionDentro": "Precaución: hay una alerta en {{zona}}. Evitá la zona y alejate hacia el {{direccion}}.",
+    "mensajePrecaucionCerca": "Precaución: estás a {{metros}} m de una zona de riesgo ({{zona}}). No te acerques.",
+    "consent": {
+      "titulo": "¿Querés que te avisemos si estás cerca de una zona de peligro?",
+      "p1": "Usaremos la ubicación de tu dispositivo solo mientras la aplicación esté abierta, para avisarte si estás cerca de una zona de peligro.",
+      "p2": "Tus coordenadas exactas no se guardan ni se asocian a tu cuenta.",
+      "p3": "Podés revocar este permiso cuando quieras.",
+      "legal": "Al permitirlo aceptás el uso de tu ubicación según la <1>Política de Privacidad</1> (Ley 25.326).",
+      "permitir": "Permitir ubicación",
+      "ahoraNo": "Ahora no"
+    },
+    "clima": {
+      "titulo": "Clima ahora",
+      "real": "REAL · Open-Meteo",
+      "sensacion": "Sensación",
+      "viento": "Viento",
+      "rafagas": "Ráfagas",
+      "lluvia": "Lluvia",
+      "aire": "Aire (AQI)",
+      "cargando": "Cargando clima…",
+      "noDisponible": "El servicio de clima no está disponible por el momento.",
+      "ubicacion": "Ubicación: {{donde}}",
+      "dondePrueba": "modo prueba ({{etiqueta}})",
+      "dondeDispositivo": "tu dispositivo",
+      "dondeDefecto": "Buenos Aires (por defecto)"
+    },
+    "ubicacion": {
+      "titulo": "Mi ubicación",
+      "gps": "Estado del GPS",
+      "estados": {
+        "inactivo": "inactivo",
+        "buscando": "buscando señal…",
+        "activo": "activo",
+        "denegado": "bloqueado por el navegador",
+        "noSoportado": "no soportado",
+        "error": "sin señal"
+      },
+      "ayudaBloqueo": "Habilitá la ubicación en la configuración del navegador (candado junto a la dirección).",
+      "revocar": "Revocar permiso de ubicación",
+      "noComparte": "No estás compartiendo tu ubicación.",
+      "permitir": "Permitir ubicación",
+      "responder": "Respondé la pregunta de arriba para activar los avisos por ubicación.",
+      "notif": "Activar notificaciones del navegador",
+      "notifOn": "Notificaciones activadas ✓",
+      "sinSoporte": "Tu navegador no soporta notificaciones.",
+      "activadas": "Notificaciones activadas.",
+      "denegadas": "No se activaron las notificaciones (permiso denegado)."
+    },
+    "mapa": {
+      "titulo": "Mapa de zonas de riesgo",
+      "zonas": "{{n}} zona(s) activa(s)",
+      "vos": "Vos"
+    },
+    "avisos": {
+      "titulo": "Avisos",
+      "resumen": "{{total}} en total · {{criticos}} críticos",
+      "vacio": "Sin avisos por el momento. ¡Todo tranquilo!",
+      "real": "REAL",
+      "simulado": "SIMULADO",
+      "enZona": "{{tipo}} en {{zona}}",
+      "detalleSimulado": "Alerta detectada por sensores de la ciudad."
+    },
+    "prueba": {
+      "titulo": "Modo prueba",
+      "salir": "Salir del modo prueba",
+      "descripcion": "Simulá tu posición respecto de una zona de riesgo para ver el cartel de peligro sin moverte. Se crean zonas iniciando un escenario desde el panel de Simulación.",
+      "sinZonas": "No hay zonas de riesgo activas ahora.",
+      "dentro": "Dentro",
+      "cerca": "Cerca",
+      "lejos": "Lejos",
+      "etiquetas": {
+        "dentro": "dentro de {{zona}}",
+        "cerca": "cerca de {{zona}}",
+        "lejos": "lejos de {{zona}}"
+      }
+    },
+    "misDatos": {
+      "titulo": "Mis datos",
+      "cuenta": "Cuenta:",
+      "verificado": "perfil verificado ✓",
+      "sinVerificar": "perfil sin verificar",
+      "verificar": "verificar",
+      "descargar": "Descargar mis datos",
+      "baja": "Dar de baja mi cuenta",
+      "confirmarBaja": "¿Dar de baja tu cuenta? Se anonimizarán tus datos personales y no podrás volver a entrar con ella.",
+      "errDescarga": "No se pudieron descargar tus datos.",
+      "errBaja": "No se pudo dar de baja la cuenta."
+    },
+    "pie": {
+      "terminos": "Términos y Condiciones",
+      "privacidad": "Política de Privacidad",
+      "orientativo": "Información orientativa. En una emergencia llamá al 911."
+    }
+  },
+  "peligro": {
+    "titulo": "¡Estás en una zona peligrosa!",
+    "mensaje": "{{tipo}} en <1>{{zona}}</1>. Alejate lo antes posible hacia el <1>{{direccion}}</1>.",
+    "notificacion": "{{tipo}} en {{zona}}: alejate hacia el {{direccion}}.",
+    "distancia": "A {{m}} m del centro de la zona (radio de peligro: {{radio}} m)",
+    "emergencias": "Emergencias: <1>911</1> · Bomberos <1>100</1> · Defensa Civil <1>103</1>",
+    "entendido": "Entendido, me estoy alejando"
+  },
+  "registro": {
+    "titulo": "Crear cuenta",
+    "subtitulo": "Recibí avisos del clima y de zonas de riesgo cerca tuyo. Después vas a verificar tu perfil con un código para tu correo y otro para tu celular.",
+    "usuario": "Usuario",
+    "usuarioPH": "4 a 30 caracteres (letras, números, _ .)",
+    "email": "Email",
+    "emailPH": "tu@email.com",
+    "celular": "Celular",
+    "celularPH": "+54 9 11 2233 4455",
+    "contrasena": "Contraseña",
+    "contrasenaPH": "Mínimo 10 caracteres, con letras y números",
+    "consentimientos": "Consentimientos",
+    "terminos": "Leí y acepto los <1>Términos y Condiciones</1> <2>(obligatorio)</2>",
+    "privacidad": "Leí y acepto la <1>Política de Privacidad</1> y el tratamiento de mis datos según la Ley 25.326 <2>(obligatorio)</2>",
+    "edad": "Soy mayor de {{edad}} años o cuento con autorización de mi madre, padre o tutor/a <1>(obligatorio)</1>",
+    "ubicacion": "Permitir el uso de mi ubicación",
+    "ubicacionDesc": "para avisarme si estoy en una zona peligrosa <1>(opcional)</1>",
+    "ubicacionP1": "Usaremos la ubicación de tu dispositivo solo mientras la aplicación esté abierta, para avisarte si estás cerca de una zona de peligro.",
+    "ubicacionP2": "Tus coordenadas exactas no se guardan ni se asocian a tu cuenta.",
+    "ubicacionP3": "Podés revocar este permiso cuando quieras.",
+    "enviar": "Aceptar y crear cuenta",
+    "enviando": "Creando cuenta…",
+    "yaTengo": "Ya tengo cuenta",
+    "verSinCuenta": "Ver sin cuenta",
+    "errorGenerico": "No se pudo crear la cuenta"
+  },
+  "verificacion": {
+    "kicker": "AEGIS URBAN · VERIFICACIÓN",
+    "titulo": "Verificá tu perfil",
+    "intro": "Confirmá el código de tu correo y el de tu celular para completar tu cuenta.",
+    "simulacionTotal": "<1>Modo simulación:</1> en esta versión no se envía ningún correo ni SMS real. Los códigos aparecen en las bandejas simuladas de abajo, como pasaría con un proveedor de envío.",
+    "simulacionParcial": "<1>Correo real, celular simulado:</1> el código del correo se envía de verdad a tu casilla. En esta versión no se envía ningún SMS real: el código del celular aparece en el SMS simulado de abajo.",
+    "correo": "Correo electrónico",
+    "celular": "Celular",
+    "verificado": "VERIFICADO ✓",
+    "pendiente": "PENDIENTE",
+    "bandejaSim": "📥 Bandeja de entrada (simulada)",
+    "smsSim": "💬 SMS (simulado)",
+    "mensajeCodigo": "Tu código de verificación de AEGIS Urban es <1>{{codigo}}</1>. Vence en 10 minutos.",
+    "sinMensaje": "Todavía no hay un mensaje. Pedí un código nuevo para verlo acá.",
+    "correoReal": "✉ Correo real",
+    "correoRealTexto": "Te enviamos un código a <1>{{destino}}</1>. Puede tardar un minuto; revisá también la carpeta de spam.",
+    "codigo": "Código de 6 dígitos",
+    "confirmar": "Confirmar",
+    "reenviar": "Reenviar código",
+    "reenviarEn": "Pedir otro código en {{s}} s",
+    "listo": "¡Perfil verificado!",
+    "listoTexto": "Ya podés usar todas las funciones de tu cuenta.",
+    "irCiudadana": "Ir a la vista ciudadana",
+    "seguirSin": "Seguir sin verificar",
+    "salir": "Cerrar sesión",
+    "reintentar": "Reintentar",
+    "errEstado": "No se pudo consultar el estado de tu perfil",
+    "errConfirmar": "No se pudo confirmar el código",
+    "errReenviar": "No se pudo pedir un código nuevo"
+  },
+  "legalPagina": {
+    "volver": "← Volver al registro",
+    "ciudadana": "Vista ciudadana",
+    "version": "Versión {{version}} · Argentina",
+    "soloEspanol": "Los textos legales están disponibles solo en español.",
+    "base": "Texto base del prototipo: pendiente de revisión legal antes de un uso real con público."
+  },
+  "gestion": {
+    "comun": {
+      "live": "● LIVE",
+      "offline": "○ offline",
+      "enVivo": "EN VIVO",
+      "sinConexion": "SIN CONEXIÓN",
+      "actualizar": "Actualizar",
+      "reintentar": "Reintentar",
+      "cerrar": "Cerrar",
+      "todas": "Todas",
+      "todos": "Todos",
+      "cargando": "Cargando…"
+    },
+    "acciones": {
+      "USER_LOGIN": "Sesión iniciada",
+      "USER_LOGOUT": "Sesión cerrada",
+      "SENSOR_READING_ANOMALY": "Anomalía detectada",
+      "ALERT_CREATED": "Alerta creada",
+      "ALERT_ACKNOWLEDGED": "Alerta reconocida",
+      "ALERT_RESOLVED": "Alerta resuelta",
+      "EVACUATION_INITIATED": "Evacuación iniciada",
+      "USER_REGISTERED": "Usuario registrado",
+      "EMAIL_VERIFIED": "Correo verificado",
+      "PHONE_VERIFIED": "Celular verificado",
+      "BACKUP_CREATED": "Respaldo creado",
+      "BACKUP_RESTORE_DRILL": "Simulacro de restauración",
+      "BACKUP_RESTORED": "Base restaurada",
+      "LOCATION_CONSENT_GRANTED": "Ubicación consentida",
+      "LOCATION_CONSENT_REVOKED": "Ubicación revocada",
+      "USER_DELETED_BY_REQUEST": "Cuenta dada de baja"
+    },
+    "dashboard": {
+      "eyebrow": "CENTRO DE OPERACIONES · BUENOS AIRES",
+      "subtitulo": "Estado de sensores, alertas y actividad de la ciudad.",
+      "salud": "Estado de los servicios",
+      "actualizarDatos": "Actualizar datos",
+      "error": "No se pudieron actualizar los datos. Puede que la API no esté disponible.",
+      "kicker": "SITUACIÓN ACTUAL",
+      "resumen": "Resumen operativo",
+      "actualizado": "Actualizado {{hora}}",
+      "esperando": "Esperando datos",
+      "subSensores": "sensores activos",
+      "subAlertas": "alertas en curso",
+      "subCriticas": "críticas activas",
+      "lecturas": "Lecturas 24h",
+      "subLecturas": "registros de telemetría",
+      "accesos": "Accesos rápidos",
+      "abrirMapa": "Abrir mapa",
+      "abrirMapaSub": "Ver sensores por zona",
+      "gestionar": "Gestionar alertas",
+      "gestionarSub": "Revisar eventos activos",
+      "probar": "Probar escenario",
+      "probarSub": "Simular lecturas de sensores",
+      "actividad": "Actividad Reciente",
+      "eventos": "{{n}} eventos",
+      "vacio": "El motor de simulación genera actividad cada 15 segundos.",
+      "nueva": "⚠ Nueva alerta:"
+    },
+    "alertas": {
+      "titulo": "Alertas",
+      "subtitulo": "Eventos por severidad, zona y estado de atención.",
+      "resumen": {
+        "activas": "Activas",
+        "criticas": "Críticas",
+        "reconocidas": "Reconocidas",
+        "resueltas": "Resueltas"
+      },
+      "filtros": {
+        "todas": "Todas",
+        "activas": "Activas",
+        "reconocidas": "Reconocidas",
+        "resueltas": "Resueltas"
+      },
+      "buscar": "Buscar por sensor, zona o descripción",
+      "buscarAria": "Buscar alertas",
+      "severidad": "Severidad",
+      "severidadAria": "Filtrar por severidad",
+      "zona": "Zona",
+      "desde": "Desde",
+      "hasta": "Hasta",
+      "total": "{{n}} alertas en total",
+      "errorCarga": "No se pudieron cargar las alertas.",
+      "cargando": "Cargando alertas…",
+      "vacio": "Sin alertas en este filtro.",
+      "vacioSub": "El motor de simulación genera lecturas cada 15 segundos.",
+      "niveles": {
+        "WARNING": "ADVERTENCIA",
+        "CRITICAL": "CRÍTICA",
+        "CATASTROPHIC": "CATASTRÓFICA"
+      },
+      "nivelesSel": {
+        "WARNING": "Advertencia",
+        "CRITICAL": "Crítica",
+        "CATASTROPHIC": "Catastrófica"
+      },
+      "estados": {
+        "ACTIVE": "ACTIVA",
+        "ACKNOWLEDGED": "RECONOCIDA",
+        "RESOLVED": "RESUELTA"
+      },
+      "reconocer": "✓ Reconocer",
+      "evacuar": "↗ Iniciar evacuación",
+      "resolver": "✓ Resolver alerta",
+      "errReconocer": "No se pudo reconocer la alerta. Actualizá la lista e intentá de nuevo.",
+      "errEvacuar": "No se pudo generar el plan. Actualizá la lista e intentá de nuevo.",
+      "errResolver": "No se pudo resolver la alerta. Actualizá la lista e intentá de nuevo.",
+      "paginacion": "Paginación",
+      "anterior": "← Anterior",
+      "siguiente": "Siguiente →",
+      "pagina": "Página {{p}} / {{t}}",
+      "plan": {
+        "titulo": "Plan de evacuación",
+        "estrategia": "Estrategia",
+        "zona": "Zona",
+        "sensor": "Sensor",
+        "personas": "Personas estimadas",
+        "radio": "Radio afectado",
+        "metros": "{{n}} m",
+        "centro": "Centro del área",
+        "puntos": "Puntos de encuentro de referencia",
+        "instrucciones": "Instrucciones",
+        "nota": "Plan iniciado para la alerta #{{id}}. La alerta permanece reconocida hasta que un operador la resuelva.",
+        "supuesto": "Las personas estimadas usan 5.000 hab/km² como densidad de referencia: es un supuesto, no un dato del censo.",
+        "estrategias": {
+          "ZONAL": "Evacuación zonal",
+          "MASIVA": "Evacuación masiva",
+          "REFUGIO_IN_SITU": "Refugio en el lugar"
+        },
+        "pasos": {
+          "ZONAL": [
+            "Acordonar el perímetro de {{radio}} m alrededor del sensor #{{sensor}}",
+            "Evacuar los edificios dentro del radio",
+            "Dirigirse al punto de encuentro más cercano",
+            "Respetar la señalización y al personal de Defensa Civil"
+          ],
+          "MASIVA": [
+            "Evacuar de inmediato un radio de {{radioKm}} km alrededor del sensor #{{sensor}}",
+            "Usar las rutas de evacuación principales",
+            "Llevar documentos, medicamentos y agua; no usar ascensores",
+            "Seguir las instrucciones de Defensa Civil y Bomberos"
+          ],
+          "REFUGIO_IN_SITU": [
+            "Permanecer en interiores y cerrar puertas y ventanas",
+            "Alejarse de las ventanas",
+            "Sintonizar la radio de emergencia",
+            "No salir hasta recibir una nueva instrucción de Defensa Civil"
+          ]
+        }
+      }
+    },
+    "sensores": {
+      "titulo": "Sensores",
+      "subtitulo": "Red de sensores IoT — datos en tiempo real vía WebSocket",
+      "errCarga": "No se pudieron cargar los sensores.",
+      "errLectura": "No se pudo registrar la lectura simulada.",
+      "resumen": {
+        "normales": "Normales",
+        "advertencia": "Advertencia",
+        "criticos": "Críticos",
+        "total": "Total"
+      },
+      "tabla": {
+        "tipo": "Tipo",
+        "serial": "Serial",
+        "distrito": "Distrito",
+        "estado": "Estado",
+        "ultima": "Última Lectura",
+        "acciones": "Acciones"
+      },
+      "cargando": "Cargando sensores…",
+      "vacio": "No hay sensores para este filtro.",
+      "sinDatos": "SIN DATOS",
+      "sinLecturas": "Sin lecturas",
+      "sinHora": "Hora no disponible",
+      "simular": "⚡ Simular",
+      "forzar": "Forzar lectura simulada",
+      "soloRoles": "Sólo roles autorizados",
+      "real": "Sensor real"
+    },
+    "simulacion": {
+      "titulo": "Motor de Simulación",
+      "subtitulo": "Mocking Engine — genera telemetría sintética para todos los sensores simulados",
+      "errLista": "No se pudo cargar la lista de sensores.",
+      "errIniciar": "No se pudo iniciar el escenario. Seleccioná sensores simulados y revisá los parámetros.",
+      "errDetener": "No se pudo detener el escenario.",
+      "errSimular": "No se pudo simular este sensor. Confirmá que esté habilitado para ejercicios.",
+      "errVarios": "{{n}} sensor(es) no pudieron simularse. Revisá su configuración y permisos.",
+      "escenarios": "Escenarios configurables",
+      "nombre": "Nombre",
+      "nombreDefecto": "Ejercicio urbano",
+      "sensoresSim": "Sensores simulados",
+      "ayudaMultiple": "En computadora: Ctrl/Cmd + clic para elegir varios.",
+      "intensidad": "Intensidad",
+      "intensidades": {
+        "NORMAL": "Normal",
+        "WARNING": "Advertencia",
+        "CRITICAL": "Crítica"
+      },
+      "intervalo": "Intervalo (seg.)",
+      "duracion": "Duración (min.)",
+      "crear": "Crear e iniciar escenario",
+      "iniciando": "Iniciando…",
+      "detener": "Detener",
+      "min": "min",
+      "motorActivo": "Motor activo",
+      "ciclo": "ciclo #{{n}}",
+      "proximo": "{{s}}s hasta próximo ciclo",
+      "simularTodos": "⚡ Simular todos los sensores ahora",
+      "simulandoTodos": "Simulando todos…",
+      "sensoresTitulo": "Sensores simulados",
+      "tabla": {
+        "tipo": "Tipo",
+        "serial": "Serial",
+        "ultimo": "Último valor"
+      },
+      "log": "Log de simulaciones",
+      "logVacio": "Presioná ▶ en un sensor o «Simular todos» para ver resultados aquí.",
+      "sensorN": "Sensor #{{id}}",
+      "estrategiasTitulo": "Patrón Strategy — Estrategias de evacuación",
+      "estrategiasDesc": "El contexto de evacuación selecciona automáticamente la estrategia según el nivel y el tipo de alerta. Cada clase implementa la misma interfaz.",
+      "nivel": "Nivel: {{v}}",
+      "personas": "Personas: {{v}}",
+      "radio": "Radio: {{v}}",
+      "estr": {
+        "zonal": {
+          "nivel": "WARNING / CRITICAL",
+          "personas": "≈ 3.900",
+          "radio": "500 m (750 m en incendios)",
+          "desc": "Evacúa solo la zona alrededor del sensor afectado, centrada en su ubicación real. Minimiza el impacto en el resto de la ciudad.",
+          "pasos": [
+            "Acordonar el perímetro",
+            "Evacuar los edificios del radio",
+            "Activar refugios cercanos",
+            "Notificar a los equipos de respuesta"
+          ]
+        },
+        "masiva": {
+          "nivel": "CRITICAL / CATASTROPHIC",
+          "personas": "≈ 62.800",
+          "radio": "2 km (3 km en incendios)",
+          "desc": "Evacuación de un área amplia. Se activa cuando la crisis supera la capacidad zonal y requiere coordinación entre barrios.",
+          "pasos": [
+            "Activar el protocolo de ciudad completa",
+            "Coordinar el transporte público",
+            "Abrir todos los refugios del área",
+            "Activar la cadena de mando municipal"
+          ]
+        },
+        "refugio": {
+          "nivel": "viento, aire, energía",
+          "personas": "0 (en el lugar)",
+          "radio": "1 km",
+          "desc": "Refugio en el lugar. Para viento, calidad del aire o cortes de energía: las personas permanecen en interiores con las ventanas cerradas.",
+          "pasos": [
+            "Cerrar ventanas y puertas",
+            "Apagar la ventilación",
+            "Esperar instrucciones oficiales",
+            "Monitorear los valores cada 5 min"
+          ]
+        }
+      }
+    },
+    "admin": {
+      "titulo": "Administración",
+      "subtitulo": "Gestión de usuarios, familias, integridad DVH/DVV y respaldos",
+      "verificar": "🔐 Verificar Integridad",
+      "verificando": "Verificando…",
+      "tabs": {
+        "usuarios": "Usuarios",
+        "familias": "Familias",
+        "bitacora": "Bitácora",
+        "integridad": "Integridad DVH/DVV",
+        "respaldos": "Respaldos"
+      },
+      "errCarga": "No se pudieron cargar estos datos. Revisá la conexión o tus permisos e intentá de nuevo.",
+      "errVerificar": "No se pudo verificar la bitácora. Revisá la conexión o tus permisos e intentá de nuevo.",
+      "usuarios": {
+        "id": "ID",
+        "usuario": "Usuario",
+        "email": "Email",
+        "familia": "Familia",
+        "estado": "Estado",
+        "ultimo": "Último acceso",
+        "activo": "Activo",
+        "inactivo": "Inactivo"
+      },
+      "familias": {
+        "id": "ID",
+        "nombre": "Nombre",
+        "descripcion": "Descripción",
+        "usuarios": "Usuarios",
+        "creada": "Creada"
+      },
+      "bitacora": {
+        "log": "#Log",
+        "accion": "Acción",
+        "entidad": "Entidad",
+        "id": "ID",
+        "ip": "IP",
+        "fecha": "Fecha"
+      },
+      "integridad": {
+        "vacio1": "Hacé clic en <1>«Verificar Integridad»</1> para recalcular DVH + DVV de todos los registros de la bitácora.",
+        "vacio2": "El sistema recorre cada fila de la bitácora, recalcula el hash individual (DVH) y el hash encadenado (DVV), y compara con los valores almacenados. Cualquier fila alterada queda identificada.",
+        "valida": "Integridad VÁLIDA",
+        "comprometida": "Integridad COMPROMETIDA",
+        "filas": "{{n}} filas analizadas",
+        "filaComp": " — fila #{{f}} comprometida",
+        "sinAlt": " — sin alteraciones detectadas",
+        "totalFilas": "Total de filas",
+        "resultado": "Resultado",
+        "filaCorrupta": "Fila corrupta",
+        "explicacion": "Cada fila tiene un <1>DVH</1> (hash SHA-256 de sus propios campos) y un <1>DVV</1> (hash encadenado que incluye el DVV de la fila anterior). Si cualquier campo de una fila es alterado, el DVH cambia y rompe toda la cadena DVV a partir de esa fila.",
+        "inmutable": "Además, la bitácora es inmutable: un disparador de la base de datos rechaza UPDATE, DELETE y TRUNCATE, incluso para el superusuario."
+      }
+    },
+    "respaldos": {
+      "titulo": "Respaldos de la base de datos",
+      "automatico": "Automático: <1>{{valor}}</1> · se conservan los últimos {{n}} · modo {{modo}}",
+      "cada24": "sí, cada 24 h",
+      "no": "no",
+      "crear": "Crear respaldo ahora",
+      "creando": "Creando…",
+      "creado": "Respaldo creado: {{archivo}} ({{tam}})",
+      "vacio": "Todavía no hay respaldos.",
+      "tabla": {
+        "archivo": "Archivo",
+        "creado": "Creado",
+        "tamano": "Tamaño",
+        "bitacora": "Bitácora al respaldar",
+        "acciones": "Acciones"
+      },
+      "integra": "íntegra · {{n}} filas",
+      "sinDatos": "sin datos",
+      "simulacro": "Simulacro",
+      "probando": "Probando…",
+      "restaurar": "Restaurar…",
+      "resultado": {
+        "aprobado": "APROBADO",
+        "problemas": "CON PROBLEMAS",
+        "archivoIntegro": "archivo íntegro",
+        "archivoAlterado": "archivo ALTERADO",
+        "bitacora": "Bitácora DVH/DVV: {{motivo}}",
+        "nota": "Se restauró en una base temporal que ya se eliminó: la base en uso no se tocó.",
+        "titulo": "Simulacro de restauración: {{estado}}"
+      },
+      "confirmar": "Vas a REEMPLAZAR los datos actuales con el respaldo {{archivo}}.\nSe crea antes un respaldo de seguridad.\n\nEscribí RESTAURAR para confirmar:",
+      "restaurado": "Restauración completa desde {{archivo}}.",
+      "errLista": "No se pudo cargar la lista de respaldos",
+      "errOperacion": "La operación falló"
+    }
+  },
+  "ayuda": {
+    "titulo": "Ayuda",
+    "subtitulo": "Cómo usar AEGIS Urban según tu rol",
+    "abrir": "Ayuda",
+    "cerrar": "Cerrar ayuda",
+    "mas": "Más información",
+    "emergencias": {
+      "titulo": "En una emergencia real",
+      "texto": "AEGIS Urban es un prototipo y no reemplaza a los organismos oficiales. Llamá al 911 (policía), 100 (bomberos) o 103 (Defensa Civil)."
+    },
+    "rolesTitulo": "Primeros pasos según tu rol",
+    "roles": {
+      "ciudadano": {
+        "titulo": "Ciudadanía",
+        "pasos": [
+          "Abrí «Ver como ciudadano» en la pantalla de ingreso: no hace falta cuenta.",
+          "Mirá el clima actual y los avisos. Cada aviso dice si es REAL (clima) o SIMULADO (sensores de demostración).",
+          "Si querés alertas por ubicación, tocá «Permitir ubicación». Podés revocarlo cuando quieras.",
+          "Si estás dentro de una zona de peligro vas a ver un cartel rojo que indica hacia dónde alejarte.",
+          "Para tener cuenta: «Crear cuenta», aceptá los términos y verificá tu correo y tu celular con los códigos."
+        ]
+      },
+      "operador": {
+        "titulo": "Operación y tránsito",
+        "pasos": [
+          "Ingresá con tu usuario y contraseña.",
+          "En el Panel mirá el resumen de sensores y alertas.",
+          "En el Mapa ubicá los sensores por zona.",
+          "En Alertas filtrá por severidad, zona o fecha para encontrar lo que necesitás."
+        ]
+      },
+      "defensa": {
+        "titulo": "Defensa Civil",
+        "pasos": [
+          "Reconocé la alerta antes de iniciar una evacuación.",
+          "Iniciá la evacuación: el sistema elige la estrategia según la severidad y el tipo, y centra el plan en el sensor.",
+          "En Simulación creá ejercicios con sensores simulados y detenelos cuando quieras.",
+          "Resolvé la alerta cuando termina la emergencia."
+        ]
+      },
+      "auditoria": {
+        "titulo": "Auditoría",
+        "pasos": [
+          "Entrá a Administración → Bitácora para ver las acciones registradas.",
+          "Usá «Verificar Integridad» para recalcular DVH y DVV.",
+          "Tu acceso es de solo lectura: no podés cambiar el estado de las alertas."
+        ]
+      },
+      "admin": {
+        "titulo": "Administración",
+        "pasos": [
+          "Usuarios y Familias: revisá quién tiene acceso y con qué rol.",
+          "Respaldos: creá un respaldo y probá el simulacro de restauración con regularidad.",
+          "Restaurar reemplaza los datos actuales: pide una confirmación escrita y antes crea un respaldo de seguridad.",
+          "Los respaldos automáticos se hacen cada 24 h y se conservan los últimos 7."
+        ]
+      }
+    },
+    "faqTitulo": "Preguntas frecuentes",
+    "faq": [
+      {
+        "p": "¿Qué significa REAL y SIMULADO?",
+        "r": "REAL es un dato de una fuente externa (el clima de Open-Meteo). SIMULADO lo generan los sensores virtuales de demostración. Las simulaciones no son alertas oficiales."
+      },
+      {
+        "p": "¿Cómo funciona la alerta por ubicación?",
+        "r": "Con tu permiso, el navegador envía tu posición solo para calcular la distancia a cada zona de riesgo. No se guarda."
+      },
+      {
+        "p": "¿Por qué me piden verificar mi perfil?",
+        "r": "Para confirmar que el correo y el celular son tuyos: recibís un código de 6 dígitos en cada uno. En esta versión el SMS es simulado: el código aparece en pantalla."
+      },
+      {
+        "p": "No me llegó el código",
+        "r": "Revisá la carpeta de spam y esperá 30 segundos para pedir otro. Cada código vence a los 10 minutos y permite 5 intentos."
+      },
+      {
+        "p": "¿Cómo cambio el idioma?",
+        "r": "Con el selector ES / EN. Tu elección se recuerda en este navegador."
+      },
+      {
+        "p": "¿Qué son DVH y DVV?",
+        "r": "Son huellas (hash) de cada fila de la bitácora: el DVH protege cada fila y el DVV las encadena. Si alguien altera la bitácora, el sistema lo detecta."
+      },
+      {
+        "p": "¿Cómo hago un respaldo?",
+        "r": "Administración → Respaldos → «Crear respaldo ahora». Además se hace uno automático cada 24 h."
+      },
+      {
+        "p": "¿Cómo descargo mis datos o elimino mi cuenta?",
+        "r": "En la vista ciudadana, sección «Mis datos»: «Descargar mis datos» y «Dar de baja mi cuenta»."
+      }
+    ],
+    "glosarioTitulo": "Glosario",
+    "glosario": [
+      {
+        "t": "Zona de riesgo",
+        "d": "Área circular alrededor de un sensor con una alerta vigente; su radio crece con la gravedad."
+      },
+      {
+        "t": "Familia y patente",
+        "d": "Una patente es un permiso puntual; una familia agrupa patentes (es un rol)."
+      },
+      {
+        "t": "Estrategia de evacuación",
+        "d": "Forma de calcular el plan: zonal, masiva o refugio en el lugar."
+      },
+      {
+        "t": "Escenario",
+        "d": "Ejercicio de simulación con sensores, intensidad y duración elegidos."
+      }
+    ],
+    "tooltips": {
+      "modoPrueba": "Simula tu posición respecto de una zona para ver el cartel de peligro sin moverte.",
+      "respaldos": "El simulacro restaura el respaldo en una base temporal y verifica la integridad, sin tocar la base en uso.",
+      "evacuar": "El plan se centra en la ubicación real del sensor. La estrategia depende de la severidad y del tipo de alerta."
+    },
+    "ayudaContextual": "Ayuda sobre este tema"
   }
 }

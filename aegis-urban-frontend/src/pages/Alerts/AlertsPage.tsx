@@ -1,8 +1,11 @@
 import { useEffect, useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
+import HelpTooltip from "../../components/HelpTooltip/HelpTooltip";
 import Sidebar from "../../components/Layout/Sidebar";
 import { useWebSocket } from "../../hooks/useWebSocket";
 import api from "../../services/api";
-import { useAuthStore } from "../../store/authStore";
+import { conCache } from "../../services/cache";
+import { usePatente } from "../../store/authStore";
 import styles from "./AlertsPage.module.css";
 
 interface Alerta {
@@ -23,19 +26,23 @@ interface Alerta {
 interface Zona { id_node: number; name: string; node_type: string }
 interface Paginacion { page: number; pageSize: number; total: number; totalPages: number }
 
+/** Plan tal como lo devuelve POST /alertas/:id/evacuar. */
 interface PlanEvacuacion {
-  nombreEstrategia:   string;
-  descripcion:        string;
+  estrategiaUsada:    string;
   personasEstimadas:  number;
-  instrucciones:      string[];
-  tiempoEstimadoMin:  number;
-  radioMetros:        number | null;
+  instrucciones:      string;
+  radioMetros:        number;
+  zona:               string;
+  idSensor:           number;
+  tipoAlerta:         string;
+  centro:             { lat: number; lon: number };
+  puntosEncuentro:    { nombre: string; lat: number; lon: number }[];
 }
 
-const NIVEL_CONFIG: Record<string, { label: string; cls: string }> = {
-  WARNING:      { label: "ADVERTENCIA", cls: "medium" },
-  CRITICAL:     { label: "CRÍTICA", cls: "high" },
-  CATASTROPHIC: { label: "CATASTRÓFICA", cls: "critical" },
+const NIVEL_CONFIG: Record<string, { cls: string }> = {
+  WARNING:      { cls: "medium" },
+  CRITICAL:     { cls: "high" },
+  CATASTROPHIC: { cls: "critical" },
 };
 
 const TIPO_ICON: Record<string, string> = {
@@ -43,9 +50,10 @@ const TIPO_ICON: Record<string, string> = {
 };
 
 export default function AlertsPage() {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.resolvedLanguage?.startsWith("en") ? "en-GB" : "es-AR";
   const { conectado, ultimaAlerta } = useWebSocket();
-  const familia = useAuthStore(s => s.usuario?.familia);
-  const puedeOperar = familia === "ADMIN_SISTEMA" || familia === "DEFENSA_CIVIL";
+  const puedeOperar = usePatente("ALERT_ACKNOWLEDGE");
   const [alertas, setAlertas]       = useState<Alerta[]>([]);
   const [cargando, setCargando]     = useState(true);
   const [errorCarga, setErrorCarga] = useState(false);
@@ -78,7 +86,7 @@ export default function AlertsPage() {
     }
   }, [pagina.page, pagina.pageSize, zonaId, desde, hasta, filtro, filtroNivel, busqueda]);
 
-  useEffect(() => { void api.get<{ zonas: Zona[] }>("/alertas/zonas").then(r => setZonas(r.data.zonas)).catch(() => undefined); }, []);
+  useEffect(() => { void conCache("alertas:zonas", 5 * 60_000, () => api.get<{ zonas: Zona[] }>("/alertas/zonas").then(r => r.data.zonas)).then(setZonas).catch(() => undefined); }, []);
   useEffect(() => { cargarAlertas(); }, [cargarAlertas]);
   useEffect(() => { if (ultimaAlerta) cargarAlertas(); }, [ultimaAlerta, cargarAlertas]);
 
@@ -91,7 +99,7 @@ export default function AlertsPage() {
         a.id_alert === id ? { ...a, status: "ACKNOWLEDGED" } : a
       ));
     } catch {
-      setErrorAccion("No se pudo reconocer la alerta. Actualizá la lista e intentá de nuevo.");
+      setErrorAccion(t("gestion.alertas.errReconocer"));
     } finally {
       setAccionando(null);
     }
@@ -105,7 +113,7 @@ export default function AlertsPage() {
       setPlan(res.data.plan);
       setPlanAlertaId(id);
     } catch {
-      setErrorAccion("No se pudo generar el plan. Actualizá la lista e intentá de nuevo.");
+      setErrorAccion(t("gestion.alertas.errEvacuar"));
     } finally {
       setAccionando(null);
     }
@@ -118,7 +126,7 @@ export default function AlertsPage() {
       await api.patch(`/alertas/${id}/resolver`);
       setAlertas(prev => prev.map(a => a.id_alert === id ? { ...a, status: "RESOLVED" } : a));
     } catch {
-      setErrorAccion("No se pudo resolver la alerta. Actualizá la lista e intentá de nuevo.");
+      setErrorAccion(t("gestion.alertas.errResolver"));
     } finally {
       setAccionando(null);
     }
@@ -140,14 +148,14 @@ export default function AlertsPage() {
       <main className={styles.main}>
         <header className={styles.topbar}>
           <div>
-            <h1 className={styles.pageTitle}>Alertas</h1>
-            <p className={styles.subtitle}>Eventos por severidad, zona y estado de atención.</p>
+            <h1 className={styles.pageTitle}>{t("gestion.alertas.titulo")}<HelpTooltip texto={t("ayuda.tooltips.evacuar")} /></h1>
+            <p className={styles.subtitle}>{t("gestion.alertas.subtitulo")}</p>
           </div>
           <div className={styles.topbarRight}>
             <span className={`${styles.wsBadge} ${conectado ? styles.wsOn : styles.wsOff}`}>
-              {conectado ? "● LIVE" : "○ offline"}
+              {conectado ? t("gestion.comun.live") : t("gestion.comun.offline")}
             </span>
-            <button onClick={cargarAlertas} className={styles.refreshBtn} title="Actualizar">↻</button>
+            <button onClick={cargarAlertas} className={styles.refreshBtn} title={t("gestion.comun.actualizar")}>↻</button>
           </div>
         </header>
 
@@ -155,19 +163,19 @@ export default function AlertsPage() {
         <div className={styles.resumenGrid}>
           <div className={`${styles.resumenCard} ${styles["resumenCard--danger"]}`}>
             <span className={styles.resumenVal}>{conteo.active}</span>
-            <span className={styles.resumenLabel}>Activas</span>
+            <span className={styles.resumenLabel}>{t("gestion.alertas.resumen.activas")}</span>
           </div>
           <div className={`${styles.resumenCard} ${styles["resumenCard--critical"]}`}>
             <span className={styles.resumenVal}>{conteo.critical}</span>
-            <span className={styles.resumenLabel}>Críticas</span>
+            <span className={styles.resumenLabel}>{t("gestion.alertas.resumen.criticas")}</span>
           </div>
           <div className={`${styles.resumenCard} ${styles["resumenCard--warning"]}`}>
             <span className={styles.resumenVal}>{conteo.acknowledged}</span>
-            <span className={styles.resumenLabel}>Reconocidas</span>
+            <span className={styles.resumenLabel}>{t("gestion.alertas.resumen.reconocidas")}</span>
           </div>
           <div className={`${styles.resumenCard} ${styles["resumenCard--ok"]}`}>
             <span className={styles.resumenVal}>{conteo.resolved}</span>
-            <span className={styles.resumenLabel}>Resueltas</span>
+            <span className={styles.resumenLabel}>{t("gestion.alertas.resumen.resueltas")}</span>
           </div>
         </div>
 
@@ -180,7 +188,7 @@ export default function AlertsPage() {
               onClick={() => cambiarFiltro(() => setFiltro(f))}
               className={`${styles.filtroBtn} ${filtro === f ? styles.filtroBtnActive : ""}`}
             >
-              {f === "TODOS" ? "Todas" : f === "ACTIVE" ? "Activas" : f === "ACKNOWLEDGED" ? "Reconocidas" : "Resueltas"}
+              {f === "TODOS" ? t("gestion.alertas.filtros.todas") : f === "ACTIVE" ? t("gestion.alertas.filtros.activas") : f === "ACKNOWLEDGED" ? t("gestion.alertas.filtros.reconocidas") : t("gestion.alertas.filtros.resueltas")}
             </button>
           ))}
         </div>
@@ -192,44 +200,44 @@ export default function AlertsPage() {
               type="search"
               value={busqueda}
               onChange={e => cambiarFiltro(() => setBusqueda(e.target.value))}
-              placeholder="Buscar por sensor, zona o descripción"
-              aria-label="Buscar alertas"
+              placeholder={t("gestion.alertas.buscar")}
+              aria-label={t("gestion.alertas.buscarAria")}
             />
           </label>
           <label className={styles.nivelSelectWrap}>
-            <span>Severidad</span>
-            <select value={filtroNivel} onChange={e => cambiarFiltro(() => setFiltroNivel(e.target.value))} aria-label="Filtrar por severidad">
-              <option value="TODOS">Todas</option>
-              <option value="WARNING">Advertencia</option>
-              <option value="CRITICAL">Crítica</option>
-              <option value="CATASTROPHIC">Catastrófica</option>
+            <span>{t("gestion.alertas.severidad")}</span>
+            <select value={filtroNivel} onChange={e => cambiarFiltro(() => setFiltroNivel(e.target.value))} aria-label={t("gestion.alertas.severidadAria")}>
+              <option value="TODOS">{t("gestion.comun.todas")}</option>
+              <option value="WARNING">{t("gestion.alertas.nivelesSel.WARNING")}</option>
+              <option value="CRITICAL">{t("gestion.alertas.nivelesSel.CRITICAL")}</option>
+              <option value="CATASTROPHIC">{t("gestion.alertas.nivelesSel.CATASTROPHIC")}</option>
             </select>
           </label>
-          <label className={styles.nivelSelectWrap}><span>Zona</span><select value={zonaId} onChange={e => cambiarFiltro(() => setZonaId(e.target.value))}>
-            <option value="">Todas</option>{zonas.map(z => <option key={z.id_node} value={z.id_node}>{z.name} · {z.node_type}</option>)}
+          <label className={styles.nivelSelectWrap}><span>{t("gestion.alertas.zona")}</span><select value={zonaId} onChange={e => cambiarFiltro(() => setZonaId(e.target.value))}>
+            <option value="">{t("gestion.comun.todas")}</option>{zonas.map(z => <option key={z.id_node} value={z.id_node}>{z.name} · {z.node_type}</option>)}
           </select></label>
-          <label className={styles.nivelSelectWrap}><span>Desde</span><input type="date" value={desde} onChange={e => cambiarFiltro(() => setDesde(e.target.value))}/></label>
-          <label className={styles.nivelSelectWrap}><span>Hasta</span><input type="date" value={hasta} onChange={e => cambiarFiltro(() => setHasta(e.target.value))}/></label>
-          <span className={styles.resultadosFiltro}>{pagina.total} alertas en total</span>
+          <label className={styles.nivelSelectWrap}><span>{t("gestion.alertas.desde")}</span><input type="date" value={desde} onChange={e => cambiarFiltro(() => setDesde(e.target.value))}/></label>
+          <label className={styles.nivelSelectWrap}><span>{t("gestion.alertas.hasta")}</span><input type="date" value={hasta} onChange={e => cambiarFiltro(() => setHasta(e.target.value))}/></label>
+          <span className={styles.resultadosFiltro}>{t("gestion.alertas.total", { n: pagina.total })}</span>
         </div>
 
         {/* Lista de alertas */}
         <div className={styles.alertasList}>
           {errorCarga && alertas.length === 0 ? (
             <div className={styles.empty}>
-              <p>No se pudieron cargar las alertas.</p>
-              <button className={styles.filtroBtn} onClick={cargarAlertas}>Reintentar</button>
+              <p>{t("gestion.alertas.errorCarga")}</p>
+              <button className={styles.filtroBtn} onClick={cargarAlertas}>{t("gestion.comun.reintentar")}</button>
             </div>
           ) : cargando ? (
-            <div className={styles.empty}>Cargando alertas…</div>
+            <div className={styles.empty}>{t("gestion.alertas.cargando")}</div>
           ) : filtradas.length === 0 ? (
             <div className={styles.empty}>
-              <p>Sin alertas en este filtro.</p>
-              <small>El motor de simulación genera lecturas cada 15 segundos.</small>
+              <p>{t("gestion.alertas.vacio")}</p>
+              <small>{t("gestion.alertas.vacioSub")}</small>
             </div>
           ) : (
             filtradas.map(a => {
-              const nivel = NIVEL_CONFIG[a.level] ?? { label: a.level, cls: "info" };
+              const nivel = { label: t(`gestion.alertas.niveles.${a.level}`, { defaultValue: a.level }), cls: NIVEL_CONFIG[a.level]?.cls ?? "info" };
               return (
                 <div key={a.id_alert} className={`${styles.alertaCard} ${styles[`alertaCard--${nivel.cls}`]}`}>
                   <div className={styles.alertaHeader}>
@@ -238,16 +246,16 @@ export default function AlertsPage() {
                         {nivel.label}
                       </span>
                       <span className={styles.alertaTipo}>
-                        {TIPO_ICON[a.sensor_type] ?? "📡"} {a.alert_type}
+                        {TIPO_ICON[a.sensor_type] ?? "📡"} {t(`tipos.${a.alert_type}`, { defaultValue: a.alert_type })}
                       </span>
                       <span className={styles.alertaDistrito}>{a.city_node_name}</span>
                     </div>
                     <div className={styles.alertaHeaderRight}>
                       <span className={`${styles.statusBadge} ${styles[`statusBadge--${a.status.toLowerCase()}`]}`}>
-                        {a.status === "ACTIVE" ? "ACTIVA" : a.status === "ACKNOWLEDGED" ? "RECONOCIDA" : "RESUELTA"}
+                        {t(`gestion.alertas.estados.${a.status}`, { defaultValue: a.status })}
                       </span>
                       <span className={styles.alertaTime}>
-                        {new Date(a.created_at).toLocaleString("es-AR", { dateStyle: "short", timeStyle: "short" })}
+                        {new Date(a.created_at).toLocaleString(locale, { dateStyle: "short", timeStyle: "short" })}
                       </span>
                     </div>
                   </div>
@@ -261,21 +269,21 @@ export default function AlertsPage() {
                           onClick={() => reconocer(a.id_alert)}
                           disabled={accionando === a.id_alert}
                         >
-                          {accionando === a.id_alert ? "…" : "✓ Reconocer"}
+                          {accionando === a.id_alert ? "…" : t("gestion.alertas.reconocer")}
                         </button>}
                         <button
                           className={styles.btnEvacuar}
                           onClick={() => evacuar(a.id_alert)}
                           disabled={accionando === a.id_alert}
                         >
-                          {accionando === a.id_alert ? "…" : "↗ Iniciar evacuación"}
+                          {accionando === a.id_alert ? "…" : t("gestion.alertas.evacuar")}
                         </button>
                         {a.status === "ACKNOWLEDGED" && <button
                           className={styles.btnReconocer}
                           onClick={() => resolver(a.id_alert)}
                           disabled={accionando === a.id_alert}
                         >
-                          {accionando === a.id_alert ? "…" : "✓ Resolver alerta"}
+                          {accionando === a.id_alert ? "…" : t("gestion.alertas.resolver")}
                         </button>}
                       </div>
                     )}
@@ -286,54 +294,66 @@ export default function AlertsPage() {
           )}
         </div>
 
-        <div className={styles.filtros} aria-label="Paginación">
-          <button className={styles.filtroBtn} disabled={pagina.page <= 1} onClick={() => setPagina(p => ({ ...p, page: p.page - 1 }))}>← Anterior</button>
-          <span className={styles.resultadosFiltro}>Página {pagina.page} / {Math.max(1, pagina.totalPages)}</span>
-          <button className={styles.filtroBtn} disabled={pagina.page >= pagina.totalPages} onClick={() => setPagina(p => ({ ...p, page: p.page + 1 }))}>Siguiente →</button>
+        <div className={styles.filtros} aria-label={t("gestion.alertas.paginacion")}>
+          <button className={styles.filtroBtn} disabled={pagina.page <= 1} onClick={() => setPagina(p => ({ ...p, page: p.page - 1 }))}>{t("gestion.alertas.anterior")}</button>
+          <span className={styles.resultadosFiltro}>{t("gestion.alertas.pagina", { p: pagina.page, t: Math.max(1, pagina.totalPages) })}</span>
+          <button className={styles.filtroBtn} disabled={pagina.page >= pagina.totalPages} onClick={() => setPagina(p => ({ ...p, page: p.page + 1 }))}>{t("gestion.alertas.siguiente")}</button>
         </div>
 
         {/* Modal plan de evacuación */}
-        {plan && (
-          <div className={styles.modalBackdrop} onClick={() => setPlan(null)}>
-            <div className={styles.modal} onClick={e => e.stopPropagation()}>
-              <div className={styles.modalHeader}>
-                <h2 className={styles.modalTitle}>Plan de Evacuación</h2>
-                <button className={styles.modalClose} onClick={() => setPlan(null)}>✕</button>
-              </div>
-              <div className={styles.modalBody}>
-                <div className={styles.planRow}>
-                  <span className={styles.planLabel}>Estrategia</span>
-                  <span className={styles.planVal}>{plan.nombreEstrategia}</span>
+        {plan && (() => {
+          const pasos = t(`gestion.alertas.plan.pasos.${plan.estrategiaUsada}`, {
+            returnObjects: true, radio: plan.radioMetros, radioKm: plan.radioMetros / 1000, sensor: plan.idSensor,
+          }) as unknown;
+          return (
+            <div className={styles.modalBackdrop} onClick={() => setPlan(null)}>
+              <div className={styles.modal} onClick={e => e.stopPropagation()}>
+                <div className={styles.modalHeader}>
+                  <h2 className={styles.modalTitle}>{t("gestion.alertas.plan.titulo")}</h2>
+                  <button className={styles.modalClose} onClick={() => setPlan(null)} aria-label={t("gestion.comun.cerrar")}>✕</button>
                 </div>
-                <div className={styles.planRow}>
-                  <span className={styles.planLabel}>Descripción</span>
-                  <span className={styles.planVal}>{plan.descripcion}</span>
-                </div>
-                <div className={styles.planRow}>
-                  <span className={styles.planLabel}>Personas estimadas</span>
-                  <span className={styles.planVal}>{plan.personasEstimadas.toLocaleString("es-AR")}</span>
-                </div>
-                <div className={styles.planRow}>
-                  <span className={styles.planLabel}>Tiempo estimado</span>
-                  <span className={styles.planVal}>{plan.tiempoEstimadoMin} minutos</span>
-                </div>
-                {plan.radioMetros && (
+                <div className={styles.modalBody}>
                   <div className={styles.planRow}>
-                    <span className={styles.planLabel}>Radio afectado</span>
-                    <span className={styles.planVal}>{plan.radioMetros}m</span>
+                    <span className={styles.planLabel}>{t("gestion.alertas.plan.estrategia")}</span>
+                    <span className={styles.planVal}>{t(`gestion.alertas.plan.estrategias.${plan.estrategiaUsada}`, { defaultValue: plan.estrategiaUsada })}</span>
                   </div>
-                )}
-                <div className={styles.instruccionesTitle}>Instrucciones:</div>
-                <ol className={styles.instrucciones}>
-                  {plan.instrucciones.map((inst, i) => (
-                    <li key={i}>{inst}</li>
-                  ))}
-                </ol>
-                <div className={styles.planAlertaId}>Plan iniciado para la alerta #{planAlertaId}. La alerta permanece reconocida hasta que un operador la resuelva.</div>
+                  <div className={styles.planRow}>
+                    <span className={styles.planLabel}>{t("gestion.alertas.plan.zona")}</span>
+                    <span className={styles.planVal}>{plan.zona}</span>
+                  </div>
+                  <div className={styles.planRow}>
+                    <span className={styles.planLabel}>{t("gestion.alertas.plan.sensor")}</span>
+                    <span className={styles.planVal}>#{plan.idSensor} · {t(`tipos.${plan.tipoAlerta}`, { defaultValue: plan.tipoAlerta })}</span>
+                  </div>
+                  <div className={styles.planRow}>
+                    <span className={styles.planLabel}>{t("gestion.alertas.plan.personas")}</span>
+                    <span className={styles.planVal}>{plan.personasEstimadas.toLocaleString(locale)}</span>
+                  </div>
+                  <div className={styles.planRow}>
+                    <span className={styles.planLabel}>{t("gestion.alertas.plan.radio")}</span>
+                    <span className={styles.planVal}>{t("gestion.alertas.plan.metros", { n: plan.radioMetros })}</span>
+                  </div>
+                  <div className={styles.planRow}>
+                    <span className={styles.planLabel}>{t("gestion.alertas.plan.centro")}</span>
+                    <span className={styles.planVal}>{plan.centro.lat.toFixed(4)}, {plan.centro.lon.toFixed(4)}</span>
+                  </div>
+                  {plan.puntosEncuentro.length > 0 && (
+                    <div className={styles.planRow}>
+                      <span className={styles.planLabel}>{t("gestion.alertas.plan.puntos")}</span>
+                      <span className={styles.planVal}>{plan.puntosEncuentro.map(p => p.nombre).join(", ")}</span>
+                    </div>
+                  )}
+                  <div className={styles.instruccionesTitle}>{t("gestion.alertas.plan.instrucciones")}:</div>
+                  <ol className={styles.instrucciones}>
+                    {(Array.isArray(pasos) ? (pasos as string[]) : [plan.instrucciones]).map((inst, i) => <li key={i}>{inst}</li>)}
+                  </ol>
+                  <div className={styles.planAlertaId}>{t("gestion.alertas.plan.nota", { id: planAlertaId })}</div>
+                  <div className={styles.planAlertaId}>{t("gestion.alertas.plan.supuesto")}</div>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
       </main>
     </div>
   );

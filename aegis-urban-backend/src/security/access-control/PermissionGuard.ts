@@ -95,3 +95,24 @@ async function construirArbolFamilias(idFamilia: number): Promise<FamiliaComposi
 
   return familia;
 }
+
+/**
+ * Códigos de patente efectivos de una familia (propias + heredadas de sus familias padre).
+ * El frontend los usa para mostrar u ocultar botones: la API sigue validando cada petición.
+ */
+export async function patentesDeFamilia(idFamilia: number): Promise<string[]> {
+  const { rows } = await db.consultar<{ codigo: string }>(`
+    WITH RECURSIVE arbol AS (
+      SELECT id_family, id_parent_family FROM family WHERE id_family = $1 AND is_active = TRUE
+      UNION ALL
+      SELECT f.id_family, f.id_parent_family FROM family f
+      INNER JOIN arbol a ON a.id_parent_family = f.id_family WHERE f.is_active = TRUE
+    )
+    SELECT DISTINCT p.code AS codigo
+    FROM patent p
+    INNER JOIN family_patent fp ON fp.id_patent = p.id_patent
+    WHERE fp.id_family IN (SELECT id_family FROM arbol) AND p.is_active = TRUE
+    ORDER BY p.code
+  `, [idFamilia]);
+  return rows.map(r => r.codigo);
+}
