@@ -21,9 +21,9 @@ async function token(usuario: string): Promise<string> {
 // lo que se prueba es que la autorización no bloquee, no el resultado del negocio.
 const ES_403 = (s: number) => s === 403;
 const MATRIZ: Array<{ m: string; ruta: string; quien: string[]; que: string }> = [
-  { m: "GET",   ruta: "/api/sensores",                  quien: ["admin", "operador", "transito", "defensa", "auditor"], que: "ver sensores" },
-  { m: "GET",   ruta: "/api/alertas",                   quien: ["admin", "operador", "transito", "defensa", "auditor"], que: "ver alertas" },
-  { m: "GET",   ruta: "/api/telemetry/estadisticas",    quien: ["admin", "operador", "transito", "defensa", "auditor"], que: "ver el panel" },
+  { m: "GET",   ruta: "/api/sensores",                  quien: ["admin", "transito", "defensa", "auditor"], que: "ver sensores" },
+  { m: "GET",   ruta: "/api/alertas",                   quien: ["admin", "transito", "defensa", "auditor"], que: "ver alertas" },
+  { m: "GET",   ruta: "/api/telemetry/estadisticas",    quien: ["admin", "transito", "defensa", "auditor"], que: "ver el panel" },
   { m: "PATCH", ruta: "/api/alertas/0/reconocer",       quien: ["admin", "defensa"],                                    que: "reconocer alertas" },
   { m: "PATCH", ruta: "/api/alertas/0/resolver",        quien: ["admin", "defensa"],                                    que: "resolver alertas" },
   { m: "POST",  ruta: "/api/alertas/0/evacuar",         quien: ["admin", "defensa"],                                    que: "iniciar evacuaciones" },
@@ -36,7 +36,7 @@ const MATRIZ: Array<{ m: string; ruta: string; quien: string[]; que: string }> =
   { m: "GET",   ruta: "/api/admin/backups",             quien: ["admin"],                                               que: "ver respaldos" },
   { m: "POST",  ruta: "/api/admin/backups/x/restaurar", quien: ["admin"],                                               que: "restaurar un respaldo" },
 ];
-const ROLES = ["admin", "operador", "transito", "defensa", "auditor"];
+const ROLES = ["admin", "transito", "defensa", "auditor"];
 
 describe("Autorización por rol (API real)", () => {
   beforeAll(async () => {
@@ -61,18 +61,18 @@ describe("Autorización por rol (API real)", () => {
       const r = await llamar("POST", "/api/auth/login", { body: { username: u, password: CLAVE } });
       return new Set<string>(r.body.permisos);
     };
-    const defensa = await pat("defensa"), operador = await pat("operador"), auditor = await pat("auditor");
+    const defensa = await pat("defensa"), transito = await pat("transito"), auditor = await pat("auditor");
     expect(defensa.has("EVACUATION_CREATE")).toBe(true);
-    expect(operador.has("EVACUATION_CREATE")).toBe(false);
+    expect(transito.has("EVACUATION_CREATE")).toBe(false);
     expect(auditor.has("AUDIT_VIEW")).toBe(true);
-    expect(operador.has("AUDIT_VIEW")).toBe(false);
+    expect(transito.has("AUDIT_VIEW")).toBe(false);
+    // DEFENSA_CIVIL hereda de TRANSITO (Composite): tiene todas sus patentes y más.
+    for (const patente of transito) expect(defensa.has(patente)).toBe(true);
+    expect(defensa.size).toBeGreaterThan(transito.size);
   });
 
-  test("tránsito y operador de crisis hoy tienen exactamente las mismas patentes", async () => {
-    const pat = async (u: string) => {
-      const r = await llamar("POST", "/api/auth/login", { body: { username: u, password: CLAVE } });
-      return [...r.body.permisos].sort().join(",");
-    };
-    expect(await pat("transito")).toBe(await pat("operador"));
+  test("la familia OPERADOR_CRISIS ya no existe (unificada en TRANSITO)", async () => {
+    const r = await llamar("POST", "/api/auth/login", { body: { username: "transito", password: CLAVE } });
+    expect(r.body.user.familyName).toBe("TRANSITO");
   });
 });

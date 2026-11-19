@@ -542,25 +542,17 @@ La jerarquía de seguridad usa **Composite** puro: una `FamilyComposite` puede c
 FAMILY_ADMIN_SISTEMA  (FamilyComposite — raíz absoluta)
 ├── Todas las patentes del catálogo anterior
 │
-FAMILY_OPERADOR_CRISIS  (FamilyComposite — 2.° nivel)
-├── AUTH_LOGIN, AUTH_LOGOUT
-├── MAP_VIEW, SENSOR_VIEW, TELEMETRY_VIEW
-├── ALERT_VIEW, ALERT_ACKNOWLEDGE, ALERT_RESOLVE
-├── EVACUATION_VIEW, EVACUATION_CREATE, EVACUATION_ACTIVATE, EVACUATION_STRATEGY
-├── SIMULATION_VIEW, SIMULATION_RUN, SIMULATION_STOP
+FAMILY_TRANSITO  (FamilyComposite — base de la operación, solo lectura)
+├── AUTH_ME, AUTH_LOGOUT
+├── DASHBOARD_VIEW, DASHBOARD_ACTIVITY
+├── MAP_VIEW, SENSOR_VIEW, SENSOR_HISTORY
+├── ALERT_VIEW
 │   │
-│   ├── FAMILY_TRANSITO  (FamilyComposite — hoja operativa limitada)
-│   │   ├── AUTH_LOGIN, AUTH_LOGOUT
-│   │   ├── MAP_VIEW
-│   │   ├── SENSOR_VIEW, TELEMETRY_VIEW
-│   │   └── ALERT_VIEW
-│   │
-│   └── FAMILY_DEFENSA_CIVIL  (FamilyComposite — hoja operativa completa)
-│       ├── AUTH_LOGIN, AUTH_LOGOUT
-│       ├── MAP_VIEW, SENSOR_VIEW, TELEMETRY_VIEW
-│       ├── ALERT_VIEW, ALERT_ACKNOWLEDGE, ALERT_RESOLVE
-│       ├── EVACUATION_VIEW, EVACUATION_CREATE, EVACUATION_ACTIVATE, EVACUATION_STRATEGY
-│       └── SIMULATION_VIEW, SIMULATION_RUN, SIMULATION_STOP
+│   └── FAMILY_DEFENSA_CIVIL  (hereda de TRANSITO y suma acciones de respuesta)
+│       ├── ALERT_ACKNOWLEDGE, ALERT_RESOLVE
+│       ├── EVACUATION_CREATE
+│       ├── SENSOR_SIMULATE
+│       └── SIMULATION_SCENARIOS_VIEW, SIMULATION_SCENARIOS_CREATE, SIMULATION_SCENARIOS_STOP
 │
 FAMILY_AUDITOR  (FamilyComposite — rama independiente)
 ├── AUTH_LOGIN, AUTH_LOGOUT
@@ -573,24 +565,24 @@ FAMILY_AUDITOR  (FamilyComposite — rama independiente)
 
 ### 4.4 Tabla de Asignación Familia → Patentes
 
-| Patente | ADMIN | OPERADOR_CRISIS | TRANSITO | DEFENSA_CIVIL | AUDITOR |
-|---|:---:|:---:|:---:|:---:|:---:|
-| `AUTH_LOGIN` / `AUTH_LOGOUT` | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `MAP_VIEW` | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `SENSOR_VIEW` | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `SENSOR_CREATE` / `EDIT` / `DELETE` | ✓ | — | — | — | — |
-| `TELEMETRY_VIEW` | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `TELEMETRY_EXPORT` | ✓ | — | — | — | ✓ |
-| `ALERT_VIEW` | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `ALERT_ACKNOWLEDGE` / `RESOLVE` | ✓ | ✓ | — | ✓ | — |
-| `EVACUATION_VIEW` | ✓ | ✓ | — | ✓ | — |
-| `EVACUATION_CREATE` / `ACTIVATE` / `STRATEGY` | ✓ | ✓ | — | ✓ | — |
-| `SIMULATION_VIEW` | ✓ | ✓ | — | ✓ | — |
-| `SIMULATION_RUN` / `STOP` | ✓ | ✓ | — | ✓ | — |
-| `AUDIT_VIEW_ALL` / `VERIFY` / `EXPORT` | ✓ | — | — | — | ✓ |
-| `USER_CREATE` / `EDIT` / `DELETE` / `PERMISSIONS` | ✓ | — | — | — | — |
-| `CITY_VIEW` | ✓ | — | — | — | ✓ |
-| `CITY_MANAGE` | ✓ | — | — | — | — |
+| Patente | ADMIN | TRANSITO | DEFENSA_CIVIL | AUDITOR |
+|---|:---:|:---:|:---:|:---:|
+| `AUTH_LOGIN` / `AUTH_LOGOUT` | ✓ | ✓ | ✓ | ✓ |
+| `MAP_VIEW` | ✓ | ✓ | ✓ | ✓ |
+| `SENSOR_VIEW` | ✓ | ✓ | ✓ | ✓ |
+| `SENSOR_CREATE` / `EDIT` / `DELETE` | ✓ | — | — | — |
+| `TELEMETRY_VIEW` | ✓ | ✓ | ✓ | ✓ |
+| `TELEMETRY_EXPORT` | ✓ | — | — | ✓ |
+| `ALERT_VIEW` | ✓ | ✓ | ✓ | ✓ |
+| `ALERT_ACKNOWLEDGE` / `RESOLVE` | ✓ | — | ✓ | — |
+| `EVACUATION_VIEW` | ✓ | — | ✓ | — |
+| `EVACUATION_CREATE` / `ACTIVATE` / `STRATEGY` | ✓ | — | ✓ | — |
+| `SIMULATION_VIEW` | ✓ | — | ✓ | — |
+| `SIMULATION_RUN` / `STOP` | ✓ | — | ✓ | — |
+| `AUDIT_VIEW_ALL` / `VERIFY` / `EXPORT` | ✓ | — | — | ✓ |
+| `USER_CREATE` / `EDIT` / `DELETE` / `PERMISSIONS` | ✓ | — | — | — |
+| `CITY_VIEW` | ✓ | — | — | ✓ |
+| `CITY_MANAGE` | ✓ | — | — | — |
 
 ### 4.5 Traza de Evaluación — `FamilyComposite.hasPermission()`
 

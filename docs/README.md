@@ -7,6 +7,8 @@ AEGIS Urban es una plataforma de alerta temprana y apoyo a operaciones municipal
 > [!IMPORTANT]
 > **Alcance del proyecto:** es un prototipo. No reemplaza a los organismos oficiales ni debe presentar lecturas de sensores o simulaciones como instrucciones oficiales de emergencia. Ante una emergencia real: **911**, **100** (bomberos) o **103** (Defensa Civil).
 
+> **Leer el documento funcional:** [página por página con flechas ←  → (empieza en la portada)](documento/00-portada.md) · [todo en un solo archivo](AEGIS-Urban-Documento-Funcional-Unificado.md) · [PDF](pdf/AEGIS-Urban-Documento-Funcional-Unificado.pdf). Se generan con `node docs/unificado/generar-markdown.cjs` y `node docs/unificado/generar-pdf.cjs`.
+
 ## Documento funcional
 
 El documento funcional sigue el ciclo de vida del software, en etapas numeradas. Cada etapa es una página con navegación anterior/siguiente:

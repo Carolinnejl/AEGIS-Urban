@@ -8,7 +8,7 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-22E5FF?style=flat-square&logo=typescript&logoColor=white&labelColor=0B1220)
 ![React](https://img.shields.io/badge/React-18-22E5FF?style=flat-square&logo=react&logoColor=white&labelColor=0B1220)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-8B5CF6?style=flat-square&logo=postgresql&logoColor=white&labelColor=0B1220)
-![Tests](https://img.shields.io/badge/tests-270%20aprobados-19F5A0?style=flat-square&labelColor=0B1220)
+![Tests](https://img.shields.io/badge/tests-256%20aprobados-19F5A0?style=flat-square&labelColor=0B1220)
 ![Estado](https://img.shields.io/badge/estado-prototipo-FFB020?style=flat-square&labelColor=0B1220)
 
 [Documentación](docs/README.md) · [Cómo levantarlo](#cómo-levantarlo) · [Modo ciudadano](#modo-ciudadano) · [Arquitectura](#arquitectura) · [Equipo](#equipo)
@@ -65,7 +65,7 @@ cd aegis-urban-backend  && npm install && node scripts/crear-env.js && npm run d
 cd aegis-urban-frontend && npm install && npm run dev
 ```
 
-Las migraciones están en `aegis-urban-backend/database/migrations/` (001 a 017) y los datos de ejemplo en `database/seeds/`. Docker las aplica solo al crear un volumen vacío; en una base existente aplicalas en orden (el `arrancar.bat` se ocupa de 006 a 014).
+Las migraciones están en `aegis-urban-backend/database/migrations/` (001 a 018) y los datos de ejemplo en `database/seeds/`. Docker las aplica solo al crear un volumen vacío; en una base existente aplicalas en orden (el `arrancar.bat` se ocupa de 006 a 014).
 
 El backend **no arranca** sin `JWT_SECRET` (mínimo 32 caracteres) ni `AES_SECRET_KEY` (64 caracteres hexadecimales): no hay valores por defecto. `node scripts/crear-env.js` los genera aleatorios.
 
@@ -75,7 +75,7 @@ El backend **no arranca** sin `JWT_SECRET` (mínimo 32 caracteres) ni `AES_SECRE
 |---|---|---|
 | backend | `npm run dev` | API con recarga automática en `:3001` |
 | backend | `npm test` | Pruebas unitarias (133) |
-| backend | `npm run test:live` | Integración y seguridad contra la API y PostgreSQL levantados (113, incluye 72 por rol) |
+| backend | `npm run test:live` | Integración y seguridad contra la API y PostgreSQL levantados (99, incluye 58 por rol) |
 | frontend | `npm run test:e2e` | 6 pruebas de punta a punta con Chrome real (con backend y frontend levantados) |
 | backend | `npm run test:perf` | Prueba de carga: latencia, throughput y compresión |
 | backend | `npm run build` | Compila a JavaScript |
@@ -163,9 +163,8 @@ flowchart TB
 | Familia | Acceso |
 |---|---|
 | `ADMIN_SISTEMA` | Todo el sistema, usuarios y familias |
-| `OPERADOR_CRISIS` | Mapa, sensores, alertas y panel |
-| `DEFENSA_CIVIL` | Reconocer y resolver alertas, evacuar, ejercicios simulados |
-| `TRANSITO` | Consulta de mapa, sensores y alertas |
+| `TRANSITO` | Operación de solo lectura: panel, mapa, sensores y alertas |
+| `DEFENSA_CIVIL` | Hereda de `TRANSITO` y suma reconocer y resolver alertas, evacuar y ejercicios simulados |
 | `AUDITOR` | Consulta operativa y verificación de bitácora; sin cambios |
 | `CIUDADANO` | Solo su vista pública y sus propios datos; ninguna pantalla de gestión |
 
@@ -183,7 +182,7 @@ flowchart TB
 ```text
 AEGIS-Urban/
 ├── aegis-urban-backend/
-│   ├── database/migrations/    # Esquema SQL versionado (001–017)
+│   ├── database/migrations/    # Esquema SQL versionado (001–018)
 │   ├── database/seeds/         # Datos iniciales y de ejemplo
 │   ├── scripts/                # crear-env.js (genera el .env)
 │   ├── src/
@@ -260,3 +259,14 @@ Toda la documentación se lee directamente en GitHub, por páginas:
 *AEGIS Urban · Proyecto en equipo · 2026*
 
 </div>
+
+---
+
+<p align="center">
+  <b>Seguí leyendo</b><br>
+  <a href="docs/documento/00-portada.md"><b>Siguiente → Documento funcional</b></a>
+  &nbsp;·&nbsp;
+  <a href="docs/AEGIS-Urban-Documento-Funcional-Unificado.md">todo en un solo archivo</a>
+  &nbsp;·&nbsp;
+  <a href="docs/pdf/AEGIS-Urban-Documento-Funcional-Unificado.pdf">PDF</a>
+</p>

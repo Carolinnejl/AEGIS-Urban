@@ -61,7 +61,7 @@ Medido en el equipo de desarrollo (API en `ts-node-dev` y PostgreSQL en Docker e
 |---|---|
 | Pruebas unitarias backend | 133 aprobadas |
 | Pruebas unitarias frontend | 18 aprobadas |
-| Integración, seguridad y roles (en vivo) | 113 aprobadas |
+| Integración, seguridad y roles (en vivo) | 99 aprobadas |
 | Punta a punta con navegador (Playwright) | 6 aprobadas |
 | Compilación TypeScript backend y frontend | Ver sección de cierre del README |
 | Job de CI «en vivo» en GitHub Actions | Definido, aún no ejecutado en GitHub (requiere subir los cambios) |

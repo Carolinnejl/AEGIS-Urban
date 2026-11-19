@@ -1,6 +1,6 @@
 # AEGIS Urban — Operación de la base de datos
 
-PostgreSQL 16. El esquema se versiona en `aegis-urban-backend/database/migrations/` (001–017); una migración aplicada no se edita.
+PostgreSQL 16. El esquema se versiona en `aegis-urban-backend/database/migrations/` (001–018); una migración aplicada no se edita.
 
 ## Respaldo y restauración
 

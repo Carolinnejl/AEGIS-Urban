@@ -3,7 +3,6 @@
 INSERT INTO users (username, email, password_hash, id_family, is_active)
 SELECT v.username, v.email, '$2b$12$bO./2mn4pZ/y7Y8YyyPaXORPyiV9yDuFU3iHaMZJMHyvyfKpQCjTG', f.id_family, TRUE
 FROM (VALUES
-    ('operador', 'operador@aegis.urban', 'OPERADOR_CRISIS'),
     ('transito', 'transito@aegis.urban', 'TRANSITO'),
     ('defensa',  'defensa@aegis.urban',  'DEFENSA_CIVIL'),
     ('auditor',  'auditor@aegis.urban',  'AUDITOR')

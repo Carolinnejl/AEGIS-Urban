@@ -13,22 +13,22 @@ Es un prototipo: no reemplaza a los organismos oficiales (911, 100, 103).
 | Familia (rol) | Qué hace | Acceso |
 |---|---|---|
 | CIUDADANO | Ve clima y avisos, recibe cartel de peligro por ubicación, gestiona sus datos | Vista pública + cuenta verificada |
-| OPERADOR_CRISIS / TRANSITO | Panel, mapa, sensores y alertas, según las patentes de la familia | Operativo (TRANSITO hereda de OPERADOR_CRISIS) |
+| TRANSITO | Panel, mapa, sensores y alertas (solo lectura) | Operativo |
 | DEFENSA_CIVIL | Reconoce, evacúa y resuelve alertas; crea simulaciones | Operación completa |
 | AUDITOR | Lee la bitácora y verifica DVH/DVV | Solo lectura |
 | ADMIN_SISTEMA | Usuarios, familias, respaldos y restauración | Administración |
 
-**Qué puede hacer cada rol (verificado con `tests/live/roles.test.ts`, 70 comprobaciones contra la API real):**
+**Qué puede hacer cada rol (verificado con `tests/live/roles.test.ts`, 56 comprobaciones contra la API real):**
 
-| Capacidad | ADMIN_SISTEMA | OPERADOR_CRISIS | TRANSITO | DEFENSA_CIVIL | AUDITOR |
-|---|---|---|---|---|---|
-| Ver sensores, alertas y panel | Sí | Sí | Sí | Sí | Sí |
-| Reconocer / resolver alertas, iniciar evacuación | Sí | No | No | Sí | No |
-| Ver escenarios y forzar lecturas simuladas | Sí | No | No | Sí | No |
-| Consultar la bitácora y verificar integridad | Sí | No | No | No | Sí |
-| Usuarios, familias y respaldos | Sí | No | No | No | No |
+| Capacidad | ADMIN_SISTEMA | TRANSITO | DEFENSA_CIVIL | AUDITOR |
+|---|---|---|---|---|
+| Ver sensores, alertas y panel | Sí | Sí | Sí | Sí |
+| Reconocer / resolver alertas, iniciar evacuación | Sí | No | Sí | No |
+| Ver escenarios y forzar lecturas simuladas | Sí | No | Sí | No |
+| Consultar la bitácora y verificar integridad | Sí | No | No | Sí |
+| Usuarios, familias y respaldos | Sí | No | No | No |
 
-DEFENSA_CIVIL hereda de OPERADOR_CRISIS (Composite). TRANSITO también hereda de OPERADOR_CRISIS pero hoy no suma patentes propias, por lo que sus permisos son idénticos a los de OPERADOR_CRISIS (una prueba lo deja asentado).
+DEFENSA_CIVIL hereda de TRANSITO (Composite) y suma las acciones de respuesta. La familia OPERADOR_CRISIS se eliminó (migración 018): tenía exactamente las mismas patentes que TRANSITO, es decir, era el mismo rol con dos nombres.
 
 Las familias agrupan **patentes** (permisos atómicos, p. ej. `EVACUATION_CREATE`) en un árbol Composite; ver [matriz de patentes](02-analisis-diseno.md).
 

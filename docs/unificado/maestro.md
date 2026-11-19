@@ -58,7 +58,7 @@
 
 **Stack.** Node.js + TypeScript + Express (API REST y socket.io), React 18 + Vite + TypeScript (interfaz), PostgreSQL 16 (datos), Docker (base de datos local), GitHub Actions (integración continua).
 
-**Estado.** Prototipo funcional con 270 pruebas automatizadas aprobadas: 133 unitarias de backend, 18 de frontend, 113 de integración, seguridad y autorización por rol contra la API y PostgreSQL reales, y 6 de punta a punta con un navegador real. Compilación de backend y frontend aprobada. Pendientes: la sesión de aceptación con usuarios (el guion y el acta están en la sección 5.3) y la primera ejecución del job de CI «en vivo» en GitHub.
+**Estado.** Prototipo funcional con 256 pruebas automatizadas aprobadas: 133 unitarias de backend, 18 de frontend, 99 de integración, seguridad y autorización por rol contra la API y PostgreSQL reales, y 6 de punta a punta con un navegador real. Compilación de backend y frontend aprobada. Pendientes: la sesión de aceptación con usuarios (el guion y el acta están en la sección 5.3) y la primera ejecución del job de CI «en vivo» en GitHub.
 
 **Equipo.** Cinco integrantes con roles de Product Owner/QA, frontend, backend, seguridad y base de datos, e integración (ver portada).
 
@@ -87,7 +87,7 @@
 |---|---|---|---|
 | 1 — Análisis y factibilidad | Problema, objetivos, actores, fuentes de alertas, factibilidades y planificación | Objetivos, factibilidades, plan de 5 sprints y riesgos | Alcance acordado y riesgos identificados |
 | 2 — Diseño y arquitectura | Stack, base de datos, requisitos, UML, seguridad e interfaz | RF-01 a RF-13, RNF-01 a RNF-11, DER, clases, casos de uso, DSS y matriz de patentes | Trazabilidad de cada requisito a un módulo del código |
-| 3 — Implementación y testing | Construcción por módulos, pruebas, operación de BD | Código, migraciones 001–017, 270 pruebas, script de carga, CI y respaldos | Pruebas automatizadas aprobadas y compilación limpia |
+| 3 — Implementación y testing | Construcción por módulos, pruebas, operación de BD | Código, migraciones 001–018, 256 pruebas, script de carga, CI y respaldos | Pruebas automatizadas aprobadas y compilación limpia |
 | 4 — Release y mantenimiento | Versión, aceptación, reversión, manuales y cierre | Notas v1.0.0, manuales, plan de mantenimiento y anexos | Checklist de pre-release y brechas declaradas |
 
 <div class="salto"></div>
@@ -113,7 +113,7 @@ La información sobre amenazas urbanas puede estar repartida entre sensores, tab
 
 | Actor | Casos de uso |
 |---|---|
-| Operador / Tránsito | Iniciar y cerrar sesión, revisar mapa, telemetría y alertas |
+| Tránsito | Iniciar y cerrar sesión, revisar mapa, telemetría y alertas |
 | Defensa Civil | Reconocer una alerta, solicitar el plan de evacuación, ejecutar simulaciones |
 | Auditor | Consultar la bitácora y verificar su integridad |
 | Administrador | Gestionar usuarios, familias, respaldos y restauración |
@@ -188,6 +188,7 @@ El modelo lógico (DER) y su descripción detallada se incluyen en la sección 3
 | 015 | Particiones futuras automáticas y respaldos |
 | 016 | Bitácora inmutable (triggers contra UPDATE, DELETE y TRUNCATE) |
 | 017 | Estado compartido entre instancias: `rate_limit` (limitador) y `shared_cache` (caché) |
+| 018 | Unifica OPERADOR_CRISIS en TRANSITO (eran el mismo rol) |
 
 **Particionamiento trimestral.** `sensor_reading` se particiona por rango de fecha, una partición por trimestre. La función `asegurar_particiones_sensor_reading(n)` crea las futuras; corre al arrancar y cada 6 horas. Antes de la migración 015 la última partición terminaba el 31/12/2026 y las lecturas habrían fallado desde el 01/01/2027.
 
@@ -272,13 +273,13 @@ Las patentes también gobiernan la interfaz: el login devuelve las patentes efec
 
 ## 4.1 Preparación del entorno
 
-Requisitos: Node.js 20+, Docker Desktop y Git. En Windows, `arrancar.bat` reutiliza o crea el contenedor `aegis_postgres`, aplica las migraciones 006–017 y los datos iniciales, genera el `.env` con secretos aleatorios si falta, instala dependencias y abre el backend (puerto 3001) y el frontend (puerto 5173). `detener.bat` los detiene. `docker-compose.yml` monta las migraciones solo al crear un volumen vacío.
+Requisitos: Node.js 20+, Docker Desktop y Git. En Windows, `arrancar.bat` reutiliza o crea el contenedor `aegis_postgres`, aplica las migraciones 006–018 y los datos iniciales, genera el `.env` con secretos aleatorios si falta, instala dependencias y abre el backend (puerto 3001) y el frontend (puerto 5173). `detener.bat` los detiene. `docker-compose.yml` monta las migraciones solo al crear un volumen vacío.
 
 | Dónde | Comando | Qué hace |
 |---|---|---|
 | backend | `npm run dev` | API con recarga automática |
 | backend | `npm test` | 133 pruebas unitarias |
-| backend | `npm run test:live` | 113 pruebas de integración y seguridad contra la API y PostgreSQL |
+| backend | `npm run test:live` | 99 pruebas de integración y seguridad contra la API y PostgreSQL |
 | backend | `npm run test:perf` | Prueba de carga con percentiles |
 | backend | `npm run build` | Compila a JavaScript |
 | frontend | `npm run dev` / `npm test` / `npm run build` | Web en Vite, 18 pruebas y bundle de producción |
@@ -307,7 +308,7 @@ Requisitos: Node.js 20+, Docker Desktop y Git. En Windows, `arrancar.bat` reutil
 @@include 06-base-de-datos.md | Verificación de integridad | 1 | skipTitle
 @@include 06-base-de-datos.md | Cifrado | 1 | skipTitle
 
-**Revisión SQA de la etapa 3:** compilación de backend y frontend aprobada; 270 pruebas aprobadas (133 + 18 + 113 + 6); simulacro de restauración disponible; prueba de carga con 0 errores; job de CI definido (sin ejecutar aún en GitHub).
+**Revisión SQA de la etapa 3:** compilación de backend y frontend aprobada; 256 pruebas aprobadas (133 + 18 + 99 + 6); simulacro de restauración disponible; prueba de carga con 0 errores; job de CI definido (sin ejecutar aún en GitHub).
 
 <div class="salto"></div>
 
@@ -339,7 +340,7 @@ Requisitos: Node.js 20+, Docker Desktop y Git. En Windows, `arrancar.bat` reutil
 |---|---|
 | Compilación TypeScript de backend y frontend | Aprobada |
 | 133 pruebas unitarias backend y 18 de frontend | Aprobadas |
-| 113 pruebas en vivo (integración, seguridad y 72 de autorización por rol) | Aprobadas |
+| 99 pruebas en vivo (integración, seguridad y 58 de autorización por rol) | Aprobadas |
 | 6 pruebas de punta a punta con navegador (Playwright) | Aprobadas |
 | Migraciones 001–017 aplicadas en la base local | Aprobado |
 | Respaldo con restauración verificada (simulacro) | Disponible |
@@ -428,4 +429,4 @@ AEGIS Urban cumple, como prototipo, el ciclo de vida completo: se analizó el pr
 
 **Prioridades siguientes:** envío real de SMS; catastro de refugios y rutas por calles; revisión legal de los textos; integrar una fuente oficial por CAP; suscripciones por zona y avisos con la aplicación cerrada (PWA); realizar la sesión de aceptación con usuarios; pasar limitador y caché a Redis si el tráfico lo exige; y un worker persistente para las simulaciones activas al escalar a varias instancias.
 
-**Revisión SQA de la etapa 4:** brechas respecto del plan original declaradas (sección 5.1); checklist de pre-release con estado verdadero; manuales por perfil; plan de reversión probado con el simulacro de restauración.
+**Revisión SQA de la etapa 4:** brechas respecto del plan original declaradas (sección 5.1); checklist de pre-release con estado verdadero; manuales por perfil; plan de reversión apoyado en el simulacro de restauración.

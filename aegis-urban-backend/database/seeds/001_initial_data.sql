@@ -13,10 +13,9 @@ ON CONFLICT (code) DO NOTHING;
 -- ── Familias (estructura Composite)
 INSERT INTO family (name, description, id_parent_family) VALUES
     ('ADMIN_SISTEMA',      'Acceso total al sistema',                          NULL),
-    ('OPERADOR_CRISIS',    'Gestión operativa de emergencias',                 NULL),
     ('AUDITOR',            'Consulta y verificación de bitácora',              NULL),
-    ('TRANSITO',           'Visualización de mapa y telemetría',               2),
-    ('DEFENSA_CIVIL',      'Gestión completa de alertas y evacuación',         2)
+    ('TRANSITO',           'Visualización de mapa y telemetría',               NULL),
+    ('DEFENSA_CIVIL',      'Gestión completa de alertas y evacuación',         NULL)
 ON CONFLICT (name) DO NOTHING;
 
 -- ── Patentes (permisos atómicos)
