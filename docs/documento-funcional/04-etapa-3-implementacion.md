@@ -57,7 +57,7 @@ La suite automatizada cubre cálculo de integridad, matriz de autorización por 
 |---|---|
 | Pruebas backend (unitarias) | 133 pruebas aprobadas en 13 suites |
 | Pruebas frontend | 18 pruebas aprobadas (sesión, verificación, caché y paridad de traducciones) |
-| Integración y seguridad contra API y PostgreSQL reales | 41 pruebas aprobadas (`npm run test:live`) y 6 de punta a punta (`npm run test:e2e`); ver [pruebas y rendimiento](../05-pruebas-y-rendimiento.md) |
+| Integración y seguridad contra API y PostgreSQL reales | 113 pruebas aprobadas (`npm run test:live`) y 6 de punta a punta (`npm run test:e2e`); ver [pruebas y rendimiento](../05-pruebas-y-rendimiento.md) |
 | Compilación TypeScript backend | Aprobada |
 | Compilación TypeScript y bundle frontend | Aprobada |
 | Job de CI con PostgreSQL de servicio | Definido; aún no ejecutado en GitHub |

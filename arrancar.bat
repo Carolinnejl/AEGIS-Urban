@@ -38,6 +38,7 @@ for %%f in ("%BACKEND%\database\migrations\006*.sql" "%BACKEND%\database\migrati
 )
 docker exec -i aegis_postgres psql -U aegis_app_user -d aegis_urban_db < "%BACKEND%\database\seeds\001_initial_data.sql" > nul 2>&1
 docker exec -i aegis_postgres psql -U aegis_app_user -d aegis_urban_db < "%BACKEND%\database\seeds\002_sprint3_data.sql" > nul 2>&1
+docker exec -i aegis_postgres psql -U aegis_app_user -d aegis_urban_db < "%BACKEND%\database\seeds\003_usuarios_por_rol.sql" > nul 2>&1
 echo  Datos iniciales OK (usuario: admin / Admin2026!)
 
 node "%BACKEND%\scripts\crear-env.js"

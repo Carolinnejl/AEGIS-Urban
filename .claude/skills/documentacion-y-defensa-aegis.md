@@ -27,6 +27,6 @@ Brechas declaradas hoy: sin Swagger, k6/pgbench ni despliegue en Render/Vercel; 
 3. **Patrones** (señalar el archivo): Singleton `config/database.ts` y `core/events/EventBus.ts`; Factory `core/factory/SensorFactory.ts`; Observer `EventBus` + handlers; Strategy `core/strategies`; Composite `core/composite/patent-family`.
 4. **Seguridad:** bcrypt, HMAC, AES (`security/encryption`), JWT con revocación, patentes y familias (`PermissionGuard`), botones por patente, DVH/DVV (`integrity`), triggers de la migración 016.
 5. **Base de datos:** respaldo con SHA-256, simulacro, restauración transaccional, particiones trimestrales (migración 015).
-6. **Pruebas:** mostrar 133 + 18 + 41 + 6 E2E aprobadas y la tabla de percentiles de `test:perf`; explicar el bug real que encontraron (JWT duplicado → 500).
+6. **Pruebas:** mostrar 133 + 18 + 113 + 6 E2E aprobadas y la tabla de percentiles de `test:perf`; explicar el bug real que encontraron (JWT duplicado → 500).
 7. **Preguntas probables:** ¿qué pasa si un superusuario altera la bitácora? (DVH/DVV lo detecta, no lo impide); ¿por qué el SMS es simulado? (sin proveedor contratado); ¿cómo escala? (sección de escalabilidad: estado en memoria a mover a Redis); ¿qué falta? (las brechas de arriba).
 8. **Cada integrante** debe poder explicar su rol y un módulo propio de la tabla «Distribución del trabajo».

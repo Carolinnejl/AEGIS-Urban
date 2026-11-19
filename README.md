@@ -8,7 +8,7 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-22E5FF?style=flat-square&logo=typescript&logoColor=white&labelColor=0B1220)
 ![React](https://img.shields.io/badge/React-18-22E5FF?style=flat-square&logo=react&logoColor=white&labelColor=0B1220)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-8B5CF6?style=flat-square&logo=postgresql&logoColor=white&labelColor=0B1220)
-![Tests](https://img.shields.io/badge/tests-198%20aprobados-19F5A0?style=flat-square&labelColor=0B1220)
+![Tests](https://img.shields.io/badge/tests-270%20aprobados-19F5A0?style=flat-square&labelColor=0B1220)
 ![Estado](https://img.shields.io/badge/estado-prototipo-FFB020?style=flat-square&labelColor=0B1220)
 
 [Documentación](docs/README.md) · [Cómo levantarlo](#cómo-levantarlo) · [Modo ciudadano](#modo-ciudadano) · [Arquitectura](#arquitectura) · [Equipo](#equipo)
@@ -75,7 +75,7 @@ El backend **no arranca** sin `JWT_SECRET` (mínimo 32 caracteres) ni `AES_SECRE
 |---|---|---|
 | backend | `npm run dev` | API con recarga automática en `:3001` |
 | backend | `npm test` | Pruebas unitarias (133) |
-| backend | `npm run test:live` | Integración y seguridad contra la API y PostgreSQL levantados (41) |
+| backend | `npm run test:live` | Integración y seguridad contra la API y PostgreSQL levantados (113, incluye 72 por rol) |
 | frontend | `npm run test:e2e` | 6 pruebas de punta a punta con Chrome real (con backend y frontend levantados) |
 | backend | `npm run test:perf` | Prueba de carga: latencia, throughput y compresión |
 | backend | `npm run build` | Compila a JavaScript |

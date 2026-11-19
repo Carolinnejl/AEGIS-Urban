@@ -18,6 +18,18 @@ Es un prototipo: no reemplaza a los organismos oficiales (911, 100, 103).
 | AUDITOR | Lee la bitácora y verifica DVH/DVV | Solo lectura |
 | ADMIN_SISTEMA | Usuarios, familias, respaldos y restauración | Administración |
 
+**Qué puede hacer cada rol (verificado con `tests/live/roles.test.ts`, 70 comprobaciones contra la API real):**
+
+| Capacidad | ADMIN_SISTEMA | OPERADOR_CRISIS | TRANSITO | DEFENSA_CIVIL | AUDITOR |
+|---|---|---|---|---|---|
+| Ver sensores, alertas y panel | Sí | Sí | Sí | Sí | Sí |
+| Reconocer / resolver alertas, iniciar evacuación | Sí | No | No | Sí | No |
+| Ver escenarios y forzar lecturas simuladas | Sí | No | No | Sí | No |
+| Consultar la bitácora y verificar integridad | Sí | No | No | No | Sí |
+| Usuarios, familias y respaldos | Sí | No | No | No | No |
+
+DEFENSA_CIVIL hereda de OPERADOR_CRISIS (Composite). TRANSITO también hereda de OPERADOR_CRISIS pero hoy no suma patentes propias, por lo que sus permisos son idénticos a los de OPERADOR_CRISIS (una prueba lo deja asentado).
+
 Las familias agrupan **patentes** (permisos atómicos, p. ej. `EVACUATION_CREATE`) en un árbol Composite; ver [matriz de patentes](02-analisis-diseno.md).
 
 ## 3. Requerimientos funcionales
