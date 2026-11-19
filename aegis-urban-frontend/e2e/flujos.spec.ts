@@ -52,11 +52,17 @@ test("6. defensa civil: alerta → reconocer → plan de evacuación", async ({ 
   await ingresar(page);
   await page.getByRole("link", { name: /alertas/i }).first().click();
   const reconocer = page.getByRole("button", { name: "✓ Reconocer" }).first();
-  const evacuar = page.getByRole("button", { name: /iniciar evacuaci/i }).first();
-  await reconocer.or(evacuar).first().waitFor({ timeout: 15_000 });
+  const evacuar = page.getByRole("button", { name: /iniciar evacuaci/i });
+  await reconocer.or(evacuar.first()).first().waitFor({ timeout: 15_000 });
   if (await reconocer.isVisible()) await reconocer.click();
-  await evacuar.waitFor({ timeout: 10_000 });
-  await evacuar.click();
-  await expect(page.getByText(/plan de evacuaci/i).first()).toBeVisible();
+  // Solo se puede evacuar una alerta ya reconocida: se prueba cada botón hasta que el plan se abre.
+  const total = Math.min(await evacuar.count(), 10);
+  let abierto = false;
+  for (let i = 0; i < total && !abierto; i++) {
+    await evacuar.nth(i).click();
+    abierto = await page.getByText(/plan de evacuaci/i).first().waitFor({ state: "visible", timeout: 3000 }).then(() => true, () => false);
+    if (!abierto) await page.waitForTimeout(300);
+  }
+  expect(abierto).toBe(true);
   await expect(page.getByText(/radio afectado/i).first()).toBeVisible();
 });
