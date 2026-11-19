@@ -48,23 +48,22 @@ test("5. administrador: ve Administración (patente) y la bitácora verifica la 
   await expect(page.getByText("Integridad VÁLIDA")).toBeVisible({ timeout: 15_000 });
 });
 
-test("6. defensa civil: alerta → reconocer → plan de evacuación", async ({ page }) => {
+test("6. defensa civil: alerta reconocida → plan de evacuación", async ({ page, request }) => {
+  // Preparación por API: reconoce las alertas activas, para que cualquier botón «Iniciar evacuación» sea válido.
+  const API = process.env.E2E_API ?? "http://localhost:3001";
+  const login = await request.post(`${API}/api/auth/login`, { data: { username: USUARIO, password: CLAVE } });
+  const token = (await login.json()).token as string;
+  const cab = { Authorization: `Bearer ${token}` };
+  const lista = await (await request.get(`${API}/api/alertas?pageSize=50`, { headers: cab })).json();
+  const alertas = lista.alertas as Array<{ id_alert: number; status: string }>;
+  test.skip(alertas.length === 0, "La base todavía no tiene alertas (las generan los sensores simulados)");
+  for (const a of alertas.filter((x) => x.status === "ACTIVE")) await request.patch(`${API}/api/alertas/${a.id_alert}/reconocer`, { headers: cab });
+
   await ingresar(page);
   await page.getByRole("link", { name: /alertas/i }).first().click();
-  const reconocer = page.getByRole("button", { name: "✓ Reconocer" }).first();
-  const evacuar = page.getByRole("button", { name: /iniciar evacuaci/i });
-  // Las alertas las generan los sensores simulados: en una base recién creada puede no haber ninguna todavía.
-  const hayAlertas = await reconocer.or(evacuar.first()).first().waitFor({ timeout: 20_000 }).then(() => true, () => false);
-  test.skip(!hayAlertas, "La base todavía no tiene alertas (las generan los sensores simulados)");
-  if (await reconocer.isVisible()) await reconocer.click();
-  // Solo se puede evacuar una alerta ya reconocida: se prueba cada botón hasta que el plan se abre.
-  const total = Math.min(await evacuar.count(), 10);
-  let abierto = false;
-  for (let i = 0; i < total && !abierto; i++) {
-    await evacuar.nth(i).click();
-    abierto = await page.getByText(/plan de evacuaci/i).first().waitFor({ state: "visible", timeout: 3000 }).then(() => true, () => false);
-    if (!abierto) await page.waitForTimeout(300);
-  }
-  expect(abierto).toBe(true);
+  const evacuar = page.getByRole("button", { name: /iniciar evacuaci/i }).first();
+  await evacuar.waitFor({ timeout: 15_000 });
+  await evacuar.click();
+  await expect(page.getByText(/plan de evacuaci/i).first()).toBeVisible();
   await expect(page.getByText(/radio afectado/i).first()).toBeVisible();
 });
