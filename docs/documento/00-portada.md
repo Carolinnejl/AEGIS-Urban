@@ -14,7 +14,7 @@
 | Materia | Prácticas Profesionalizantes |
 | Curso | 6°3 |
 | Metodología | Ciclo de vida del software en 4 etapas, con revisión SQA al cierre de cada una; ejecución ágil en 5 sprints de 2 semanas |
-| Duración | 10 semanas (14/09/2026 – 20/11/2026) |
+| Duración | 8 meses (10/03/2026 – 20/11/2026) |
 | Versión del documento | v1.0.0 |
 | Fecha de edición | 19/11/2026 |
 | Estado del producto | Prototipo en desarrollo: no sustituye protocolos ni autoridad de emergencia |
