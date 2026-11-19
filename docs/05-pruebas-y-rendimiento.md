@@ -7,7 +7,7 @@
 | Unitarias backend | Lógica pura: integridad DVH, geometría, estrategias de evacuación, validación de registro, secretos, límite de intentos, respaldos | `aegis-urban-backend/tests/unit` | `npm test` | 133 en 13 suites |
 | Unitarias frontend | Almacenes de sesión y verificación, caché de peticiones, **paridad de traducciones es/en** | `aegis-urban-frontend/src/**/*.test.ts` | `npm test` | 18 en 4 archivos |
 | Integración | API + PostgreSQL reales: sesiones, patentes, bitácora e integridad, inmutabilidad, particiones, hashes | `tests/live/integracion.test.ts` | `npm run test:live` | 10 |
-| Punta a punta (E2E) | Flujos reales en Chrome: ciudadanía, cambio de idioma, login inválido, ruta protegida, Administración con verificación de integridad, alerta → plan de evacuación | `aegis-urban-frontend/e2e/flujos.spec.ts` | `npm run test:e2e` | 6 |
+| Punta a punta (E2E) | Flujos reales en Chrome (la prueba de evacuación se omite si la base aún no tiene alertas): ciudadanía, cambio de idioma, login inválido, ruta protegida, Administración con verificación de integridad, alerta → plan de evacuación | `aegis-urban-frontend/e2e/flujos.spec.ts` | `npm run test:e2e` | 6 |
 | Seguridad | Autenticación, manipulación de JWT, inyección SQL, recorrido de directorios, cabeceras, CORS, fuerza bruta | `tests/live/seguridad.test.ts` | `npm run test:live` | 29 |
 | Rendimiento | Latencia y throughput bajo carga concurrente, compresión | `scripts/rendimiento.mjs` | `npm run test:perf` | 5 endpoints |
 | Automatización | Todo lo anterior en cada push y Pull Request | `.github/workflows/ci.yml` | GitHub Actions | 3 jobs |
